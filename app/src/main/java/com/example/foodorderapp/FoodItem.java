@@ -4,17 +4,19 @@ public class FoodItem {
     private String name;
     private String price;
     private String rating;
-    private String deliveryTime;
+    private String time;
     private int imageResId;
 
-    public FoodItem(String name, String price, String rating, String deliveryTime, int imageResId) {
+    // Constructor
+    public FoodItem(String name, String price, String rating, String time, int imageResId) {
         this.name = name;
         this.price = price;
         this.rating = rating;
-        this.deliveryTime = deliveryTime;
+        this.time = time;
         this.imageResId = imageResId;
     }
 
+    // Getters
     public String getName() {
         return name;
     }
@@ -27,8 +29,8 @@ public class FoodItem {
         return rating;
     }
 
-    public String getDeliveryTime() {
-        return deliveryTime;
+    public String getTime() {
+        return time;
     }
 
     public int getImageResId() {

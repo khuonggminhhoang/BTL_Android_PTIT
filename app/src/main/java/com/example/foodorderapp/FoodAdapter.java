@@ -11,45 +11,52 @@ import java.util.List;
 
 public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder> {
 
-    private List<FoodItem> foodItems;
+    private List<FoodItem> foodList;
 
-    public FoodAdapter(List<FoodItem> foodItems) {
-        this.foodItems = foodItems;
+    // Constructor
+    public FoodAdapter(List<FoodItem> foodList) {
+        this.foodList = foodList;
     }
 
     @NonNull
     @Override
     public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_food, parent, false);
+        // Inflate layout food_list_item.xml
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.food_list_item, parent, false);
         return new FoodViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull FoodViewHolder holder, int position) {
-        FoodItem foodItem = foodItems.get(position);
+        // Lấy item tại vị trí position
+        FoodItem foodItem = foodList.get(position);
+
+        // Gán dữ liệu vào các view
         holder.foodImage.setImageResource(foodItem.getImageResId());
         holder.foodName.setText(foodItem.getName());
         holder.foodPrice.setText(foodItem.getPrice());
-        holder.ratingText.setText(foodItem.getRating());
-        holder.deliveryTime.setText(foodItem.getDeliveryTime());
+        holder.foodRating.setText(foodItem.getRating());
+        holder.foodTime.setText(foodItem.getTime());
     }
 
     @Override
     public int getItemCount() {
-        return foodItems.size();
+        return foodList.size();
     }
 
+    // ViewHolder để giữ các view trong food_list_item.xml
     static class FoodViewHolder extends RecyclerView.ViewHolder {
         ImageView foodImage;
-        TextView foodName, foodPrice, ratingText, deliveryTime;
+        TextView foodName, foodPrice, foodRating, foodTime;
 
         public FoodViewHolder(@NonNull View itemView) {
             super(itemView);
             foodImage = itemView.findViewById(R.id.food_image);
             foodName = itemView.findViewById(R.id.food_name);
             foodPrice = itemView.findViewById(R.id.food_price);
-            ratingText = itemView.findViewById(R.id.rating_text);
-            deliveryTime = itemView.findViewById(R.id.delivery_time);
+            foodRating = itemView.findViewById(R.id.food_rating);
+            foodTime = itemView.findViewById(R.id.food_time);
         }
     }
 }
