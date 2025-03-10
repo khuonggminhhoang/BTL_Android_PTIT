@@ -10,38 +10,58 @@
     android:background="#FFFFFF"
     android:gravity="center">
 
-    <ImageView
+    <ImageButton
         android:id="@+id/nav_home"
         android:layout_width="0dp"
-        android:layout_height="24dp"
+        android:layout_height="48dp"
         android:layout_weight="1"
-        android:src="@drawable/ic_home" />
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_home"
+        android:contentDescription="Home" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/nav_favorite"
         android:layout_width="0dp"
-        android:layout_height="24dp"
+        android:layout_height="48dp"
         android:layout_weight="1"
-        android:src="@drawable/ic_favorite" />
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_favorite"
+        android:contentDescription="Favorite" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/nav_notifications"
         android:layout_width="0dp"
-        android:layout_height="24dp"
+        android:layout_height="48dp"
         android:layout_weight="1"
-        android:src="@drawable/ic_notifications" />
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_notifications"
+        android:contentDescription="Notifications" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/nav_cart"
         android:layout_width="0dp"
-        android:layout_height="24dp"
+        android:layout_height="48dp"
         android:layout_weight="1"
-        android:src="@drawable/ic_cart" />
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_cart"
+        android:contentDescription="Cart" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/nav_settings"
         android:layout_width="0dp"
-        android:layout_height="24dp"
+        android:layout_height="48dp"
         android:layout_weight="1"
-        android:src="@drawable/ic_settings" />
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_settings"
+        android:contentDescription="Settings" />
 </LinearLayout>
