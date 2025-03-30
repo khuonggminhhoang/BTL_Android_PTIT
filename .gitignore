@@ -1,15 +1,54 @@
+#*.iml
+#.gradle
+#/local.properties
+#/.idea/caches
+#/.idea/libraries
+#/.idea/modules.xml
+#/.idea/workspace.xml
+#/.idea/navEditor.xml
+#/.idea/assetWizardSettings.xml
+#.DS_Store
+#/build
+#/captures
+#.externalNativeBuild
+#.cxx
+#local.properties
+# Ignore tất cả file .iml
 *.iml
-.gradle
+
+# Ignore thư mục Gradle
+.gradle/
+
+# Ignore file cấu hình máy cá nhân
 /local.properties
-/.idea/caches
-/.idea/libraries
+*.keystore
+*.jks
+
+# Ignore thư mục cấu hình của Android Studio
+/.idea/
+/.idea/caches/
+/.idea/libraries/
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+
+# Ignore thư mục build và biên dịch
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+/build/
+.cxx/
+.externalNativeBuild/
+captures/
+
+# Ignore thư mục của Flutter (nếu có)
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+.packages
+
+# Ignore Google Services API Key
+/google-services.json
+/google-services.xml
+
+# Ignore file debug keystore
+/debug.keystore
