@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">FoodOrderApp</string>
+    <string name="app_name" translatable="false">JobHunter</string>
+    <string name="profile" translatable="false">Profile</string>
+    <string name="personal_data" translatable="false">Personal Data</string>
+    <string name="resume_my_info" translatable="false">Resume &amp; My Info</string>
+    <string name="my_application" translatable="false">My Application</string>
+    <string name="settings" translatable="false">Settings</string>
+    <string name="faq" translatable="false">FAQ</string>
+    <string name="privacy_policy" translatable="false">Privacy &amp; Policy</string>
 </resources>
