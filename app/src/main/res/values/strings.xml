@@ -7,4 +7,12 @@
     <string name="settings" translatable="false">Settings</string>
     <string name="faq" translatable="false">FAQ</string>
     <string name="privacy_policy" translatable="false">Privacy &amp; Policy</string>
+    <string name="save" translatable="false">Save</string>
+    <string name="full_name" translatable="false">Full Name</string>
+    <string name="email_address" translatable="false">Email Address</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="location" translatable="false">Location</string>
+    <string name="birth_date" translatable="false">Birth Date</string>
+    <!-- Thêm chuỗi back -->
+    <string name="back" translatable="false">Back</string>
 </resources>

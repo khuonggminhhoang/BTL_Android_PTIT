@@ -1,5 +1,7 @@
 package com.example.foodorderapp.adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.MenuItem;
+import com.example.foodorderapp.ui.PersonalDataActivity; // Thêm import cho PersonalDataActivity
 
 import java.util.List;
 
@@ -18,8 +21,10 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_ITEM = 1;
 
     private List<Object> items;
+    private Context context;
 
-    public MenuAdapter(List<Object> items) {
+    public MenuAdapter(Context context, List<Object> items) {
+        this.context = context;
         this.items = items;
     }
 
@@ -55,6 +60,17 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             MenuItem menuItem = (MenuItem) items.get(position);
             itemHolder.icon.setImageResource(menuItem.getIconResId());
             itemHolder.title.setText(menuItem.getTitle());
+
+            // Xử lý sự kiện khi bấm vào item
+            itemHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (menuItem.getTitle().equals("Personal Data")) {
+                        Intent intent = new Intent(context, PersonalDataActivity.class);
+                        context.startActivity(intent);
+                    }
+                }
+            });
         }
     }
 
@@ -66,11 +82,13 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView title;
+        ImageView arrow; // Thêm ImageView cho mũi tên
 
         ItemViewHolder(View itemView) {
             super(itemView);
             icon = itemView.findViewById(R.id.iv_icon);
             title = itemView.findViewById(R.id.tv_title);
+            arrow = itemView.findViewById(R.id.iv_arrow); // Khởi tạo ImageView mũi tên
         }
     }
 
