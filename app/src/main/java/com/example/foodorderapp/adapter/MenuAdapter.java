@@ -12,7 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.MenuItem;
-import com.example.foodorderapp.ui.PersonalDataActivity; // Thêm import cho PersonalDataActivity
+import com.example.foodorderapp.ui.PersonalDataActivity;
+import com.example.foodorderapp.ui.ResumeMyInfoActivity; // Thêm import
 
 import java.util.List;
 
@@ -65,8 +66,11 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (menuItem.getTitle().equals("Personal Data")) {
+                    if (menuItem.getTitle().equals(context.getString(R.string.personal_data))) {
                         Intent intent = new Intent(context, PersonalDataActivity.class);
+                        context.startActivity(intent);
+                    } else if (menuItem.getTitle().equals(context.getString(R.string.resume_my_info))) {
+                        Intent intent = new Intent(context, ResumeMyInfoActivity.class);
                         context.startActivity(intent);
                     }
                 }
@@ -82,13 +86,13 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView title;
-        ImageView arrow; // Thêm ImageView cho mũi tên
+        ImageView arrow;
 
         ItemViewHolder(View itemView) {
             super(itemView);
             icon = itemView.findViewById(R.id.iv_icon);
             title = itemView.findViewById(R.id.tv_title);
-            arrow = itemView.findViewById(R.id.iv_arrow); // Khởi tạo ImageView mũi tên
+            arrow = itemView.findViewById(R.id.iv_arrow);
         }
     }
 

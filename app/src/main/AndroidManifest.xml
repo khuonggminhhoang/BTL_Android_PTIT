@@ -20,9 +20,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Đăng ký PersonalDataActivity -->
         <activity
             android:name=".ui.PersonalDataActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.ResumeMyInfoActivity"
             android:exported="false" />
     </application>
 
