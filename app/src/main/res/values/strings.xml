@@ -1,3 +1,60 @@
 <resources>
-    <string name="app_name">FoodOrderApp</string>
+    <string name="app_name">Tìm Việc Làm</string>
+    <string name="hello_user">Xin chào %1$s</string>
+    <string name="find_your_dream_jobs">Tìm công việc mơ ước của bạn!</string>
+    <string name="search_hint">Tìm kiếm</string>
+    <string name="top_job_in_month">Công việc hàng đầu trong tháng %1$s</string>
+    <string name="read_more">Xem thêm</string>
+    <string name="browse_by_categories">Duyệt theo danh mục</string>
+    <string name="news_jobs">Công việc mới</string>
+    <string name="see_more">Xem tất cả</string>
+    <string name="notification_content_description">Thông báo</string>
+    <string name="job_illustration_content_description">Hình minh họa công việc</string>
+    <string name="category_icon_content_description">Biểu tượng danh mục</string>
+    <string name="company_logo_content_description">Logo công ty</string>
+    <string name="favorite_content_description">Yêu thích</string>
+    <string name="location_icon_content_description">Biểu tượng địa điểm</string>
+    <string name="salary_icon_content_description">Biểu tượng lương</string>
+    <string name="title_home">Trang chủ</string>
+    <string name="title_favorites">Yêu thích</string>
+    <string name="title_chat">Tin nhắn</string>
+    <string name="title_profile">Hồ sơ</string>
+    <string name="job_detail_title">Chi Tiết Công Việc</string>
+    <string name="back_button_description">Quay lại</string>
+    <string name="applicants_label">Ứng viên</string>
+    <string name="tab_description">Mô tả</string>
+    <string name="tab_company">Công ty</string>
+    <string name="apply_this_job">Ứng Tuyển Ngay</string>
+    <string name="label_website">Website</string>
+    <string name="label_industry">Ngành nghề</string>
+    <string name="label_company_size">Quy mô công ty</string>
+    <string name="label_office_address">Địa chỉ văn phòng</string>
+    <string name="hello_user_placeholder">Xin chào!</string>
+    <string name="top_job_in_month_placeholder">Công việc hàng đầu</string>
+    <string name="favorites_fragment_placeholder">Màn hình Yêu thích</string>
+    <string name="chat_fragment_placeholder">Màn hình Tin nhắn</string>
+    <string name="profile_fragment_placeholder">Màn hình Hồ sơ</string>
+    <string name="filter_button_description">Lọc</string>
+    <string name="search_category_hint">Tìm công việc hoặc %1$s...</string>
+    <string name="top_companies_title">Công ty hàng đầu</string>
+    <string name="recommended_for_you_title">Đề xuất cho bạn</string>
+    <string name="apply_job_title">Ứng Tuyển</string>
+    <string name="upload_resume_label">Tải lên CV</string>
+    <string name="upload_resume_hint">Tải lên tệp định dạng pdf, tối đa 5mb</string>
+    <string name="upload_resume_icon_description">Biểu tượng tải lên CV</string>
+    <string name="phone_number_hint">Số điện thoại</string>
+    <string name="cover_letter_hint">Thư xin việc (Cover Letter)</string>
+    <string name="apply_now_button">Nộp Đơn Ngay</string>
+    <string name="file_selected_label">Đã chọn: %1$s</string>
+    <string name="success_illustration_description">Hình minh họa thành công</string>
+    <string name="congratulation_title">Chúc mừng!</string>
+    <string name="success_message_format">Đơn ứng tuyển của bạn tới %1$s cho vị trí %2$s đã được gửi.</string> <string name="continue_explore_button">Tiếp tục khám phá</string>
+    <string name="error_select_file">Vui lòng tải lên CV của bạn</string>
+    <string name="profile" translatable="false">Profile</string>
+    <string name="personal_data" translatable="false">Personal Data</string>
+    <string name="resume_my_info" translatable="false">Resume &amp; My Info</string>
+    <string name="my_application" translatable="false">My Application</string>
+    <string name="settings" translatable="false">Settings</string>
+    <string name="faq" translatable="false">FAQ</string>
+    <string name="privacy_policy" translatable="false">Privacy &amp; Policy</string>
 </resources>
