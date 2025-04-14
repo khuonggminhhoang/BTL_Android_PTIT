@@ -1,4 +1,4 @@
-package com.example.foodorderapp.ui;
+package com.example.foodorderapp.activity;
 
 import android.os.Bundle;
 import android.widget.TextView;

@@ -1,4 +1,4 @@
-package com.example.foodorderapp.ui;
+package com.example.foodorderapp.activity;
 
 import android.os.Bundle;
 import android.view.View;
@@ -7,11 +7,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.foodorderapp.R;
 
-public class PersonalDataActivity extends AppCompatActivity {
+public class ResumeMyInfoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_personal_data);
+        setContentView(R.layout.activity_resume_my_info);
 
         // Xử lý nút Back
         ImageView ivBack = findViewById(R.id.iv_back);

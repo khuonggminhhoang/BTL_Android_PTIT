@@ -30,10 +30,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.PersonalDataActivity"
+            android:name=".activity.PersonalDataActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.ResumeMyInfoActivity"
+            android:name=".activity.ResumeMyInfoActivity"
             android:exported="false" />
     </application>
 

@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.MenuItem;
-import com.example.foodorderapp.ui.PersonalDataActivity;
-import com.example.foodorderapp.ui.ResumeMyInfoActivity; // Thêm import
+import com.example.foodorderapp.activity.PersonalDataActivity;
+import com.example.foodorderapp.activity.ResumeMyInfoActivity; // Thêm import
 
 import java.util.List;
 
