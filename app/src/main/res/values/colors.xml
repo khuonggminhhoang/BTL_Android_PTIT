@@ -17,5 +17,12 @@
     <color name="category_icon_tint">@color/blue_primary</color>
     <color name="bottom_nav_selected">@color/blue_primary</color>
     <color name="bottom_nav_unselected">@color/grey</color>
-
-    <color name="fragment_favorites_background">#FF6B6B</color> <color name="fragment_chat_background">#4ECDC4</color> <color name="fragment_profile_background">#FFE66D</color> </resources>
+    <color name="fragment_favorites_background">#FF6B6B</color>
+    <color name="fragment_chat_background">#4ECDC4</color>
+    <color name="fragment_profile_background">#FFE66D</color>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="background">#F5F5F5</color>
+    <color name="textGray">#666666</color>
+</resources>
