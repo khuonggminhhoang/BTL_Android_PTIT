@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <!-- Thanh tiêu đề -->
+    <ImageView
+        android:id="@+id/iv_back"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_revert"
+        android:contentDescription="@string/back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/personal_data"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        android:textSize="16sp"
+        android:textColor="#00C4B4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Ảnh đại diện -->
+    <ImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_placeholder_avatar"
+        android:scaleType="centerCrop"
+        android:background="@drawable/circle_white_background"
+        android:clipToOutline="true"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <!-- Trường Full Name -->
+    <TextView
+        android:id="@+id/tv_full_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/full_name"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/iv_avatar"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/et_full_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="hafidzzaki"
+        android:textSize="16sp"
+        android:background="@null"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_full_name_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iv_check_full_name"
+        android:layout_marginEnd="8dp" />
+
+    <ImageView
+        android:id="@+id/iv_check_full_name"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/checkbox_on_background"
+        app:layout_constraintBottom_toBottomOf="@id/et_full_name"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Trường Email Address -->
+    <TextView
+        android:id="@+id/tv_email_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/email_address"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/et_full_name"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/et_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="hafidzzaki@gmail.com"
+        android:textSize="16sp"
+        android:background="@null"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_email_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iv_check_email"
+        android:layout_marginEnd="8dp" />
+
+    <ImageView
+        android:id="@+id/iv_check_email"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/checkbox_on_background"
+        app:layout_constraintBottom_toBottomOf="@id/et_email"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Trường Password -->
+    <TextView
+        android:id="@+id/tv_password_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/password"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/et_email"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="********"
+        android:textSize="16sp"
+        android:inputType="textPassword"
+        android:background="@null"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_password_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iv_check_password"
+        android:layout_marginEnd="8dp" />
+
+    <ImageView
+        android:id="@+id/iv_check_password"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/checkbox_on_background"
+        app:layout_constraintBottom_toBottomOf="@id/et_password"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Trường Location -->
+    <TextView
+        android:id="@+id/tv_location_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/location"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/et_password"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/et_location"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Jalan Teuku Umar Perumahan Bukit Indah Permai, Samarinda East Borneo"
+        android:textSize="16sp"
+        android:background="@null"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_location_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Trường Birth Date -->
+    <TextView
+        android:id="@+id/tv_birth_date_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/birth_date"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/et_location"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tv_birth_date_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <EditText
+            android:id="@+id/et_day"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="26"
+            android:textSize="16sp"
+            android:background="@null"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/et_month"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="March"
+            android:textSize="16sp"
+            android:background="@null"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/et_year"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="1998"
+            android:textSize="16sp"
+            android:background="@null"
+            android:paddingBottom="8dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -36,7 +36,7 @@ public class ProfileActivity extends AppCompatActivity {
         menuItems.add(new MenuItem(android.R.drawable.ic_menu_help, getString(R.string.faq), "OTHER"));
         menuItems.add(new MenuItem(android.R.drawable.ic_menu_info_details, getString(R.string.privacy_policy), "OTHER"));
 
-        adapter = new MenuAdapter(menuItems);
+        adapter = new MenuAdapter(this, menuItems);
         recyclerView.setAdapter(adapter);
 
         // Thiết lập BottomNavigationView

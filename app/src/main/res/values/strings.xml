@@ -57,4 +57,19 @@
     <string name="settings" translatable="false">Settings</string>
     <string name="faq" translatable="false">FAQ</string>
     <string name="privacy_policy" translatable="false">Privacy &amp; Policy</string>
+    <string name="save" translatable="false">Save</string>
+    <string name="full_name" translatable="false">Full Name</string>
+    <string name="email_address" translatable="false">Email Address</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="location" translatable="false">Location</string>
+    <string name="birth_date" translatable="false">Birth Date</string>
+    <string name="back" translatable="false">Back</string>
+    <string name="edit_resume" translatable="false">Edit resume</string>
+    <string name="about_me" translatable="false">About me</string>
+    <string name="work_experience" translatable="false">Work Experience</string>
+    <string name="skills" translatable="false">Skills</string>
+    <string name="detail_experience_skills" translatable="false">Detail Experience &amp; Skills</string>
+    <string name="edit" translatable="false">Edit</string>
+    <string name="company_icon" translatable="false">Company icon</string>
+    <string name="cv_portfolio_pdf"><![CDATA[CV & Portfolio.pdf]]></string>
 </resources>
