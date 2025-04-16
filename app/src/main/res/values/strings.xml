@@ -50,18 +50,27 @@
     <string name="success_message_format">Đơn ứng tuyển của bạn tới %1$s cho vị trí %2$s đã được gửi.</string>
     <string name="continue_explore_button">Tiếp tục khám phá</string>
     <string name="error_select_file">Vui lòng tải lên CV của bạn</string>
-
-    <string name="profile">Hồ sơ</string> <string name="personal_data">Dữ liệu cá nhân</string>
-    <string name="resume_my_info">CV &amp; Thông tin</string>
-    <string name="my_application">Đơn ứng tuyển</string>
-    <string name="settings">Cài đặt</string>
-    <string name="faq">Câu hỏi thường gặp</string>
-    <string name="privacy_policy">Chính sách bảo mật</string>
-    <string name="avatar_content_description">Ảnh đại diện</string>
-    <string name="edit_avatar_content_description">Sửa ảnh đại diện</string>
-    <string name="applied_label">Đã ứng tuyển</string>
-    <string name="reviewed_label">Đã xem</string>
-    <string name="contacted_label">Đã liên hệ</string>
-    <string name="account_section_title">TÀI KHOẢN</string>
-    <string name="other_section_title">KHÁC</string>
+    <string name="profile" translatable="false">Profile</string>
+    <string name="personal_data" translatable="false">Personal Data</string>
+    <string name="resume_my_info" translatable="false">Resume &amp; My Info</string>
+    <string name="my_application" translatable="false">My Application</string>
+    <string name="settings" translatable="false">Settings</string>
+    <string name="faq" translatable="false">FAQ</string>
+    <string name="privacy_policy" translatable="false">Privacy &amp; Policy</string>
+    <string name="save" translatable="false">Save</string>
+    <string name="full_name" translatable="false">Full Name</string>
+    <string name="email_address" translatable="false">Email Address</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="location" translatable="false">Location</string>
+    <string name="birth_date" translatable="false">Birth Date</string>
+    <string name="back" translatable="false">Back</string>
+    <string name="edit_resume" translatable="false">Edit resume</string>
+    <string name="about_me" translatable="false">About me</string>
+    <string name="work_experience" translatable="false">Work Experience</string>
+    <string name="skills" translatable="false">Skills</string>
+    <string name="detail_experience_skills" translatable="false">Detail Experience &amp; Skills</string>
+    <string name="edit" translatable="false">Edit</string>
+    <string name="company_icon" translatable="false">Company icon</string>
+    <string name="cv_portfolio_pdf"><![CDATA[CV & Portfolio.pdf]]></string>
 </resources>
+
