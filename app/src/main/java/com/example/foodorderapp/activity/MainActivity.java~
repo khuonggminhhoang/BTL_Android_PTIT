@@ -1,6 +1,5 @@
 package com.example.foodorderapp.activity; // Package của bạn
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;

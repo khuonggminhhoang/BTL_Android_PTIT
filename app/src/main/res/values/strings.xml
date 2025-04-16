@@ -18,8 +18,7 @@
     <string name="title_home">Trang chủ</string>
     <string name="title_favorites">Yêu thích</string>
     <string name="title_chat">Tin nhắn</string>
-    <string name="title_profile">Hồ sơ</string>
-    <string name="job_detail_title">Chi Tiết Công Việc</string>
+    <string name="title_profile">Hồ sơ</string> <string name="job_detail_title">Chi Tiết Công Việc</string>
     <string name="back_button_description">Quay lại</string>
     <string name="applicants_label">Ứng viên</string>
     <string name="tab_description">Mô tả</string>
@@ -48,13 +47,21 @@
     <string name="file_selected_label">Đã chọn: %1$s</string>
     <string name="success_illustration_description">Hình minh họa thành công</string>
     <string name="congratulation_title">Chúc mừng!</string>
-    <string name="success_message_format">Đơn ứng tuyển của bạn tới %1$s cho vị trí %2$s đã được gửi.</string> <string name="continue_explore_button">Tiếp tục khám phá</string>
+    <string name="success_message_format">Đơn ứng tuyển của bạn tới %1$s cho vị trí %2$s đã được gửi.</string>
+    <string name="continue_explore_button">Tiếp tục khám phá</string>
     <string name="error_select_file">Vui lòng tải lên CV của bạn</string>
-    <string name="profile" translatable="false">Profile</string>
-    <string name="personal_data" translatable="false">Personal Data</string>
-    <string name="resume_my_info" translatable="false">Resume &amp; My Info</string>
-    <string name="my_application" translatable="false">My Application</string>
-    <string name="settings" translatable="false">Settings</string>
-    <string name="faq" translatable="false">FAQ</string>
-    <string name="privacy_policy" translatable="false">Privacy &amp; Policy</string>
+
+    <string name="profile">Hồ sơ</string> <string name="personal_data">Dữ liệu cá nhân</string>
+    <string name="resume_my_info">CV &amp; Thông tin</string>
+    <string name="my_application">Đơn ứng tuyển</string>
+    <string name="settings">Cài đặt</string>
+    <string name="faq">Câu hỏi thường gặp</string>
+    <string name="privacy_policy">Chính sách bảo mật</string>
+    <string name="avatar_content_description">Ảnh đại diện</string>
+    <string name="edit_avatar_content_description">Sửa ảnh đại diện</string>
+    <string name="applied_label">Đã ứng tuyển</string>
+    <string name="reviewed_label">Đã xem</string>
+    <string name="contacted_label">Đã liên hệ</string>
+    <string name="account_section_title">TÀI KHOẢN</string>
+    <string name="other_section_title">KHÁC</string>
 </resources>
