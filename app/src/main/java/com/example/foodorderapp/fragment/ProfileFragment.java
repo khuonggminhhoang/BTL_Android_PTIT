@@ -1,5 +1,6 @@
 package com.example.foodorderapp.fragment;
 
+import android.app.Activity;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -84,7 +85,7 @@ public class ProfileFragment extends Fragment {
         menuItems.add(new MenuItem(android.R.drawable.ic_menu_info_details, getString(R.string.privacy_policy), "OTHER"));
 
         // Khởi tạo Adapter với Context của Fragment
-        adapter = new MenuAdapter(menuItems); // MenuAdapter có thể cần Context, nếu vậy hãy truyền getContext()
+        adapter = new MenuAdapter(getContext(), menuItems); // MenuAdapter có thể cần Context, nếu vậy hãy truyền getContext()
         recyclerView.setAdapter(adapter);
     }
 
