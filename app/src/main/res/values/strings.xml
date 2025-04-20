@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Tìm Việc Làm</string>
+    <string name="app_name">JobFinder</string>
     <string name="hello_user">Xin chào %1$s</string>
     <string name="find_your_dream_jobs">Tìm công việc mơ ước của bạn!</string>
     <string name="search_hint">Tìm kiếm</string>
@@ -18,7 +18,8 @@
     <string name="title_home">Trang chủ</string>
     <string name="title_favorites">Yêu thích</string>
     <string name="title_chat">Tin nhắn</string>
-    <string name="title_profile">Hồ sơ</string> <string name="job_detail_title">Chi Tiết Công Việc</string>
+    <string name="title_profile">Hồ sơ</string>
+    <string name="job_detail_title">Chi Tiết Công Việc</string>
     <string name="back_button_description">Quay lại</string>
     <string name="applicants_label">Ứng viên</string>
     <string name="tab_description">Mô tả</string>
@@ -73,13 +74,26 @@
     <string name="company_icon" translatable="false">Company icon</string>
     <string name="cv_portfolio_pdf"><![CDATA[CV & Portfolio.pdf]]></string>
 
-<!--    <string name="profile">Hồ sơ</string> -->
-<!--    <string name="personal_data">Dữ liệu cá nhân</string>-->
-<!--    <string name="resume_my_info">CV &amp; Thông tin</string>-->
-<!--    <string name="my_application">Đơn ứng tuyển</string>-->
-<!--    <string name="settings">Cài đặt</string>-->
-<!--    <string name="faq">Câu hỏi thường gặp</string>-->
-<!--    <string name="privacy_policy">Chính sách bảo mật</string>-->
+    <!--verify otp-->
+    <string name="otp_title">Enter Your verification code</string>
+    <string name="otp_subtitle_format">We sent a verification code to %1$s</string>
+    <string name="otp_subtitle_default">We sent a verification code to your email</string>
+    <string name="resend_code">Resend code?</string>
+    <string name="verification_button">Verification</string>
+
+    <!--reset password-->
+    <string name="reset_password_title">Reset password</string>
+    <string name="reset_password_subtitle">Please fill in the field below to reset your current password.</string> <string name="new_password_hint">New Password</string>
+    <string name="confirm_new_password_hint">Confirm New Password</string>
+    <string name="reset_password_button">Reset Password</string>
+
+    <!--    <string name="profile">Hồ sơ</string> -->
+    <!--    <string name="personal_data">Dữ liệu cá nhân</string>-->
+    <!--    <string name="resume_my_info">CV &amp; Thông tin</string>-->
+    <!--    <string name="my_application">Đơn ứng tuyển</string>-->
+    <!--    <string name="settings">Cài đặt</string>-->
+    <!--    <string name="faq">Câu hỏi thường gặp</string>-->
+    <!--    <string name="privacy_policy">Chính sách bảo mật</string>-->
     <string name="avatar_content_description">Ảnh đại diện</string>
     <string name="edit_avatar_content_description">Sửa ảnh đại diện</string>
     <string name="applied_label">Đã ứng tuyển</string>
