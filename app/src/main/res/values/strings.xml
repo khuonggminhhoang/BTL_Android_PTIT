@@ -83,9 +83,17 @@
 
     <!--reset password-->
     <string name="reset_password_title">Reset password</string>
-    <string name="reset_password_subtitle">Please fill in the field below to reset your current password.</string> <string name="new_password_hint">New Password</string>
+    <string name="reset_password_subtitle">Please fill in the field below to reset your current password.</string>
+    <string name="new_password_hint">New Password</string>
     <string name="confirm_new_password_hint">Confirm New Password</string>
     <string name="reset_password_button">Reset Password</string>
+
+    <!--search    -->
+    <string name="search_title">Search</string>
+    <string name="search_job_hint">Search job</string>
+    <string name="current_location_hint">Current Location</string>
+    <string name="search_history_title">Search History</string>
+    <string name="arrow_description">Mũi tên</string>
 
     <!--    <string name="profile">Hồ sơ</string> -->
     <!--    <string name="personal_data">Dữ liệu cá nhân</string>-->
