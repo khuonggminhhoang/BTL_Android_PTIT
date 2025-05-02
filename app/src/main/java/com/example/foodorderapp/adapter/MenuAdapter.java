@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.activity.SettingsActivity;
 import com.example.foodorderapp.model.MenuItem;
 import com.example.foodorderapp.activity.PersonalDataActivity;
 import com.example.foodorderapp.activity.ResumeMyInfoActivity; // Thêm import
@@ -71,6 +72,9 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         context.startActivity(intent);
                     } else if (menuItem.getTitle().equals(context.getString(R.string.resume_my_info))) {
                         Intent intent = new Intent(context, ResumeMyInfoActivity.class);
+                        context.startActivity(intent);
+                    } else if (menuItem.getTitle().equals(context.getString(R.string.settings_title))) {
+                        Intent intent = new Intent(context, SettingsActivity.class);
                         context.startActivity(intent);
                     }
                 }

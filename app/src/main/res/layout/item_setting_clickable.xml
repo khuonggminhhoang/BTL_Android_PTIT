@@ -1,0 +1,57 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?attr/listPreferredItemHeightSmall"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/imageViewSettingIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:srcCompat="@drawable/ic_contact_us"
+        app:tint="?attr/colorControlNormal" /> <TextView
+    android:id="@+id/textViewSettingTitle"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:textAppearance="?attr/textAppearanceBody1"
+    app:layout_constraintStart_toEndOf="@id/imageViewSettingIcon"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/textViewSettingSubtitle"
+    app:layout_constraintEnd_toStartOf="@id/imageViewSettingArrow"
+    app:layout_constraintVertical_chainStyle="packed"
+    tools:text="Setting Title" />
+
+    <TextView
+        android:id="@+id/textViewSettingSubtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textAppearance="?attr/textAppearanceCaption"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintStart_toEndOf="@id/imageViewSettingIcon"
+        app:layout_constraintTop_toBottomOf="@id/textViewSettingTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/imageViewSettingArrow"
+        tools:text="Setting subtitle describing the option" />
+
+    <ImageView
+        android:id="@+id/imageViewSettingArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_chevron_right"
+        app:tint="?attr/colorControlNormal"
+        tools:ignore="MissingConstraints" /> </androidx.constraintlayout.widget.ConstraintLayout>

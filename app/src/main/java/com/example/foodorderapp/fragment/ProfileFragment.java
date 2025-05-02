@@ -80,7 +80,7 @@ public class ProfileFragment extends Fragment {
         menuItems.add(new MenuItem(android.R.drawable.ic_menu_edit, getString(R.string.resume_my_info), "ACCOUNT"));
         menuItems.add(new MenuItem(android.R.drawable.ic_menu_agenda, getString(R.string.my_application), "ACCOUNT"));
         menuItems.add(getString(R.string.other_section_title)); // Ví dụ thêm tiêu đề section
-        menuItems.add(new MenuItem(android.R.drawable.ic_menu_preferences, getString(R.string.settings), "OTHER"));
+        menuItems.add(new MenuItem(android.R.drawable.ic_menu_preferences, getString(R.string.settings_title), "OTHER"));
         menuItems.add(new MenuItem(android.R.drawable.ic_menu_help, getString(R.string.faq), "OTHER"));
         menuItems.add(new MenuItem(android.R.drawable.ic_menu_info_details, getString(R.string.privacy_policy), "OTHER"));
 
