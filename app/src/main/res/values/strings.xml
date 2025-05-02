@@ -111,15 +111,26 @@
     <string name="other_section_title">KHÁC</string>
 
     <string name="settings_title">Settings</string>
-    <string name="settings_header_general">General Settings</string>
+    <string name="settings_general_header">GENERAL SETTINGS</string>
     <string name="settings_contact_us_title">Contact Us</string>
     <string name="settings_contact_us_subtitle">Questions about the application</string>
     <string name="settings_share_title">Share The App</string>
     <string name="settings_share_subtitle">Share with people close to you</string>
     <string name="settings_rate_us_title">Rate Us</string>
     <string name="settings_rate_us_subtitle">Your review is useful for us</string>
-    <string name="settings_header_notification">Notification</string>
+    <string name="settings_notification_header">NOTIFICATION</string>
     <string name="settings_app_notification_title">App Notification</string>
     <string name="settings_dark_mode_title">Dark Mode</string>
     <string name="settings_logout_title">Logout</string>
+
+    <!-- Share Intent -->
+    <string name="share_subject">Check out this cool app!</string>
+    <string name="share_text">Download [FoodOrderApp] here: [Link App của bạn]</string>
+    <string name="share_via">Share via</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="content_description_setting_icon">Setting Icon</string>
+    <string name="content_description_navigation_arrow">Go to details</string>
+    <string name="content_description_back_button">Back</string>
+    <string name="content_description_more_options">More options</string>
 </resources>

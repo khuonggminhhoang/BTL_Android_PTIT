@@ -25,4 +25,6 @@
     <color name="colorAccent">#03DAC5</color>
     <color name="background">#F5F5F5</color>
     <color name="textGray">#666666</color>
+    <color name="setting_icon_tint">#1976D2</color>
+    <color name="setting_icon_background">#E3F2FD</color>
 </resources>

@@ -54,13 +54,13 @@
             android:name=".activity.JobDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.SettingsActivity"
-            android:label="@string/settings_title"
+            android:name=".activity.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.MainActivity"
-            android:exported="false">
-
+            android:name=".activity.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_title"
+            android:parentActivityName=".activity.MainActivity">
             <!--  -->
         </activity>
         <activity

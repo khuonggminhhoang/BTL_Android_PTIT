@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="72dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:background="?android:attr/selectableItemBackground">
+
+<ImageView
+    android:id="@+id/iv_icon_background"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:background="@drawable/bg_setting_icon_circle"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"/>
+
+<ImageView
+    android:id="@+id/iv_setting_icon"
+    android:layout_width="24dp"
+    android:layout_height="24dp"
+    tools:srcCompat="@drawable/ic_phone_24"
+    android:contentDescription="@string/content_description_setting_icon"
+    app:layout_constraintBottom_toBottomOf="@id/iv_icon_background"
+    app:layout_constraintEnd_toEndOf="@id/iv_icon_background"
+    app:layout_constraintStart_toStartOf="@id/iv_icon_background"
+    app:layout_constraintTop_toTopOf="@id/iv_icon_background" />
+
+
+<TextView
+    android:id="@+id/tv_setting_title"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:textAppearance="?attr/textAppearanceSubtitle1"
+    app:layout_constraintVertical_chainStyle="packed"
+    app:layout_constraintTop_toTopOf="@+id/iv_icon_background"
+    app:layout_constraintBottom_toTopOf="@+id/tv_setting_subtitle"
+    app:layout_constraintStart_toEndOf="@+id/iv_icon_background"
+    app:layout_constraintEnd_toStartOf="@+id/iv_setting_arrow"
+    tools:text="Setting Title" />
+
+<TextView
+    android:id="@+id/tv_setting_subtitle"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:textAppearance="?attr/textAppearanceCaption"
+    android:textColor="?android:attr/textColorSecondary"
+    app:layout_constraintTop_toBottomOf="@+id/tv_setting_title"
+    app:layout_constraintBottom_toBottomOf="@+id/iv_icon_background"
+    app:layout_constraintStart_toStartOf="@+id/tv_setting_title"
+    app:layout_constraintEnd_toStartOf="@+id/iv_setting_arrow"
+    tools:text="Optional subtitle text" />
+
+<ImageView
+    android:id="@+id/iv_setting_arrow"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:srcCompat="@drawable/ic_chevron_right_24"
+    app:tint="?android:attr/textColorSecondary"
+    android:contentDescription="@string/content_description_navigation_arrow"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Ẩn subtitle nếu không có text -->
+    <androidx.constraintlayout.widget.Group
+    android:id="@+id/group_subtitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:constraint_referenced_ids="tv_setting_subtitle"
+    android:visibility="gone"
+    tools:visibility="visible"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
