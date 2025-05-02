@@ -13,20 +13,20 @@
         android:theme="@style/Theme.FoodOrderApp"
         tools:targetApi="31">
         <activity
-            android:name=".activity.SearchActivity"
+            android:name=".features.jobs.ui.activity.SearchActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.ResetPasswordActivity"
+            android:name=".features.auth.ui.activity.ResetPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.OtpVerificationActivity"
+            android:name=".features.auth.ui.activity.OtpVerificationActivity"
             android:exported="false"
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity
-            android:name=".activity.ForgotPasswordActivity"
+            android:name=".features.auth.ui.activity.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.StartActivity"
+            android:name=".welcome.ui.activity.StartActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
@@ -36,38 +36,38 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.RegisterActivity"
+            android:name=".features.auth.ui.activity.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.LoginActivity"
+            android:name=".features.auth.ui.activity.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.WelcomeActivity"
+            android:name=".welcome.ui.activity.WelcomeActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.ApplyJobActivity"
+            android:name=".features.jobs.ui.activity.ApplyJobActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.CategoryJobsActivity"
+            android:name=".features.jobs.ui.activity.CategoryJobsActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.JobDetailActivity"
+            android:name=".features.jobs.ui.activity.JobDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".main.ui.activity.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.SettingsActivity"
+            android:name=".settings.ui.activity.SettingsActivity"
             android:exported="false"
             android:label="@string/settings_title"
-            android:parentActivityName=".activity.MainActivity">
+            android:parentActivityName=".main.ui.activity.MainActivity">
             <!--  -->
         </activity>
         <activity
-            android:name=".activity.PersonalDataActivity"
+            android:name=".profile.ui.activity.PersonalDataActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.ResumeMyInfoActivity"
+            android:name=".profile.ui.activity.ResumeMyInfoActivity"
             android:exported="false" />
     </application>
 

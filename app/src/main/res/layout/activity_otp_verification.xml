@@ -8,7 +8,7 @@
     android:background="@color/white"
     android:padding="30dp"
     android:id="@+id/main"
-    tools:context=".activity.OtpVerificationActivity">
+    tools:context=".features.auth.ui.activity.OtpVerificationActivity">
 
     <ImageButton
         android:id="@+id/otp_btn_back"
