@@ -27,4 +27,6 @@
     <color name="textGray">#666666</color>
     <color name="setting_icon_tint">#1976D2</color>
     <color name="setting_icon_background">#E3F2FD</color>
+    <color name="grey_medium">#9E9E9E</color>
+    <color name="grey_dark">#616161</color>
 </resources>

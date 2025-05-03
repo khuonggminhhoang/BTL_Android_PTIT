@@ -141,4 +141,15 @@
     <string name="content_description_favorite_item_icon">Company logo</string>
     <string name="content_description_unfavorite_button">Unfavorite</string>
     <string name="content_description_empty_favorite_illustration">Empty favorites illustration</string>
+
+    <string name="notifications_title">Notification</string>
+<!--    <string name="notifications_empty_title">No notification yet!</string>-->
+    <string name="notifications_empty_subtitle">Any notification will appear here</string>
+    <string name="content_description_notification_logo">Company logo</string>
+    <string name="content_description_notification_time_icon">Time icon</string>
+    <string name="content_description_empty_notification_illustration">Empty notification illustration</string>
+
+    <string name="content_description_notification_icon">Notification Icon</string>
+    <string name="empty_notification_title">No Notifications Yet</string>
+    <string name="empty_notification_subtitle">You will see important updates here.</string>
 </resources>

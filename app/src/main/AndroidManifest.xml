@@ -69,6 +69,16 @@
         <activity
             android:name=".features.profile.ui.activity.ResumeMyInfoActivity"
             android:exported="false" />
+        <activity
+            android:name=".features.notifications.ui.activity.NotificationsActivity"
+            android:exported="false"
+            android:label="@string/notifications_title"
+            android:parentActivityName=".features.main.ui.activity.MainActivity"> <!-- Hoặc Activity cha phù hợp -->
+            <!-- Meta-data for parent activity back navigation -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".features.main.ui.activity.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

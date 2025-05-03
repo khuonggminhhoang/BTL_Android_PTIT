@@ -10,9 +10,9 @@ import android.os.Bundle;
 import android.view.MenuItem; // Import MenuItem
 
 import com.example.foodorderapp.R;
-import com.example.foodorderapp.features.main.ui.fragment.ChatFragment;
 import com.example.foodorderapp.features.main.ui.fragment.FavoritesFragment;
 import com.example.foodorderapp.features.main.ui.fragment.HomeFragment;
+import com.example.foodorderapp.features.main.ui.fragment.NotificationFragment;
 import com.example.foodorderapp.features.profile.ui.fragment.ProfileFragment; // Import ProfileFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView; // Import đúng
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     selectedFragment = new FavoritesFragment();
                     tag = "FAVORITES_FRAGMENT";
                 } else if (itemId == R.id.navigation_chat) {
-                    selectedFragment = new ChatFragment();
+                    selectedFragment = new NotificationFragment();
                     tag = "CHAT_FRAGMENT";
                 } else if (itemId == R.id.navigation_profile) {
                     selectedFragment = new ProfileFragment(); // Sử dụng ProfileFragment mới

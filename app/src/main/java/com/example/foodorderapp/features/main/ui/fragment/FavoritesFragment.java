@@ -140,7 +140,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
         favoriteJobList.add(new Job("job_2", "Facebook", "Remote UX Designer", "Surabaya-Indonesia", "$60k - $80k",
                 "3 days ago", "URL_LOGO_FACEBOOK", true, "Desc 2...", "Company 2...", 15,
                 Arrays.asList("UX", "Remote"), "facebook.com", "Social", "50k+", "MP"));
-        
+
         // --- Kết thúc dữ liệu mẫu ---
 
         // Cập nhật adapter và UI - Adapter giờ đã được khởi tạo trong onViewCreated
