@@ -1,17 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fragment_favorites_background"
-    tools:context=".main.ui.fragment.FavoritesFragment">
+    android:background="?android:attr/colorBackground"
+    tools:context=".features.main.ui.fragment.FavoritesFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout_favorites"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/favorites_fragment_placeholder"
-        android:textSize="20sp"
-        android:textColor="@color/white"/>
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
 
-</FrameLayout>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_favorites"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/favorites_title"
+            app:menu="@menu/favorites_menu" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp">
+
+            <EditText
+                android:id="@+id/et_search_favorites"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_search_bar_rounded"
+                android:drawableStart="@drawable/ic_search_24"
+                android:drawablePadding="8dp"
+                android:hint="@string/search_hint"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:maxLines="1"
+                android:textSize="16sp" />
+        </FrameLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView_favorites"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_favorite_job"
+        tools:visibility="visible"/>
+
+        <!-- Empty State View -->
+        <LinearLayout
+            android:id="@+id/layout_empty_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_empty_illustration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_heart_outline_pink"
+            android:contentDescription="@string/content_description_empty_favorite_illustration"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:id="@+id/tv_empty_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/favorites_empty_title"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_empty_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/favorites_empty_subtitle"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?android:attr/textColorSecondary"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/btn_explore_now"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/favorites_explore_now"
+            android:background="@drawable/bg_explore_button_rounded"
+            android:textColor="@android:color/white"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>

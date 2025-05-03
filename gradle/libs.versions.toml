@@ -1,12 +1,14 @@
 [versions]
-agp = "8.8.2"
+agp = "8.8.2" # Giữ nguyên version của bạn
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-appcompat = "1.7.0"
-material = "1.12.0"
-activity = "1.10.1"
-constraintlayout = "2.2.1"
+appcompat = "1.7.0" # Giữ nguyên version của bạn
+material = "1.12.0" # Giữ nguyên version của bạn
+activity = "1.10.1" # Giữ nguyên version của bạn
+constraintlayout = "2.2.1" # Giữ nguyên version của bạn
+glide = "4.16.0"           # <<< THÊM: Phiên bản Glide (bạn có thể dùng bản mới nhất)
+recyclerview = "1.3.2"     # <<< THÊM: Phiên bản RecyclerView (hoặc 1.3.1 cũng được)
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -16,7 +18,11 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }                   # <<< THÊM: Thư viện Glide
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }         # <<< THÊM: Glide annotation processor
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }   # <<< THÊM: Thư viện RecyclerView
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-
+# Nếu dùng Kotlin và cần kapt cho Glide, bạn cần thêm plugin kotlin-kapt ở đây
+# kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version = "..." } # Điền version Kotlin của bạn

@@ -26,7 +26,7 @@
             android:name=".features.auth.ui.activity.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".welcome.ui.activity.StartActivity"
+            android:name=".features.welcome.ui.activity.StartActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
@@ -42,7 +42,7 @@
             android:name=".features.auth.ui.activity.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".welcome.ui.activity.WelcomeActivity"
+            android:name=".features.welcome.ui.activity.WelcomeActivity"
             android:exported="false" />
         <activity
             android:name=".features.jobs.ui.activity.ApplyJobActivity"
@@ -54,20 +54,20 @@
             android:name=".features.jobs.ui.activity.JobDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".main.ui.activity.MainActivity"
+            android:name=".features.main.ui.activity.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".settings.ui.activity.SettingsActivity"
+            android:name=".features.settings.ui.activity.SettingsActivity"
             android:exported="false"
             android:label="@string/settings_title"
-            android:parentActivityName=".main.ui.activity.MainActivity">
+            android:parentActivityName=".features.main.ui.activity.MainActivity">
             <!--  -->
         </activity>
         <activity
-            android:name=".profile.ui.activity.PersonalDataActivity"
+            android:name=".features.profile.ui.activity.PersonalDataActivity"
             android:exported="false" />
         <activity
-            android:name=".profile.ui.activity.ResumeMyInfoActivity"
+            android:name=".features.profile.ui.activity.ResumeMyInfoActivity"
             android:exported="false" />
     </application>
 

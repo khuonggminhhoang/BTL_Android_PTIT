@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Các dimensions khác của bạn (nếu có) -->
+
+    <!-- Thêm dòng này -->
+    <dimen name="tag_margin">4dp</dimen>
+
+    <!-- Ví dụ các dimensions khác -->
+    <!-- <dimen name="activity_horizontal_margin">16dp</dimen> -->
+    <!-- <dimen name="activity_vertical_margin">16dp</dimen> -->
+</resources>

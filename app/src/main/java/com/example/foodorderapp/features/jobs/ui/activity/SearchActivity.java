@@ -86,9 +86,24 @@ public class SearchActivity extends AppCompatActivity implements SearchHistoryAd
         String defaultDescription = "Building new user-facing features...";
         String twitterCompanyInfo = "Twitter Indonesia is a solution...";
         String defaultAddress = "Jl. Muara Baru Ujung Blok T...";
-        recommendedJobList.add(new Job("Slack", "Remote Front End Developer", "Bandung-Indonesia", "$15K - $30K / Month", "2 hours ago", R.drawable.ic_company_logo_placeholder, false, defaultDescription, "Slack company info...", 50, Arrays.asList("Frontend", "Remote"), "www.slack.com", "Collaboration", "501-1000 employee", "Bandung"));
-        recommendedJobList.add(new Job("Facebook", "Remote UX Designer", "Surabaya-Indonesia", "$10K - $25K / Month", "1 day ago", R.drawable.ic_company_logo_placeholder, true, defaultDescription, twitterCompanyInfo, 150, Arrays.asList("UI/UX", "Remote", "Design"), "www.facebook.com", "Social Network", "10000+ employee", defaultAddress));
-        // --- End Dummy Data ---
+        recommendedJobList.add(new Job(
+                "job_slack_search_1", // <<< THÊM: ID duy nhất (ví dụ)
+                "Slack",
+                "Remote Front End Developer",
+                "Bandung-Indonesia",
+                "$15K - $30K / Month",
+                "2 hours ago",
+                "", // <<< THAY THẾ: R.drawable.ic_company_logo_placeholder bằng URL (hoặc "" / null)
+                false,
+                defaultDescription,
+                "Slack company info...",
+                50,
+                Arrays.asList("Frontend", "Remote"),
+                "www.slack.com",
+                "Collaboration",
+                "501-1000 employee",
+                "Bandung"
+        ));
 
         recommendedJobAdapter = new JobAdapter(this, recommendedJobList); // Reuse JobAdapter
         rvRecommended.setLayoutManager(new LinearLayoutManager(this));

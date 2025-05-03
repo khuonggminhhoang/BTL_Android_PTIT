@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.foodorderapp.R;
-import com.example.foodorderapp.main.ui.activity.MainActivity;
+import com.example.foodorderapp.features.main.ui.activity.MainActivity;
 
 public class LoginActivity extends AppCompatActivity {
 

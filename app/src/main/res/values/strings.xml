@@ -133,4 +133,12 @@
     <string name="content_description_navigation_arrow">Go to details</string>
     <string name="content_description_back_button">Back</string>
     <string name="content_description_more_options">More options</string>
+
+    <string name="favorites_title">Favorite</string>
+    <string name="favorites_empty_title">No favorite yet!</string>
+    <string name="favorites_empty_subtitle">Any item you favorite will appear here</string>
+    <string name="favorites_explore_now">Explore now</string>
+    <string name="content_description_favorite_item_icon">Company logo</string>
+    <string name="content_description_unfavorite_button">Unfavorite</string>
+    <string name="content_description_empty_favorite_illustration">Empty favorites illustration</string>
 </resources>

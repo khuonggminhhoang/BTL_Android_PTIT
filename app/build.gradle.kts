@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    // Nếu bạn dùng Kotlin, bạn sẽ cần thêm plugin kapt ở đây:
+    // alias(libs.plugins.kotlin.kapt) // Giả sử bạn định nghĩa nó trong libs.versions.toml
 }
 
 android {
@@ -29,14 +31,32 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    // Thêm khối này nếu bạn gặp lỗi liên quan đến duplicate classes khi dùng Java 11+
+    // packagingOptions {
+    //     resources {
+    //         excludes += '/META-INF/{AL2.0,LGPL2.1}'
+    //     }
+    // }
 }
 
 dependencies {
 
+    // Các thư viện AndroidX và Material cơ bản (giả định đã định nghĩa trong libs.versions.toml)
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.activity)
-    implementation(libs.constraintlayout)
+    implementation(libs.activity)      // Hoặc libs.androidx.activity nếu bạn đặt tên khác
+    implementation(libs.constraintlayout) // Hoặc libs.androidx.constraintlayout
+
+    // Thư viện RecyclerView (cần thiết cho danh sách)
+    implementation(libs.recyclerview) // <<< THÊM DÒNG NÀY (Giả sử bạn đã định nghĩa trong libs.versions.toml)
+
+    // --- Glide Dependencies ---
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler) // Dùng annotationProcessor cho Java
+    // Nếu dùng Kotlin, thay thế dòng trên bằng:
+    // kapt(libs.glide.compiler)
+
+    // Dependencies cho Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
