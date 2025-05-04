@@ -15,6 +15,16 @@ import androidx.core.content.ContextCompat;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.features.main.ui.activity.MainActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import android.content.SharedPreferences;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail, etPassword;
@@ -60,14 +70,82 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // --- Logic đăng nhập ---
-            // TODO: Thay thế phần này bằng logic xác thực thực tế (ví dụ: gọi API, kiểm tra database)
-            // Ví dụ đơn giản: Nếu đăng nhập thành công
-            Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish(); // Đóng LoginActivity sau khi đăng nhập thành công
+            // Tạo JSON object chứa thông tin đăng nhập
+            JSONObject loginData = new JSONObject();
+            try {
+                loginData.put("email", email);
+                loginData.put("password", password);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            // Tạo request
+            String url = "http://192.168.60.103:3001/api/v1/auth/login";
+            JsonObjectRequest loginRequest = new JsonObjectRequest(Request.Method.POST, url, loginData,
+                response -> {
+                    try {
+                        // Kiểm tra success và statusCode
+                        boolean success = response.getBoolean("success");
+                        int statusCode = response.getInt("statusCode");
+                        
+                        if (success && statusCode == 201) {
+                            JSONObject data = response.getJSONObject("data");
+                            String accessToken = data.getString("accessToken");
+                            String refreshToken = data.getString("refreshToken");
+                            JSONObject userData = data.getJSONObject("user");
+                            
+                            // Lưu tokens và user data vào SharedPreferences
+                            SharedPreferences prefs = getSharedPreferences("AuthPrefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("accessToken", accessToken);
+                            editor.putString("refreshToken", refreshToken);
+                            editor.putString("user_id", String.valueOf(userData.getInt("id")));
+                            editor.putString("user_name", userData.getString("name"));
+                            editor.putString("user_email", userData.getString("email"));
+                            editor.putString("user_username", userData.getString("username"));
+                            editor.putString("user_phone", userData.getString("phoneNumber"));
+                            editor.putString("user_avatar", userData.isNull("avatar") ? null : userData.getString("avatar"));
+                            editor.putString("user_date_of_birth", userData.getString("dateOfBirth"));
+                            editor.apply();
+                            
+                            Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            String message = response.getString("message");
+                            Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        Toast.makeText(LoginActivity.this, "Có lỗi xảy ra khi xử lý dữ liệu", Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                    // Xử lý lỗi
+                    if (error.networkResponse != null) {
+                        switch (error.networkResponse.statusCode) {
+                            case 401:
+                                Toast.makeText(LoginActivity.this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 404:
+                                Toast.makeText(LoginActivity.this, "Không tìm thấy tài nguyên", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 500:
+                                Toast.makeText(LoginActivity.this, "Lỗi máy chủ", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                Toast.makeText(LoginActivity.this, "Lỗi kết nối: " + error.networkResponse.statusCode, Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Lỗi kết nối mạng", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            // Thêm request vào queue
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            requestQueue.add(loginRequest);
 
             // Ví dụ xử lý nếu đăng nhập thất bại:
             // else {
