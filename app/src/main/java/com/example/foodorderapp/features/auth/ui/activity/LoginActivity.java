@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.config.Config;
 import com.example.foodorderapp.features.main.ui.activity.MainActivity;
 
 import org.json.JSONException;
@@ -80,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             // Tạo request
-            String url = "http://192.168.60.103:3001/api/v1/auth/login";
+            String url = Config.BE_URL + "/auth/login";
             JsonObjectRequest loginRequest = new JsonObjectRequest(Request.Method.POST, url, loginData,
                 response -> {
                     try {
