@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat; // Import để dùng ContextCompat.getColor
+import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -63,7 +63,7 @@ public class RegisterActivity extends AppCompatActivity {
             togglePasswordVisibility(edtConfirmPassword, imgToggleConfirmPassword, isConfirmPasswordVisible);
         });
 
-        // Nút Đăng ký
+
         btnRegister.setOnClickListener(v -> {
             String name = edtName.getText().toString().trim();
             String username = edtUsername.getText().toString().trim();
@@ -88,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Gọi API đăng ký
+            
             org.json.JSONObject registerData = new org.json.JSONObject();
             try {
                 registerData.put("name", name);
@@ -139,18 +139,17 @@ public class RegisterActivity extends AppCompatActivity {
             requestQueue.add(registerRequest);
         });
 
-        // Nút chuyển sang Đăng nhập
+        
         btnLogin.setOnClickListener(v -> {
-            // Chuyển sang LoginActivity
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class); // Đảm bảo LoginActivity tồn tại
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
-            finish(); // Đóng RegisterActivity
+            finish();
         });
     }
 
     private void togglePasswordVisibility(EditText editText, ImageView toggleButton, boolean isVisible) {
         if (isVisible) {
-            editText.setTransformationMethod(null); // Xóa transformation
+            editText.setTransformationMethod(null);
             toggleButton.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary));
         } else {
             editText.setTransformationMethod(PasswordTransformationMethod.getInstance());

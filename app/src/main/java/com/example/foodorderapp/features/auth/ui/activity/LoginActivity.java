@@ -80,7 +80,6 @@ public class LoginActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            // Tạo request
             String url = Config.BE_URL + "/auth/login";
             JsonObjectRequest loginRequest = new JsonObjectRequest(Request.Method.POST, url, loginData,
                 response -> {

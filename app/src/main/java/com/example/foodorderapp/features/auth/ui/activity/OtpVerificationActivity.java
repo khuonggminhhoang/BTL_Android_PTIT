@@ -80,16 +80,10 @@ public class OtpVerificationActivity extends AppCompatActivity {
         btnVerify = findViewById(R.id.otp_btn_verify);
     }
 
-    // Hàm che email (ví dụ đơn giản)
     private String maskEmail(String email) {
-        // Ví dụ: maulana***@gmail.com
-        try {
-            int atIndex = email.indexOf('@');
-            if (atIndex > 3) {
-                return email.substring(0, 3) + "***" + email.substring(atIndex);
-            }
-        } catch (Exception e) {
-            // Handle error or return original email
+        int atIndex = email.indexOf('@');
+        if (atIndex > 3) {
+            return email.substring(0, 3) + "***" + email.substring(atIndex);
         }
         return email;
     }
