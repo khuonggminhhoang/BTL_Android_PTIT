@@ -56,6 +56,9 @@ dependencies {
     // Nếu dùng Kotlin, thay thế dòng trên bằng:
     // kapt(libs.glide.compiler)
 
+    // Volley for networking
+    implementation("com.android.volley:volley:1.2.1")
+
     // Dependencies cho Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
