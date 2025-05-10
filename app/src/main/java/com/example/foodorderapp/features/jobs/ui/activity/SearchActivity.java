@@ -1,6 +1,8 @@
 package com.example.foodorderapp.features.jobs.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -13,25 +15,32 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.config.Config;
 import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
-import com.example.foodorderapp.features.jobs.ui.adapter.SearchHistoryAdapter;
 import com.example.foodorderapp.core.model.Job;
-import com.example.foodorderapp.features.jobs.ui.model.SearchHistory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SearchActivity extends AppCompatActivity implements SearchHistoryAdapter.OnSearchHistoryClickListener {
+// Retrofit imports
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+
+public class SearchActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-    private ImageButton btnBack, btnFilter;
+    private ImageButton btnBack;
     private EditText edtSearchJob;
-    private TextView txtLocation;
-    private RecyclerView rvHistory, rvRecommended;
-    private SearchHistoryAdapter historyAdapter;
-    private JobAdapter recommendedJobAdapter; // Tái sử dụng JobAdapter
-    private List<SearchHistory> searchHistoryList;
+    private EditText edtLocation;
+    private RecyclerView rvRecommended;
+    private TextView txtNoResults;
+    private JobAdapter recommendedJobAdapter;
     private List<Job> recommendedJobList;
 
     @Override
@@ -39,77 +48,35 @@ public class SearchActivity extends AppCompatActivity implements SearchHistoryAd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
+        Intent intent = getIntent();
+        String search = intent.getStringExtra("search");
+
         findViews();
         setupToolbar();
-        setupSearchHistory();
         setupRecommendedJobs();
         setupListeners();
+        edtSearchJob.setText(search);
     }
 
     private void findViews() {
         toolbar = findViewById(R.id.search_toolbar);
         btnBack = findViewById(R.id.search_btn_back);
-        btnFilter = findViewById(R.id.search_btn_filter);
         edtSearchJob = findViewById(R.id.search_edt_job);
-        txtLocation = findViewById(R.id.search_txt_location);
-        rvHistory = findViewById(R.id.search_rv_history);
+        edtLocation = findViewById(R.id.search_edt_location);
         rvRecommended = findViewById(R.id.search_rv_recommended);
+        txtNoResults = findViewById(R.id.search_txt_no_results);
     }
 
     private void setupToolbar() {
-        // Không cần setSupportActionBar nếu không dùng menu của toolbar
         btnBack.setOnClickListener(v -> finish());
-        btnFilter.setOnClickListener(v -> {
-            Toast.makeText(this, "Filter clicked", Toast.LENGTH_SHORT).show();
-            // TODO: Implement filter functionality
-        });
-    }
-
-    private void setupSearchHistory() {
-        searchHistoryList = new ArrayList<>();
-        // TODO: Load search history from SharedPreferences or Database
-        // --- Dummy Data ---
-        searchHistoryList.add(new SearchHistory("UI/UX Designer", 120));
-        searchHistoryList.add(new SearchHistory("Front End Developer", 90));
-        searchHistoryList.add(new SearchHistory("Graphic Designer", 10));
-        // --- End Dummy Data ---
-
-        historyAdapter = new SearchHistoryAdapter(this, searchHistoryList, this); // Truyền this (Activity) làm listener
-        rvHistory.setLayoutManager(new LinearLayoutManager(this));
-        rvHistory.setAdapter(historyAdapter);
     }
 
     private void setupRecommendedJobs() {
         recommendedJobList = new ArrayList<>();
-        // TODO: Load recommended jobs based on user profile/history or default
-        // --- Dummy Data (Lấy từ dữ liệu mẫu bạn đã có) ---
-        String defaultDescription = "Building new user-facing features...";
-        String twitterCompanyInfo = "Twitter Indonesia is a solution...";
-        String defaultAddress = "Jl. Muara Baru Ujung Blok T...";
-        recommendedJobList.add(new Job(
-                "job_slack_search_1", // <<< THÊM: ID duy nhất (ví dụ)
-                "Slack",
-                "Remote Front End Developer",
-                "Bandung-Indonesia",
-                "$15K - $30K / Month",
-                "2 hours ago",
-                "", // <<< THAY THẾ: R.drawable.ic_company_logo_placeholder bằng URL (hoặc "" / null)
-                false,
-                defaultDescription,
-                "Slack company info...",
-                50,
-                Arrays.asList("Frontend", "Remote"),
-                "www.slack.com",
-                "Collaboration",
-                "501-1000 employee",
-                "Bandung"
-        ));
-
         recommendedJobAdapter = new JobAdapter(this, recommendedJobList); // Reuse JobAdapter
         rvRecommended.setLayoutManager(new LinearLayoutManager(this));
         rvRecommended.setAdapter(recommendedJobAdapter);
     }
-
 
     private void setupListeners() {
         // Xử lý khi nhấn nút search trên bàn phím
@@ -121,32 +88,96 @@ public class SearchActivity extends AppCompatActivity implements SearchHistoryAd
             return false;
         });
 
-        // Xử lý khi nhấn vào ô Location
-        txtLocation.setOnClickListener(v -> {
-            Toast.makeText(this, "Select location clicked", Toast.LENGTH_SHORT).show();
-            // TODO: Implement location selection (e.g., open map, use current location)
+        // Xử lý khi nhấn nút search trên bàn phím của ô location
+        edtLocation.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearch(edtSearchJob.getText().toString());
+                return true;
+            }
+            return false;
         });
     }
 
-    // Xử lý khi click vào item trong lịch sử tìm kiếm
-    @Override
-    public void onHistoryItemClick(SearchHistory item) {
-        edtSearchJob.setText(item.getTerm());
-        performSearch(item.getTerm());
+    // Gọi API tìm kiếm việc làm
+    private void searchJobsFromApi(String search, String location) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Config.BE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        JobApiService apiService = retrofit.create(JobApiService.class);
+
+        List<String> searchFields = new ArrayList<>();
+        if (location != null && !location.isEmpty()) {
+            searchFields.add("location");
+        }
+
+        Call<JobSearchResponse> call = apiService.searchJobs(search, searchFields);
+
+        call.enqueue(new Callback<JobSearchResponse>() {
+            @Override
+            public void onResponse(Call<JobSearchResponse> call, Response<JobSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().data != null) {
+                    updateSearchResults(response.body().data);
+                } else {
+                    updateSearchResults(new ArrayList<>());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JobSearchResponse> call, Throwable t) {
+                updateSearchResults(new ArrayList<>());
+            }
+        });
     }
 
-    // Hàm thực hiện tìm kiếm (hiện tại chỉ hiển thị Toast)
+    // Thay thế hàm giả lập bằng call API thực tế
     private void performSearch(String query) {
         if (query != null && !query.trim().isEmpty()) {
-            Toast.makeText(this, "Searching for: " + query, Toast.LENGTH_SHORT).show();
-            // TODO: Implement actual search logic (e.g., start SearchResultsActivity with query)
-            // Ví dụ:
-            // Intent intent = new Intent(this, SearchResultsActivity.class);
-            // intent.putExtra("SEARCH_QUERY", query);
-            // startActivity(intent);
+            String location = edtLocation.getText().toString();
+            searchJobsFromApi(query, location);
         } else {
             Toast.makeText(this, "Please enter a search term", Toast.LENGTH_SHORT).show();
         }
-        // Có thể ẩn bàn phím ở đây nếu cần
+    }
+
+    // Hàm cập nhật UI dựa trên kết quả tìm kiếm
+    private void updateSearchResults(List<Job> results) {
+        if (results == null || results.isEmpty()) {
+            // Không có kết quả
+            rvRecommended.setVisibility(View.GONE);
+            txtNoResults.setVisibility(View.VISIBLE);
+        } else {
+            // Có kết quả
+            rvRecommended.setVisibility(View.VISIBLE);
+            txtNoResults.setVisibility(View.GONE);
+            recommendedJobList.clear();
+            recommendedJobList.addAll(results);
+            recommendedJobAdapter.notifyDataSetChanged();
+        }
+    }
+
+    // Retrofit API interface
+    public interface JobApiService {
+        @GET("/api/v1/jobs")
+        Call<JobSearchResponse> searchJobs(
+            @Query("search") String search,
+            @Query("searchFields") List<String> searchFields
+        );
+    }
+
+    // Model cho response
+    public static class JobSearchResponse {
+        public boolean success;
+        public int statusCode;
+        public String message;
+        public String error;
+        public List<Job> data;
+        public Meta meta;
+
+        public static class Meta {
+            public int totalItems;
+            public Integer totalPages;
+        }
     }
 }

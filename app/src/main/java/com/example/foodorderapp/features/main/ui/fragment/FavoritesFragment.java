@@ -134,12 +134,12 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
 
         // --- Dữ liệu mẫu (thêm vào nếu cần test) ---
 
-        favoriteJobList.add(new Job("job_1", "Twitter", "Remote UI/UX Designer", "Jakarta-Indonesia", "$50k - $70k",
-                "2 days ago", "URL_LOGO_TWITTER", true, "Desc 1...", "Company 1...", 10,
-                Arrays.asList("UI/UX", "Remote"), "twitter.com", "Social", "10k+", "SF"));
-        favoriteJobList.add(new Job("job_2", "Facebook", "Remote UX Designer", "Surabaya-Indonesia", "$60k - $80k",
-                "3 days ago", "URL_LOGO_FACEBOOK", true, "Desc 2...", "Company 2...", 15,
-                Arrays.asList("UX", "Remote"), "facebook.com", "Social", "50k+", "MP"));
+//        favoriteJobList.add(new Job("job_1", "Twitter", "Remote UI/UX Designer", "Jakarta-Indonesia", "$50k - $70k",
+//                "2 days ago", "URL_LOGO_TWITTER", true, "Desc 1...", "Company 1...", 10,
+//                Arrays.asList("UI/UX", "Remote"), "twitter.com", "Social", "10k+", "SF"));
+//        favoriteJobList.add(new Job("job_2", "Facebook", "Remote UX Designer", "Surabaya-Indonesia", "$60k - $80k",
+//                "3 days ago", "URL_LOGO_FACEBOOK", true, "Desc 2...", "Company 2...", 15,
+//                Arrays.asList("UX", "Remote"), "facebook.com", "Social", "50k+", "MP"));
 
         // --- Kết thúc dữ liệu mẫu ---
 
@@ -169,11 +169,11 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
     @Override
     public void onUnfavoriteClick(Job job, int position) {
         // TODO: Xử lý logic bỏ yêu thích bằng ID
-        if (job == null || job.getId() == null || job.getId().isEmpty()) {
+        if (job == null) {
             Toast.makeText(getContext(), "Error: Invalid job data!", Toast.LENGTH_SHORT).show();
             return;
         }
-        String jobId = job.getId();
+        int jobId = job.getId();
         Toast.makeText(getContext(), "Unfavorite requested for Job ID: " + jobId, Toast.LENGTH_SHORT).show();
 
         // --- Logic xóa khỏi nguồn dữ liệu (Ví dụ) ---
@@ -195,11 +195,11 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
 
     @Override
     public void onItemClick(Job job, int position) {
-        if (job == null || job.getId() == null || job.getId().isEmpty()) {
+        if (job == null) {
             Toast.makeText(getContext(), "Error: Invalid job data!", Toast.LENGTH_SHORT).show();
             return;
         }
-        String jobId = job.getId();
+        int jobId = job.getId();
         Toast.makeText(getContext(), "Clicked Job ID: " + jobId, Toast.LENGTH_SHORT).show();
 
         // Mở màn hình chi tiết Job

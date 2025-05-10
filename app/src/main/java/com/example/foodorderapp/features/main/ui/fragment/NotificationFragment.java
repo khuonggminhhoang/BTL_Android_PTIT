@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity; // Import nếu dùng Toolbar
-import androidx.appcompat.widget.Toolbar;    // Import nếu dùng Toolbar
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,9 +11,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;         // Import nếu dùng Menu
-import android.view.MenuInflater; // Import nếu dùng Menu
-import android.view.MenuItem;    // Import nếu dùng Menu
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -23,8 +18,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.foodorderapp.R;
-import com.example.foodorderapp.core.model.NotificationItem; // Import adapter
 // Import các Activity bạn muốn điều hướng đến
+import com.example.foodorderapp.core.model.Notification;
 import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
 import com.example.foodorderapp.features.main.ui.adapter.NotificationsAdapter;
 
@@ -38,7 +33,7 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     // --- Biến thành viên ---
     private RecyclerView recyclerViewNotifications;
     private NotificationsAdapter adapter; // Adapter là biến thành viên
-    private List<NotificationItem> notificationList;
+    private List<Notification> notificationList;
     private LinearLayout emptyStateLayout;
     private ProgressBar progressBar;
     // private Toolbar toolbar; // Bỏ comment nếu layout fragment_notifications.xml có Toolbar
@@ -108,7 +103,7 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         // Ví dụ gọi API/DB ở đây...
         // Giả lập thành công sau 1 giây
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            List<NotificationItem> fetchedNotifications = getMockNotifications(); // Hàm lấy dữ liệu mẫu
+            List<Notification> fetchedNotifications = getMockNotifications(); // Hàm lấy dữ liệu mẫu
 
             // --- Xử lý kết quả ---
             if (getActivity() != null && isAdded()) { // Kiểm tra Fragment còn tồn tại
@@ -129,12 +124,48 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     }
 
     // Hàm tạo dữ liệu mẫu (thay bằng logic thật)
-    private List<NotificationItem> getMockNotifications() {
-        List<NotificationItem> mockList = new ArrayList<>();
-        mockList.add(new NotificationItem("noti_1", "Application Sent", "Your application for UI/UX Designer has been sent to Twitter.", "10:00 AM", "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/512px-Logo_of_Twitter.svg.png", false, "job_status", "job_123"));
-        mockList.add(new NotificationItem("noti_2", "Application Viewed", "Your application for Front-end Developer at Slack was viewed.", "Yesterday", "https://cdn.worldvectorlogo.com/logos/slack-new-logo.svg", false, "job_status", "job_456"));
-        mockList.add(new NotificationItem("noti_3", "New Message", "You have a new message from John Doe.", "09:30 AM", "https://www.w3schools.com/w3images/avatar2.png", false, "new_message", "chat_789"));
-        mockList.add(new NotificationItem("noti_4", "Password Changed", "Your password was successfully changed.", "2 days ago", "https://static.vecteezy.com/system/resources/thumbnails/009/663/927/small/shield-check-mark-security-logo-icon-design-free-vector.jpg", true, "security", null));
+    private List<Notification> getMockNotifications() {
+        List<Notification> mockList = new ArrayList<>();
+        Notification n1 = new Notification();
+        n1.setId(1);
+        n1.setTitle("Application Sent");
+        n1.setMessage("Your application for UI/UX Designer has been sent to Twitter.");
+        n1.setCreatedAt("10:00 AM");
+        n1.setRead(false);
+        n1.setUserId(1);
+        n1.setApplicationId(123);
+        mockList.add(n1);
+
+        Notification n2 = new Notification();
+        n2.setId(2);
+        n2.setTitle("Application Viewed");
+        n2.setMessage("Your application for Front-end Developer at Slack was viewed.");
+        n2.setCreatedAt("Yesterday");
+        n2.setRead(false);
+        n2.setUserId(1);
+        n2.setApplicationId(456);
+        mockList.add(n2);
+
+        Notification n3 = new Notification();
+        n3.setId(3);
+        n3.setTitle("New Message");
+        n3.setMessage("You have a new message from John Doe.");
+        n3.setCreatedAt("09:30 AM");
+        n3.setRead(false);
+        n3.setUserId(1);
+        n3.setApplicationId(789);
+        mockList.add(n3);
+
+        Notification n4 = new Notification();
+        n4.setId(4);
+        n4.setTitle("Password Changed");
+        n4.setMessage("Your password was successfully changed.");
+        n4.setCreatedAt("2 days ago");
+        n4.setRead(true);
+        n4.setUserId(1);
+        n4.setApplicationId(0);
+        mockList.add(n4);
+
         return mockList;
     }
 
@@ -174,79 +205,24 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
 
     // --- Xử lý Click ---
     @Override
-    public void onNotificationClick(NotificationItem notification, int position) {
-        if (getContext() == null || notification == null || notification.getId() == null) return;
-
-        Log.d(TAG, "Clicked notification ID: " + notification.getId() + " Type: " + notification.getType());
-
-        // 1. Đánh dấu đã đọc (UI + Backend/DB)
+    public void onNotificationClick(Notification notification, int position) {
+        if (getContext() == null || notification == null) return;
+        Log.d(TAG, "Clicked notification ID: " + notification.getId());
+        // Đánh dấu đã đọc
         if (!notification.isRead()) {
             if (adapter != null) {
                 adapter.markItemAsRead(position);
             }
             // TODO: Gọi hàm cập nhật trạng thái trong Database/API
-            // markNotificationAsReadInBackend(notification.getId());
         }
-
-        // 2. Điều hướng
-        String type = notification.getType();
-        String relatedId = notification.getRelatedId();
-
-        if (type == null) {
-            Log.w(TAG, "Notification type is null for ID: " + notification.getId());
-            Toast.makeText(getContext(), "Cannot determine notification action.", Toast.LENGTH_SHORT).show();
-            return;
+        // Điều hướng ví dụ: mở JobDetailActivity nếu có applicationId
+        if (notification.getApplicationId() > 0) {
+            Intent intent = new Intent(getContext(), JobDetailActivity.class);
+            intent.putExtra("JOB_ID", String.valueOf(notification.getApplicationId()));
+            startActivity(intent);
+        } else {
+            Toast.makeText(getContext(), "No action defined for this notification.", Toast.LENGTH_SHORT).show();
         }
-
-        Intent intent = null;
-        switch (type.toLowerCase()) {
-            case "job_status": // Gộp các loại job lại
-            case "job_applied":
-            case "job_viewed":
-                if (isValidId(relatedId)) {
-                    intent = new Intent(getContext(), JobDetailActivity.class);
-                    intent.putExtra("JOB_ID", relatedId);
-                } else {
-                    showInvalidDataToast("Job details");
-                }
-                break;
-            case "new_message":
-                if (isValidId(relatedId)) {
-                    // intent = new Intent(getContext(), ChatActivity.class);
-                    // intent.putExtra("CHAT_ID", relatedId);
-                    Toast.makeText(getContext(), "Open chat: " + relatedId, Toast.LENGTH_SHORT).show(); // Placeholder
-                } else {
-                    showInvalidDataToast("Chat");
-                }
-                break;
-            // Thêm các case khác...
-            default:
-                Log.w(TAG, "Unhandled notification type: " + type);
-                Toast.makeText(getContext(), "No action defined for this notification.", Toast.LENGTH_SHORT).show();
-                break;
-        }
-
-        if (intent != null) {
-            try {
-                startActivity(intent);
-            } catch (Exception e) {
-                Log.e(TAG, "Error starting activity for notification type: " + type, e);
-                Toast.makeText(getContext(), "Error opening details.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    // Hàm kiểm tra ID hợp lệ (không null và không rỗng)
-    private boolean isValidId(String id) {
-        return id != null && !id.trim().isEmpty();
-    }
-
-    // Hàm hiển thị Toast lỗi dữ liệu không hợp lệ
-    private void showInvalidDataToast(String detailType) {
-        if (getContext() != null) {
-            Toast.makeText(getContext(), detailType + " not available.", Toast.LENGTH_SHORT).show();
-        }
-        Log.w(TAG, "Missing or invalid relatedId for notification.");
     }
 
     // --- TODO: Hàm gọi backend/DB để đánh dấu đã đọc ---
