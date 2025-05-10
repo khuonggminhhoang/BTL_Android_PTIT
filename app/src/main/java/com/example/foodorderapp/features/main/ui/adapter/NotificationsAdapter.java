@@ -14,22 +14,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R; // Đảm bảo import R đúng
-import com.example.foodorderapp.core.model.NotificationItem;
+import com.example.foodorderapp.core.model.Notification;
+import com.example.foodorderapp.core.model.Application;
+import com.example.foodorderapp.core.model.Job;
+import com.example.foodorderapp.core.model.Company;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.ViewHolder> {
 
-    private List<NotificationItem> notifications;
+    private List<Notification> notifications;
     private final Context context;
     private final OnNotificationClickListener listener;
 
     public interface OnNotificationClickListener {
-        void onNotificationClick(NotificationItem notification, int position);
+        void onNotificationClick(Notification notification, int position);
     }
 
-    public NotificationsAdapter(Context context, List<NotificationItem> notifications, OnNotificationClickListener listener) {
+    public NotificationsAdapter(Context context, List<Notification> notifications, OnNotificationClickListener listener) {
         this.context = context;
         this.notifications = notifications != null ? new ArrayList<>(notifications) : new ArrayList<>();
         this.listener = listener;
@@ -44,14 +47,26 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        NotificationItem notification = notifications.get(position);
+        Notification notification = notifications.get(position);
 
         holder.tvTitle.setText(notification.getTitle());
         holder.tvMessage.setText(notification.getMessage());
-        holder.tvTimestamp.setText(notification.getTimestamp()); // TODO: Format timestamp nếu cần
+        holder.tvTimestamp.setText(notification.getCreatedAt()); // TODO: Format timestamp nếu cần
 
+        // Kiểm tra null an toàn cho application, job, company
+        String logoUrl = null;
+        Application application = notification.getApplication();
+        if (application != null) {
+            Job job = application.getJob();
+            if (job != null) {
+                Company company = job.getCompany();
+                if (company != null) {
+                    logoUrl = company.getLogoUrl();
+                }
+            }
+        }
         Glide.with(context)
-                .load(notification.getIconUrl())
+                .load(logoUrl)
                 .placeholder(R.mipmap.ic_launcher_round) // Thay placeholder
                 .error(R.drawable.ic_notifications_24) // Icon chuông mặc định
                 .circleCrop()
@@ -85,7 +100,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     }
 
     // Cập nhật dữ liệu
-    public void updateData(List<NotificationItem> newNotifications) {
+    public void updateData(List<Notification> newNotifications) {
         this.notifications = newNotifications != null ? new ArrayList<>(newNotifications) : new ArrayList<>();
         notifyDataSetChanged(); // Hoặc dùng DiffUtil
     }
@@ -93,7 +108,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     // Đánh dấu item đã đọc (chỉ cập nhật UI)
     public void markItemAsRead(int position) {
         if (position >= 0 && position < notifications.size()) {
-            NotificationItem item = notifications.get(position);
+            Notification item = notifications.get(position);
             if (!item.isRead()) {
                 item.setRead(true);
                 notifyItemChanged(position);
