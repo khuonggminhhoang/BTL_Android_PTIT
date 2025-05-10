@@ -52,12 +52,10 @@ dependencies {
 
     // --- Glide Dependencies ---
     implementation(libs.glide)
-    annotationProcessor(libs.glide.compiler) // Dùng annotationProcessor cho Java
-    // Nếu dùng Kotlin, thay thế dòng trên bằng:
-    // kapt(libs.glide.compiler)
-
-    // Volley for networking
+    annotationProcessor(libs.glide.compiler)
     implementation("com.android.volley:volley:1.2.1")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
     // Dependencies cho Testing
     testImplementation(libs.junit)
