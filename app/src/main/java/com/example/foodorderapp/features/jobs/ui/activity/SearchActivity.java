@@ -9,6 +9,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.SeekBar;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.config.Config;
+import com.example.foodorderapp.core.model.JobCategory;
 import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
 import com.example.foodorderapp.core.model.Job;
 
@@ -32,6 +35,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -75,6 +80,96 @@ public class SearchActivity extends AppCompatActivity {
 
     private void setupToolbar() {
         btnBack.setOnClickListener(v -> finish());
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_filter) {
+                showFilterBottomSheet();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void showFilterBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_filter, null);
+        bottomSheetDialog.setContentView(view);
+
+        // Get references to views
+        EditText edtKeyword = view.findViewById(R.id.edt_filter_keyword);
+        EditText edtLocation = view.findViewById(R.id.edt_filter_location);
+        TextView tvSalaryValue = view.findViewById(R.id.tv_salary_value);
+        SeekBar seekbarSalary = view.findViewById(R.id.seekbar_salary);
+        Button btnRemote = view.findViewById(R.id.btn_job_type_remote);
+        Button btnFreelance = view.findViewById(R.id.btn_job_type_freelance);
+        Button btnFulltime = view.findViewById(R.id.btn_job_type_fulltime);
+        Button btnIntern = view.findViewById(R.id.btn_job_type_intern);
+
+        tvSalaryValue.setText("500000đ-1000000đ");
+        seekbarSalary.setProgress(50);
+        seekbarSalary.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int minSalary = 0;
+                int maxSalary = 100000000;
+                int range = maxSalary - minSalary;
+                int currentMin = minSalary + (progress * range / 100);
+                int currentMax = currentMin + 500000;
+                tvSalaryValue.setText(currentMin + "đ - " + currentMax + "đ");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        View tvClearAll = view.findViewById(R.id.tv_clear_all);
+        tvClearAll.setOnClickListener(v -> {
+            edtKeyword.setText("");
+            edtLocation.setText("");
+            
+            seekbarSalary.setProgress(50);
+            tvSalaryValue.setText("500000-1000000");
+            
+            btnRemote.setBackgroundTintList(getColorStateList(R.color.blue_primary));
+            btnFreelance.setBackgroundTintList(getColorStateList(R.color.blue_primary));
+            btnFulltime.setBackgroundTintList(getColorStateList(R.color.blue_primary));
+            btnIntern.setBackgroundTintList(getColorStateList(R.color.blue_primary));
+            
+            btnRemote.setTextColor(getColorStateList(android.R.color.white));
+            btnFreelance.setTextColor(getColorStateList(android.R.color.white));
+            btnFulltime.setTextColor(getColorStateList(android.R.color.white));
+            btnIntern.setTextColor(getColorStateList(android.R.color.white));
+        });
+
+        // Handle job type button clicks
+        View.OnClickListener jobTypeClickListener = v -> {
+            Button clickedButton = (Button) v;
+            if (clickedButton.getCurrentTextColor() == getColor(android.R.color.white)) {
+                // If selected, deselect it
+                clickedButton.setBackgroundTintList(getColorStateList(R.color.blue_primary));
+                clickedButton.setTextColor(getColorStateList(android.R.color.white));
+            } else {
+                // If not selected, select it
+                clickedButton.setBackgroundTintList(getColorStateList(android.R.color.white));
+                clickedButton.setTextColor(getColorStateList(R.color.blue_primary));
+            }
+        };
+
+        btnRemote.setOnClickListener(jobTypeClickListener);
+        btnFreelance.setOnClickListener(jobTypeClickListener);
+        btnFulltime.setOnClickListener(jobTypeClickListener);
+        btnIntern.setOnClickListener(jobTypeClickListener);
+
+        // Handle apply filter button
+        View btnApply = view.findViewById(R.id.btn_apply_filter);
+        btnApply.setOnClickListener(v -> {
+            // TODO: Get filter data and pass back to SearchActivity
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
     }
 
     private void setupRecommendedJobs() {
@@ -104,6 +199,22 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
+    // Retrofit API interface
+    public interface JobApiService {
+        @GET("/api/v1/jobs")
+        Call<JobSearchResponse> searchJobs(
+            @Query("search") String search,
+            @Query("searchFields") List<String> searchFields,
+            @Query("pageSize") Integer pageSize,
+            @Query("pageNumber") Integer pageNumber,
+            @Query("sort") String sort,
+            @Query("location") String location,
+            @Query("jobCategoryId") Integer jobCategoryId,
+            @Query("salaryGte") Integer salaryGte,
+            @Query("salaryLte") Integer salaryLte
+        );
+    }
+
     // Gọi API tìm kiếm việc làm
     private void searchJobsFromApi(String search, String location) {
         Retrofit retrofit = new Retrofit.Builder()
@@ -117,9 +228,24 @@ public class SearchActivity extends AppCompatActivity {
         searchFields.add("title");
         searchFields.add("description");
 
-        Call<JobSearchResponse> call = apiService.searchJobs(search, searchFields);
+        Integer pageSize = null;
+        Integer pageNumber = null;
+        String sort = null;
+        Integer jobCategoryId = null;
+        Integer salaryGte = null;
+        Integer salaryLte = null;
 
-        android.util.Log.d("API_DEBUG", "API URL: " + call.request().url().toString());
+        Call<JobSearchResponse> call = apiService.searchJobs(
+            search,
+            searchFields,
+            pageSize,
+            pageNumber,
+            sort,
+            location,
+            jobCategoryId,
+            salaryGte,
+            salaryLte
+        );
 
         call.enqueue(new Callback<JobSearchResponse>() {
             @Override
@@ -163,15 +289,6 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    // Retrofit API interface
-    public interface JobApiService {
-        @GET("/api/v1/jobs")
-        Call<JobSearchResponse> searchJobs(
-            @Query("search") String search,
-            @Query("searchFields") List<String> searchFields
-        );
-    }
-
     // Model cho response
     public static class JobSearchResponse {
         public boolean success;
@@ -186,4 +303,18 @@ public class SearchActivity extends AppCompatActivity {
             public Integer totalPages;
         }
     }
+
+    public interface JobCategoryApiService {
+        @GET("/api/v1/job-categories")
+        Call<JobCategoryResponse> getJobCategories();
+    }
+
+    public static class JobCategoryResponse {
+        public boolean success;
+        public int statusCode;
+        public String message;
+        public String error;
+        public List<JobCategory> data;
+    }
 }
+
