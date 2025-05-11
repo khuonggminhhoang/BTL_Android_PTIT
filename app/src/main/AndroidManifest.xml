@@ -73,7 +73,8 @@
 <!--            android:name=".features.notifications.ui.activity.NotificationsActivity"-->
 <!--            android:exported="false"-->
 <!--            android:label="@string/notifications_title"-->
-<!--            android:parentActivityName=".features.main.ui.activity.MainActivity">-->
+<!--            android:parentActivityName=".features.main.ui.activity.MainActivity"> &lt;!&ndash; Hoặc Activity cha phù hợp &ndash;&gt;-->
+<!--            &lt;!&ndash; Meta-data for parent activity back navigation &ndash;&gt;-->
 <!--            <meta-data-->
 <!--                android:name="android.support.PARENT_ACTIVITY"-->
 <!--                android:value=".features.main.ui.activity.MainActivity" />-->

@@ -1,48 +1,45 @@
-package com.example.foodorderapp.features.main.ui.fragment; // Package fragment mới
+package com.example.foodorderapp.features.main.ui.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment; // Import Fragment
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView; // Import TextView nếu cần thay đổi text động
+import android.widget.TextView;
 
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.core.model.JobCategory;
+import com.example.foodorderapp.features.jobs.ui.activity.SearchActivity;
 import com.example.foodorderapp.features.jobs.ui.adapter.CategoryAdapter;
 import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
-import com.example.foodorderapp.core.model.Category;
 import com.example.foodorderapp.core.model.Job;
+import com.example.foodorderapp.core.model.Company;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-// Fragment cho màn hình chính (Trang chủ)
 public class HomeFragment extends Fragment {
 
-    // Các biến thành viên được chuyển từ MainActivity vào đây
     private RecyclerView rvCategories;
     private RecyclerView rvJobs;
     private CategoryAdapter categoryAdapter;
     private JobAdapter jobAdapter;
-    private List<Category> categoryList;
+    private List<JobCategory> categoryList;
     private List<Job> jobList;
-    // Các view khác nếu cần tương tác (ví dụ: TextView chào mừng)
     private TextView tvHello;
+    private TextView etSearch;
 
-    // Constructor mặc định (bắt buộc cho Fragment)
     public HomeFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate layout cho fragment này
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -50,35 +47,27 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Ánh xạ View sau khi layout đã được inflate
-        // Sử dụng view.findViewById() thay vì chỉ findViewById()
         rvCategories = view.findViewById(R.id.rvCategories);
         rvJobs = view.findViewById(R.id.rvJobs);
-        tvHello = view.findViewById(R.id.tvHello); // Ví dụ ánh xạ TextView
+        tvHello = view.findViewById(R.id.tvHello);
+        etSearch = view.findViewById(R.id.etSearch);
 
-        // Cập nhật text chào mừng (ví dụ)
-        // tvHello.setText(getString(R.string.hello_user, "Tên User")); // Lấy tên user thực tế nếu có
-
-        // Khởi tạo dữ liệu mẫu (logic giống hệt trong MainActivity cũ)
         initData();
-
-        // Thiết lập RecyclerView cho Danh mục
         setupCategoryRecyclerView();
-
-        // Thiết lập RecyclerView cho Công việc
         setupJobRecyclerView();
+
+        etSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                intent.putExtra("search", etSearch.getText().toString());
+                startActivity(intent);
+            }
+        });
     }
 
-    // Khởi tạo dữ liệu mẫu (fix cứng) - Giống hệt MainActivity cũ (đã sửa)
     private void initData() {
-        // Dữ liệu mẫu cho Danh mục
         categoryList = new ArrayList<>();
-        categoryList.add(new Category("Remote", R.drawable.ic_remote));
-        categoryList.add(new Category("Freelance", R.drawable.ic_freelance));
-        categoryList.add(new Category("Fulltime", R.drawable.ic_fulltime));
-        categoryList.add(new Category("Internship", R.drawable.ic_internship));
-
-        // Dữ liệu mẫu cho Công việc - Sử dụng constructor 15 tham số
         jobList = new ArrayList<>();
         String defaultDescription = "Building new user-facing features...\nAssisting with optimising build pipelines...\nImproving performance...\nAdding analytics...";
         String twitterCompanyInfo = "Twitter Indonesia is a solution for seafood addicts! We strive to express a positive impression and are committed to producing only good quality without preservatives food products.";
@@ -86,80 +75,81 @@ public class HomeFragment extends Fragment {
         String facebookCompanyInfo = "Facebook is an online social media and social networking service owned by American company Meta Platforms.";
         String defaultAddress = "Jl. Muara Baru Ujung Blok T. No. 8 Pergudangan BOSCO , RT.22 / RW.17 , Penjaringan , North Jakarta City , Jakarta 14440";
 
-        jobList.add(new Job(
-                "job_twitter_home_1", // <<< THÊM: ID duy nhất (ví dụ)
-                "Twitter",
-                "Remote UI/UX Designer",
-                "Jakarta - Indonesia",
-                "$500 - $1K / Month",
-                "1 hours ago",
-                "", // <<< THAY THẾ: R.drawable.ic_company_logo_placeholder bằng URL (hoặc "" / null)
-                true, // isFavorite
-                defaultDescription,
-                twitterCompanyInfo,
-                300, // applicantCount
-                Arrays.asList("UI/UX", "Remote"), // tags
-                "www.twitter.com", // website
-                "Socialmedia", // industry
-                "1-50 employee", // companySize
-                defaultAddress // officeAddress
-        ));
+        Job job1 = new Job();
+        job1.setId(1);
+        job1.setTitle("Remote UI/UX Designer");
+        job1.setLocation("Jakarta - Indonesia");
+        job1.setSalaryMin("500");
+        job1.setSalaryMax("1000");
+        job1.setSalaryPeriod("MONTH");
+        job1.setJobType("REMOTE");
+        job1.setTopJob(true);
+        job1.setStatus("OPEN");
+        job1.setDescription(defaultDescription);
+        job1.setCreatedAt("1 hours ago");
+        job1.setUpdatedAt("1 hours ago");
+        job1.setDeletedAt(null);
+        Company company1 = new Company();
+        company1.setName("Twitter");
+        company1.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/512px-Logo_of_Twitter.svg.png");
+        job1.setCompany(company1);
+        job1.setUsers(new ArrayList<>());
+        jobList.add(job1);
 
-// Sửa tương tự cho các dòng tạo Job khác trong HomeFragment:
-        jobList.add(new Job(
-                "job_google_home_1", // <<< THÊM ID
-                "Google",
-                "Android Developer",
-                "Mountain View, CA",
-                "$8K - $10K / Month",
-                "3 hours ago",
-                null, // <<< THAY THẾ Logo URL (hoặc URL thật)
-                false, // isFavorite
-                "Developing awesome Android applications...",
-                googleCompanyInfo,
-                150, // applicantCount
-                Arrays.asList("Android", "Fulltime", "Kotlin"), // tags
-                "www.google.com", // website
-                "Search Engine", // industry
-                "10000+ employee", // companySize
-                "1600 Amphitheatre Parkway, Mountain View, CA" // officeAddress
-        ));
+        Job job2 = new Job();
+        job2.setId(2);
+        job2.setTitle("Android Developer");
+        job2.setLocation("Mountain View, CA");
+        job2.setSalaryMin("8000");
+        job2.setSalaryMax("10000");
+        job2.setSalaryPeriod("MONTH");
+        job2.setJobType("FULL_TIME");
+        job2.setTopJob(false);
+        job2.setStatus("OPEN");
+        job2.setDescription("Developing awesome Android applications...");
+        job2.setCreatedAt("3 hours ago");
+        job2.setUpdatedAt("3 hours ago");
+        job2.setDeletedAt(null);
+        Company company2 = new Company();
+        company2.setName("Google");
+        company2.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg");
+        job2.setCompany(company2);
+        job2.setUsers(new ArrayList<>());
+        jobList.add(job2);
 
-        jobList.add(new Job(
-                "job_facebook_home_1", // <<< THÊM ID
-                "Facebook",
-                "Frontend Engineer",
-                "Menlo Park, CA",
-                "$7K - $9K / Month",
-                "5 hours ago",
-                "URL_LOGO_FB", // <<< THAY THẾ Logo URL (hoặc URL thật)
-                true, // isFavorite
-                "Building user interfaces with React...",
-                facebookCompanyInfo,
-                450, // applicantCount
-                Arrays.asList("Frontend", "React", "Remote"), // tags
-                "www.facebook.com", // website
-                "Social Network", // industry
-                "10000+ employee", // companySize
-                "1 Hacker Way, Menlo Park, CA" // officeAddress
-        ));
+        Job job3 = new Job();
+        job3.setId(3);
+        job3.setTitle("Frontend Engineer");
+        job3.setLocation("Menlo Park, CA");
+        job3.setSalaryMin("7000");
+        job3.setSalaryMax("9000");
+        job3.setSalaryPeriod("MONTH");
+        job3.setJobType("FULL_TIME");
+        job3.setTopJob(true);
+        job3.setStatus("OPEN");
+        job3.setDescription("Building user interfaces with React...");
+        job3.setCreatedAt("5 hours ago");
+        job3.setUpdatedAt("5 hours ago");
+        job3.setDeletedAt(null);
+        Company company3 = new Company();
+        company3.setName("Facebook");
+        company3.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png");
+        job3.setCompany(company3);
+        job3.setUsers(new ArrayList<>());
+        jobList.add(job3);
     }
 
-    // Thiết lập RecyclerView cho Danh mục
     private void setupCategoryRecyclerView() {
         if (categoryList == null) {
             categoryList = new ArrayList<>();
         }
-        // Sử dụng requireContext() để lấy Context an toàn trong Fragment
         categoryAdapter = new CategoryAdapter(requireContext(), categoryList);
-        // Đảm bảo layout manager được đặt đúng chiều ngang
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         rvCategories.setLayoutManager(layoutManager);
         rvCategories.setAdapter(categoryAdapter);
         rvCategories.setHasFixedSize(true);
     }
 
-    // Thiết lập RecyclerView cho Công việc
     private void setupJobRecyclerView() {
         if (jobList == null) {
             jobList = new ArrayList<>();
@@ -168,11 +158,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false);
         rvJobs.setLayoutManager(layoutManager);
         rvJobs.setAdapter(jobAdapter);
-        // NestedScrolling không cần thiết vì RecyclerView này nằm trong NestedScrollView của fragment_home.xml
-        // rvJobs.setNestedScrollingEnabled(false);
         rvJobs.setHasFixedSize(true);
     }
-
-    // TODO: Thêm logic khác cho HomeFragment nếu cần (ví dụ: xử lý click tìm kiếm,...)
 }
 

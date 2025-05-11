@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -50,9 +51,10 @@ public class WelcomeActivity extends AppCompatActivity {
         btnStartExploring.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+//                Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+//                startActivity(intent);
+//                finish();
+                Toast.makeText(WelcomeActivity.this, "Tính năng", Toast.LENGTH_SHORT).show();
             }
         });
     }

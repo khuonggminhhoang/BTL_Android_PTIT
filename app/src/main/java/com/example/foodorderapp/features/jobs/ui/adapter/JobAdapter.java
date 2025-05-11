@@ -2,7 +2,6 @@ package com.example.foodorderapp.features.jobs.ui.adapter; // Sử dụng packag
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log; // Import Log để debug nếu cần
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,11 @@ import java.util.List;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
 import com.example.foodorderapp.core.model.Job; // Import Job model đã sửa
+import com.example.foodorderapp.core.model.Company;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
@@ -60,23 +64,26 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         Job job = jobList.get(position);
         if (job == null) return;
 
-        holder.tvCompanyName.setText(job.getCompanyName());
-        holder.tvJobTitle.setText(job.getJobTitle());
+        // Sử dụng getter cho các trường
+        Company company = job.getCompany();
+        holder.tvCompanyName.setText(company != null ? company.getName() : "");
+        holder.tvJobTitle.setText(job.getTitle());
         holder.tvLocation.setText(job.getLocation());
-        holder.tvSalary.setText(job.getSalary());
-        holder.tvPostTime.setText(job.getPostTime());
+        String salary = job.getSalaryMin() + " - " + job.getSalaryMax() + " / " + job.getSalaryPeriod();
+        holder.tvSalary.setText(salary);
+        String createdAt = job.getCreatedAt();
+        holder.tvPostTime.setText(formatDate(createdAt));
 
-        // --- SỬA Ở ĐÂY: Load Logo bằng Glide từ URL ---
-        String logoUrl = job.getCompanyLogoUrl();
+        // Load Logo bằng Glide từ URL (chỉ dùng Glide, không dùng GlideToVectorYou)
+        String logoUrl = company != null ? company.getLogoUrl() : null;
         Glide.with(context)
-                .load(logoUrl)
-                .placeholder(R.mipmap.ic_launcher) // Thay bằng placeholder phù hợp
-                .error(R.mipmap.ic_launcher_round)      // Thay bằng ảnh lỗi phù hợp
-                // .circleCrop() // Tùy chọn bo tròn
-                .into(holder.ivCompanyLogo);
+            .load(logoUrl)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher_round)
+            .into(holder.ivCompanyLogo);
 
         // Cập nhật trạng thái nút favorite
-        updateFavoriteIcon(holder.ivFavorite, job.isFavorite());
+        updateFavoriteIcon(holder.ivFavorite, job.isTopJob());
 
         // --- Xử lý sự kiện click cho itemView (Dùng listener nếu có) ---
         holder.itemView.setOnClickListener(v -> {
@@ -92,9 +99,9 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
         // --- Xử lý sự kiện click cho nút favorite (Dùng listener nếu có) ---
         holder.ivFavorite.setOnClickListener(v -> {
-            boolean isNowFavorite = !job.isFavorite(); // Đảo trạng thái
-            job.setFavorite(isNowFavorite); // Cập nhật trạng thái trong object (tạm thời)
-            updateFavoriteIcon(holder.ivFavorite, isNowFavorite); // Cập nhật icon ngay lập tức
+            boolean isNowFavorite = !job.isTopJob();
+            job.setTopJob(isNowFavorite);
+            updateFavoriteIcon(holder.ivFavorite, isNowFavorite);
 
             if (listener != null) {
                 // Thông báo cho Activity/Fragment xử lý lưu trữ
@@ -107,25 +114,42 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         });
     }
 
-    // Hàm helper để cập nhật icon favorite
     private void updateFavoriteIcon(ImageView imageView, boolean isFavorite) {
         if (isFavorite) {
             imageView.setImageResource(R.drawable.ic_heart_filled_red); // Dùng icon đỏ
             imageView.clearColorFilter(); // Xóa filter nếu có
         } else {
             imageView.setImageResource(R.drawable.ic_favorite_border); // Dùng icon viền
-            // Có thể thêm màu xám cho viền nếu icon gốc là trắng
             imageView.setColorFilter(ContextCompat.getColor(context, R.color.grey), android.graphics.PorterDuff.Mode.SRC_IN);
         }
     }
 
+    private String formatDate(String isoDate) {
+        if (isoDate == null) return "";
+        String[] formats = {
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd"
+        };
+        for (String fmt : formats) {
+            try {
+                SimpleDateFormat isoFormat = new SimpleDateFormat(fmt, Locale.getDefault());
+                isoFormat.setLenient(true);
+                Date date = isoFormat.parse(isoDate);
+                if (date != null) {
+                    return new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date);
+                }
+            } catch (ParseException ignored) {}
+        }
+        return isoDate;
+    }
 
     @Override
     public int getItemCount() {
         return jobList == null ? 0 : jobList.size();
     }
 
-    // ViewHolder (Giữ nguyên)
     public static class JobViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCompanyLogo, ivFavorite;
         TextView tvCompanyName, tvJobTitle, tvLocation, tvSalary, tvPostTime;
@@ -142,7 +166,6 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         }
     }
 
-    // (Optional) Hàm để cập nhật dữ liệu từ bên ngoài
     public void updateJobList(List<Job> newJobList) {
         this.jobList = newJobList;
         notifyDataSetChanged();

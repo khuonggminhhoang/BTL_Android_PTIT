@@ -12,15 +12,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.core.model.JobCategory;
 import com.example.foodorderapp.features.jobs.ui.activity.CategoryJobsActivity; // Import Activity mới
-import com.example.foodorderapp.core.model.Category;
+
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
     private Context context;
-    private List<Category> categoryList;
+    private List<JobCategory> categoryList;
 
-    public CategoryAdapter(Context context, List<Category> categoryList) {
+    public CategoryAdapter(Context context, List<JobCategory> categoryList) {
         this.context = context;
         this.categoryList = categoryList;
     }
@@ -34,11 +35,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
-        Category category = categoryList.get(position);
+        JobCategory category = categoryList.get(position);
         if (category == null) return;
 
         holder.tvCategoryName.setText(category.getName());
-        holder.ivCategoryIcon.setImageResource(category.getIconResId());
+        holder.ivCategoryIcon.setImageResource(R.drawable.ic_building);
 
         // --- Sửa đổi sự kiện click ---
         holder.itemView.setOnClickListener(v -> {

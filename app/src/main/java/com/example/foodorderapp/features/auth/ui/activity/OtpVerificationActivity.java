@@ -17,6 +17,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.foodorderapp.R;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.example.foodorderapp.config.Config;
 
 import java.util.Locale;
 
@@ -36,13 +43,12 @@ public class OtpVerificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verification);
 
-        userEmail = getIntent().getStringExtra("USER_EMAIL"); // Đảm bảo key này được dùng khi gọi Intent
+        userEmail = getIntent().getStringExtra("email");
 
         findViews();
         setupOtpInput();
         setupClickListeners();
 
-        // Cập nhật subtitle
         if (userEmail != null && !userEmail.isEmpty()) {
             String maskedEmail = maskEmail(userEmail);
             tvSubtitle.setText(getString(R.string.otp_subtitle_format, maskedEmail));
@@ -56,7 +62,6 @@ public class OtpVerificationActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Hủy timer để tránh memory leak
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
@@ -75,16 +80,10 @@ public class OtpVerificationActivity extends AppCompatActivity {
         btnVerify = findViewById(R.id.otp_btn_verify);
     }
 
-    // Hàm che email (ví dụ đơn giản)
     private String maskEmail(String email) {
-        // Ví dụ: maulana***@gmail.com
-        try {
-            int atIndex = email.indexOf('@');
-            if (atIndex > 3) {
-                return email.substring(0, 3) + "***" + email.substring(atIndex);
-            }
-        } catch (Exception e) {
-            // Handle error or return original email
+        int atIndex = email.indexOf('@');
+        if (atIndex > 3) {
+            return email.substring(0, 3) + "***" + email.substring(atIndex);
         }
         return email;
     }
@@ -166,30 +165,69 @@ public class OtpVerificationActivity extends AppCompatActivity {
 
             String enteredOtp = otp1 + otp2 + otp3 + otp4;
 
-            // TODO: Thực hiện logic xác thực OTP ở đây (so sánh với mã đã gửi)
-            // Ví dụ:
-            if (verifyOtp(enteredOtp)) {
-                Toast.makeText(this, "Xác thực thành công!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(OtpVerificationActivity.this, ResetPasswordActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(this, "Mã OTP không đúng", Toast.LENGTH_SHORT).show();
+            // Gọi API xác thực OTP
+            String url = Config.BE_URL + "/auth/verify-otp";
+            JSONObject requestData = new JSONObject();
+            try {
+                requestData.put("email", userEmail);
+                requestData.put("otp", enteredOtp);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Lỗi dữ liệu", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            JsonObjectRequest verifyOtpRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,
+                response -> {
+                    JSONObject data = response.optJSONObject("data");
+                    boolean isSuccess = false;
+                    if (data != null) {
+                        isSuccess = data.optBoolean("isVerified", false);
+                    }
+                    if (isSuccess) {
+                        String verifiedEmail = data.optString("email", "");
+                        Toast.makeText(this, "Xác thực thành công!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(OtpVerificationActivity.this, ResetPasswordActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.putExtra("email", verifiedEmail);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Mã OTP không đúng", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Toast.makeText(this, "Có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                }
+            );
+
+            RequestQueue queue = Volley.newRequestQueue(OtpVerificationActivity.this);
+            queue.add(verifyOtpRequest);
         });
 
         tvResend.setOnClickListener(v -> {
-            // TODO: Thực hiện logic gửi lại mã OTP
-            Toast.makeText(this, "Đang gửi lại mã OTP...", Toast.LENGTH_SHORT).show();
-            startTimer();
-        });
-    }
+            String url = Config.BE_URL + "/auth/forgot-password";
+            JSONObject requestData = new JSONObject();
+            try {
+                requestData.put("email", userEmail);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Lỗi dữ liệu", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-    // Hàm giả lập xác thực OTP
-    private boolean verifyOtp(String otp) {
-        // TODO: Thay thế bằng logic kiểm tra OTP thực tế
-        // Ví dụ: return otp.equals("1234");
-        return true; // Luôn đúng để test
+            JsonObjectRequest resendOtpRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,
+                response -> {
+                    Toast.makeText(this, "Đã gửi lại mã OTP về email!", Toast.LENGTH_SHORT).show();
+                    startTimer();
+                },
+                error -> {
+                    Toast.makeText(this, "Gửi lại mã OTP thất bại. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                }
+            );
+
+            RequestQueue queue = Volley.newRequestQueue(OtpVerificationActivity.this);
+            queue.add(resendOtpRequest);
+        });
     }
 }

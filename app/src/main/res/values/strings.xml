@@ -152,4 +152,5 @@
     <string name="content_description_notification_icon">Notification Icon</string>
     <string name="empty_notification_title">No Notifications Yet</string>
     <string name="empty_notification_subtitle">You will see important updates here.</string>
+    <string name="no_results_found">Không tìm thấy kết quả phù hợp</string>
 </resources>
