@@ -1,51 +1,65 @@
 package com.example.foodorderapp.core.model;
 
+import com.google.gson.annotations.SerializedName; // << QUAN TRỌNG: Thêm import này
 import java.io.Serializable;
 import java.util.List;
 
 public class User implements Serializable {
+
+    @SerializedName("id")
     private int id;
+
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("email")
     private String email;
+
+    @SerializedName("username")
     private String username;
+
+    @SerializedName("phone_number") // Khớp với cột DB 'phone_number'
     private String phoneNumber;
+
+    @SerializedName("avatar") // Khớp với cột DB 'avatar'
     private String avatar;
+
+    @SerializedName("headline") // Khớp với cột DB 'headline'
     private String headline;
+
+    @SerializedName("location") // Khớp với cột DB 'location'
     private String location;
+
+    @SerializedName("date_of_birth") // Khớp với cột DB 'date_of_birth'
     private String dateOfBirth;
+
+    @SerializedName("about_me") // Khớp với cột DB 'about_me'
     private String aboutMe;
+
+    @SerializedName("created_at")
     private String createdAt;
+
+    @SerializedName("updated_at")
     private String updatedAt;
+
+    @SerializedName("deleted_at")
     private String deletedAt;
 
-    // Quan hệ
+    // Các trường quan hệ (nếu API /profile/me có trả về, cũng cần @SerializedName nếu key JSON khác)
+    // Ví dụ:
+    // @SerializedName("user_jobs")
     private List<Job> jobs;
+    // @SerializedName("user_notifications")
     private List<Notification> notifications;
+    // @SerializedName("user_skills")
     private List<Skill> skills;
+    // @SerializedName("user_experiences")
     private List<Experience> experiences;
 
     public User() {}
 
-    public User(int id, String name, String email, String username, String phoneNumber, String avatar, String headline,
-                String location, String dateOfBirth, String aboutMe, String createdAt, String updatedAt, String deletedAt,
-                List<Skill> skills, List<Experience> experiences) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.username = username;
-        this.phoneNumber = phoneNumber;
-        this.avatar = avatar;
-        this.headline = headline;
-        this.location = location;
-        this.dateOfBirth = dateOfBirth;
-        this.aboutMe = aboutMe;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
-        this.skills = skills;
-        this.experiences = experiences;
-    }
-
+    // Constructor và các getter/setter giữ nguyên như bạn đã có
+    // ... (toàn bộ getters và setters của bạn) ...
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
@@ -72,6 +86,10 @@ public class User implements Serializable {
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
     public String getDeletedAt() { return deletedAt; }
     public void setDeletedAt(String deletedAt) { this.deletedAt = deletedAt; }
+    public List<Job> getJobs() { return jobs; }
+    public void setJobs(List<Job> jobs) { this.jobs = jobs; }
+    public List<Notification> getNotifications() { return notifications; }
+    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
     public List<Skill> getSkills() { return skills; }
     public void setSkills(List<Skill> skills) { this.skills = skills; }
     public List<Experience> getExperiences() { return experiences; }

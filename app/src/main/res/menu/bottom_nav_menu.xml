@@ -12,7 +12,7 @@
 
     <item
         android:id="@+id/navigation_chat"
-        android:icon="@drawable/ic_chat_bubble_outline"
+        android:icon="@drawable/ic_notifications"
         android:title="@string/title_chat" />
 
     <item
