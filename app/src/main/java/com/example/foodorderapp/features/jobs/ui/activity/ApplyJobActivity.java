@@ -80,7 +80,8 @@ public class ApplyJobActivity extends AppCompatActivity {
 
         if (currentJob != null) {
             populateJobSummary(); // <<< HÀM NÀY SẼ ĐƯỢC SỬA
-            updateFavoriteButton(currentJob.isFavorite());
+//            updateFavoriteButton(currentJob.isFavorite());
+            updateFavoriteButton(true);
         } else {
             Toast.makeText(this, "Không thể tải thông tin công việc.", Toast.LENGTH_SHORT).show();
             finish(); // Thoát nếu không có dữ liệu Job
@@ -115,7 +116,7 @@ public class ApplyJobActivity extends AppCompatActivity {
 
     private void populateJobSummary() {
         // --- SỬA Ở ĐÂY: Dùng Glide để load ảnh từ URL ---
-        String logoUrl = currentJob.getCompanyLogoUrl(); // Lấy URL từ model Job đã sửa
+        String logoUrl = currentJob.getCompany() != null ? currentJob.getCompany().getLogoUrl() : null;
         Glide.with(this) // Context là Activity này
                 .load(logoUrl) // Load từ URL
                 .placeholder(R.mipmap.ic_launcher) // Ảnh tạm (thay bằng ảnh phù hợp)
@@ -124,8 +125,8 @@ public class ApplyJobActivity extends AppCompatActivity {
                 .into(ivCompanyLogoApply); // ImageView đích
 
         // --- Các phần khác giữ nguyên ---
-        tvCompanyNameApply.setText(currentJob.getCompanyName());
-        tvJobTitleApply.setText(currentJob.getJobTitle());
+        tvCompanyNameApply.setText(currentJob.getCompany() != null ? currentJob.getCompany().getName() : "");
+        tvJobTitleApply.setText(currentJob.getTitle());
     }
 
     private void updateFavoriteButton(boolean isFavorite) {
@@ -146,14 +147,14 @@ public class ApplyJobActivity extends AppCompatActivity {
         btnBackApply.setOnClickListener(v -> finish());
 
         btnFavoriteApply.setOnClickListener(v -> {
-            if (currentJob == null) return; // Kiểm tra job không null
-
-            boolean isNowFavorite = !currentJob.isFavorite(); // Đảo trạng thái
-            currentJob.setFavorite(isNowFavorite); // Cập nhật trạng thái trong object Job
-            updateFavoriteButton(isNowFavorite); // Cập nhật UI nút favorite
-
-            // TODO: Lưu trạng thái isNowFavorite và currentJob.getId() vào DB/SharedPreferences
-            Toast.makeText(this, isNowFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
+//            if (currentJob == null) return; // Kiểm tra job không null
+//
+//            boolean isNowFavorite = !currentJob.isFavorite(); // Đảo trạng thái
+//            currentJob.setFavorite(isNowFavorite); // Cập nhật trạng thái trong object Job
+//            updateFavoriteButton(isNowFavorite); // Cập nhật UI nút favorite
+//
+//            // TODO: Lưu trạng thái isNowFavorite và currentJob.getId() vào DB/SharedPreferences
+//            Toast.makeText(this, isNowFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
         });
 
         layoutUploadResume.setOnClickListener(v -> openFilePicker());
@@ -184,8 +185,8 @@ public class ApplyJobActivity extends AppCompatActivity {
 
         // Lấy đúng tên công ty và tiêu đề từ currentJob
         String successMsg = getString(R.string.success_message_format, // Cần định nghĩa string này
-                currentJob.getCompanyName(),
-                currentJob.getJobTitle());
+                currentJob.getCompany() != null ? currentJob.getCompany().getName() : "",
+                currentJob.getTitle());
         tvSuccessMessage.setText(successMsg);
 
         btnContinueExplore.setOnClickListener(v -> {

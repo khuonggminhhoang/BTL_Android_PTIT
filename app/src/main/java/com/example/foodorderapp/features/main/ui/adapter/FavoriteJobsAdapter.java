@@ -51,13 +51,13 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Job job = favoriteJobsFiltered.get(position);
 
-        holder.tvJobTitle.setText(job.getJobTitle());
-        String companyLocation = job.getCompanyName() + " • " + job.getLocation();
+        holder.tvJobTitle.setText(job.getTitle());
+        String companyLocation = job.getCompany().getName() + " • " + job.getLocation();
         holder.tvCompanyLocation.setText(companyLocation);
 
         // --- Load Logo bằng Glide từ URL ---
         Glide.with(context)
-                .load(job.getCompanyLogoUrl()) // <<< SỬ DỤNG URL
+                .load(job.getCompany().getLogoUrl()) // <<< SỬ DỤNG URL
                 .placeholder(R.mipmap.ic_launcher) // Ảnh mặc định khi đang tải
                 .error(R.mipmap.ic_launcher)      // Ảnh mặc định khi lỗi URL hoặc không có mạng
                 .circleCrop() // Tùy chọn: Bo tròn ảnh logo
@@ -136,8 +136,8 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
                     filteredList.addAll(favoriteJobs);
                 } else {
                     for (Job job : favoriteJobs) {
-                        if (job.getJobTitle().toLowerCase(Locale.getDefault()).contains(filterPattern) ||
-                                job.getCompanyName().toLowerCase(Locale.getDefault()).contains(filterPattern)) {
+                        if (job.getTitle().toLowerCase(Locale.getDefault()).contains(filterPattern) ||
+                                job.getCompany().getName().toLowerCase(Locale.getDefault()).contains(filterPattern)) {
                             filteredList.add(job);
                         }
                     }

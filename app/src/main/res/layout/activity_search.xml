@@ -50,19 +50,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <ImageButton
-                android:id="@+id/search_btn_filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_filter"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/filter_button_description"
-                app:tint="@color/black"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
-
         </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
@@ -95,8 +82,8 @@
                 android:maxLines="1"
                 android:textSize="14sp"/>
 
-            <TextView
-                android:id="@+id/search_txt_location"
+            <EditText
+                android:id="@+id/search_edt_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -105,31 +92,9 @@
                 android:drawablePadding="12dp"
                 android:hint="@string/current_location_hint"
                 android:padding="14dp"
+                android:inputType="text"
                 android:maxLines="1"
-                android:textColor="@color/grey"
-                android:textSize="14sp"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/search_title_history"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/search_history_title"
-                android:textColor="@color/grey"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/search_rv_history"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_search_history"
-                tools:itemCount="3"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                android:textSize="14sp"/>
 
             <TextView
                 android:id="@+id/search_title_recommended"
@@ -140,6 +105,17 @@
                 android:textColor="@color/grey"
                 android:textSize="18sp"
                 android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/search_txt_no_results"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/no_results_found"
+                android:textColor="@color/grey"
+                android:textSize="16sp"
+                android:visibility="gone"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/search_rv_recommended"

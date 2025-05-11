@@ -2,7 +2,6 @@ package com.example.foodorderapp.features.jobs.ui.adapter; // Sử dụng packag
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log; // Import Log để debug nếu cần
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,7 @@ import java.util.List;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
 import com.example.foodorderapp.core.model.Job; // Import Job model đã sửa
+import com.example.foodorderapp.core.model.Company;
 
 public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
@@ -60,23 +60,25 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         Job job = jobList.get(position);
         if (job == null) return;
 
-        holder.tvCompanyName.setText(job.getCompanyName());
-        holder.tvJobTitle.setText(job.getJobTitle());
+        // Sử dụng getter cho các trường
+        Company company = job.getCompany();
+        holder.tvCompanyName.setText(company != null ? company.getName() : "");
+        holder.tvJobTitle.setText(job.getTitle());
         holder.tvLocation.setText(job.getLocation());
-        holder.tvSalary.setText(job.getSalary());
-        holder.tvPostTime.setText(job.getPostTime());
+        String salary = job.getSalaryMin() + " - " + job.getSalaryMax() + " / " + job.getSalaryPeriod();
+        holder.tvSalary.setText(salary);
+        holder.tvPostTime.setText(job.getCreatedAt());
 
-        // --- SỬA Ở ĐÂY: Load Logo bằng Glide từ URL ---
-        String logoUrl = job.getCompanyLogoUrl();
+        // Load Logo bằng Glide từ URL (chỉ dùng Glide, không dùng GlideToVectorYou)
+        String logoUrl = company != null ? company.getLogoUrl() : null;
         Glide.with(context)
-                .load(logoUrl)
-                .placeholder(R.mipmap.ic_launcher) // Thay bằng placeholder phù hợp
-                .error(R.mipmap.ic_launcher_round)      // Thay bằng ảnh lỗi phù hợp
-                // .circleCrop() // Tùy chọn bo tròn
-                .into(holder.ivCompanyLogo);
+            .load(logoUrl)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher_round)
+            .into(holder.ivCompanyLogo);
 
         // Cập nhật trạng thái nút favorite
-        updateFavoriteIcon(holder.ivFavorite, job.isFavorite());
+        updateFavoriteIcon(holder.ivFavorite, job.isTopJob());
 
         // --- Xử lý sự kiện click cho itemView (Dùng listener nếu có) ---
         holder.itemView.setOnClickListener(v -> {
@@ -92,9 +94,9 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
         // --- Xử lý sự kiện click cho nút favorite (Dùng listener nếu có) ---
         holder.ivFavorite.setOnClickListener(v -> {
-            boolean isNowFavorite = !job.isFavorite(); // Đảo trạng thái
-            job.setFavorite(isNowFavorite); // Cập nhật trạng thái trong object (tạm thời)
-            updateFavoriteIcon(holder.ivFavorite, isNowFavorite); // Cập nhật icon ngay lập tức
+            boolean isNowFavorite = !job.isTopJob();
+            job.setTopJob(isNowFavorite);
+            updateFavoriteIcon(holder.ivFavorite, isNowFavorite);
 
             if (listener != null) {
                 // Thông báo cho Activity/Fragment xử lý lưu trữ

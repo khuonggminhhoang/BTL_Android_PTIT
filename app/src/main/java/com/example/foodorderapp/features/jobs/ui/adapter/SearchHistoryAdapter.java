@@ -45,7 +45,7 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<SearchHistoryAdap
         if (item == null) return;
 
         holder.tvTerm.setText(item.getTerm());
-        holder.tvCount.setText(item.getCount());
+        holder.tvCount.setText(String.valueOf(item.getCount()));
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
