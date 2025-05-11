@@ -23,7 +23,7 @@
         android:id="@+id/tvWelcome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Welcome"
+        android:text="Chào mừng"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/imgfindJob"
@@ -38,7 +38,7 @@
         android:layout_marginTop="12dp"
         android:paddingLeft="30dp"
         android:textStyle="bold"
-        android:text="Search for vacancies from top companies and find your dream career!"
+        android:text="Tìm kiếm các vị trí tuyển dụng từ các công ty hàng đầu và tìm kiếm sự nghiệp mơ ước của bạn!"
         android:textColor="@color/grey"
         app:layout_constraintTop_toBottomOf="@id/tvWelcome"
         tools:layout_editor_absoluteX="0dp" />
@@ -60,7 +60,7 @@
             android:layout_weight="1"
             android:background="@drawable/btn_outline"
             android:textAllCaps="false"
-            android:text="Register"
+            android:text="Đăng ký"
             android:layout_marginRight="5dp"
             android:textStyle="bold"
             android:textColor="@color/white"
@@ -76,11 +76,11 @@
             android:textStyle="bold"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            android:text="Login" />
+            android:text="Đăng nhập" />
     </LinearLayout>
     <Button
         android:id="@+id/btnStartExploring"
-        android:text="Start Exploring"
+        android:text="Khám phá"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/white"

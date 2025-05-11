@@ -75,6 +75,14 @@ public class SearchActivity extends AppCompatActivity {
 
     private void setupToolbar() {
         btnBack.setOnClickListener(v -> finish());
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_filter) {
+                // TODO: Hiển thị dialog hoặc activity lọc
+                Toast.makeText(this, "Filter clicked", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            return false;
+        });
     }
 
     private void setupRecommendedJobs() {
@@ -104,6 +112,22 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
+    // Retrofit API interface
+    public interface JobApiService {
+        @GET("/api/v1/jobs")
+        Call<JobSearchResponse> searchJobs(
+            @Query("search") String search,
+            @Query("searchFields") List<String> searchFields,
+            @Query("pageSize") Integer pageSize,
+            @Query("pageNumber") Integer pageNumber,
+            @Query("sort") String sort,
+            @Query("location") String location,
+            @Query("jobCategoryId") Integer jobCategoryId,
+            @Query("salaryGte") Integer salaryGte,
+            @Query("salaryLte") Integer salaryLte
+        );
+    }
+
     // Gọi API tìm kiếm việc làm
     private void searchJobsFromApi(String search, String location) {
         Retrofit retrofit = new Retrofit.Builder()
@@ -117,9 +141,26 @@ public class SearchActivity extends AppCompatActivity {
         searchFields.add("title");
         searchFields.add("description");
 
-        Call<JobSearchResponse> call = apiService.searchJobs(search, searchFields);
+        // Các trường optional, bạn có thể lấy từ UI hoặc truyền null nếu không dùng
+        Integer pageSize = null; // ví dụ: 20
+        Integer pageNumber = null; // ví dụ: 1
+        String sort = null; // ví dụ: "id, -createdAt"
+        Integer jobCategoryId = null;
+        Integer salaryGte = null;
+        Integer salaryLte = null;
+        // location đã có từ tham số
 
-        android.util.Log.d("API_DEBUG", "API URL: " + call.request().url().toString());
+        Call<JobSearchResponse> call = apiService.searchJobs(
+            search,
+            searchFields,
+            pageSize,
+            pageNumber,
+            sort,
+            location,
+            jobCategoryId,
+            salaryGte,
+            salaryLte
+        );
 
         call.enqueue(new Callback<JobSearchResponse>() {
             @Override
@@ -161,15 +202,6 @@ public class SearchActivity extends AppCompatActivity {
             recommendedJobList.addAll(results);
             recommendedJobAdapter.notifyDataSetChanged();
         }
-    }
-
-    // Retrofit API interface
-    public interface JobApiService {
-        @GET("/api/v1/jobs")
-        Call<JobSearchResponse> searchJobs(
-            @Query("search") String search,
-            @Query("searchFields") List<String> searchFields
-        );
     }
 
     // Model cho response
