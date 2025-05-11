@@ -3,6 +3,9 @@ package com.example.foodorderapp.core.model;
 import java.io.Serializable;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.http.GET;
+
 public class JobCategory implements Serializable {
     private int id;
     private String name;
@@ -38,4 +41,4 @@ public class JobCategory implements Serializable {
     public void setDeletedAt(String deletedAt) { this.deletedAt = deletedAt; }
     public List<Job> getJobs() { return jobs; }
     public void setJobs(List<Job> jobs) { this.jobs = jobs; }
-} 
+}

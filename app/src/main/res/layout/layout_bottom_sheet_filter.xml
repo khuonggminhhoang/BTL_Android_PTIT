@@ -78,38 +78,49 @@
         android:layout_marginTop="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-    <LinearLayout
-        android:id="@+id/layout_job_types"
-        android:orientation="horizontal"
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp">
-        <Button
-            android:id="@+id/btn_job_type_remote"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/layout_job_types"
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Remote"
-            android:backgroundTint="@color/blue_primary"
-            android:textColor="@android:color/white"
-            android:layout_marginEnd="8dp"/>
-        <Button
-            android:id="@+id/btn_job_type_freelance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Freelance"
-            android:layout_marginEnd="8dp"/>
-        <Button
-            android:id="@+id/btn_job_type_fulltime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Full Time"
-            android:layout_marginEnd="8dp"/>
-        <Button
-            android:id="@+id/btn_job_type_intern"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Intern"/>
-    </LinearLayout>
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btn_job_type_remote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remote"
+                android:backgroundTint="@color/blue_primary"
+                android:textColor="@android:color/white"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_job_type_freelance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Freelance"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_job_type_fulltime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full Time"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_job_type_intern"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Intern"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
 
     <Button
         android:id="@+id/btn_apply_filter"

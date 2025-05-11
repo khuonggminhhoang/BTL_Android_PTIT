@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.config.Config;
+import com.example.foodorderapp.core.model.JobCategory;
 import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
 import com.example.foodorderapp.core.model.Job;
 
@@ -302,4 +303,18 @@ public class SearchActivity extends AppCompatActivity {
             public Integer totalPages;
         }
     }
+
+    public interface JobCategoryApiService {
+        @GET("/api/v1/job-categories")
+        Call<JobCategoryResponse> getJobCategories();
+    }
+
+    public static class JobCategoryResponse {
+        public boolean success;
+        public int statusCode;
+        public String message;
+        public String error;
+        public List<JobCategory> data;
+    }
 }
+
