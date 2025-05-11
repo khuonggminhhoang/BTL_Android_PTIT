@@ -101,18 +101,20 @@ public class SearchActivity extends AppCompatActivity {
     // Gọi API tìm kiếm việc làm
     private void searchJobsFromApi(String search, String location) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Config.BE_URL)
+                .baseUrl(Config.BE_URL + "/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         JobApiService apiService = retrofit.create(JobApiService.class);
 
         List<String> searchFields = new ArrayList<>();
-        if (location != null && !location.isEmpty()) {
-            searchFields.add("location");
-        }
+        searchFields.add("title");
+        searchFields.add("description");
 
         Call<JobSearchResponse> call = apiService.searchJobs(search, searchFields);
+
+        // In ra URL API thực tế
+        android.util.Log.d("API_DEBUG", "API URL: " + call.request().url().toString());
 
         call.enqueue(new Callback<JobSearchResponse>() {
             @Override
@@ -131,7 +133,6 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
-    // Thay thế hàm giả lập bằng call API thực tế
     private void performSearch(String query) {
         if (query != null && !query.trim().isEmpty()) {
             String location = edtLocation.getText().toString();
@@ -141,14 +142,11 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    // Hàm cập nhật UI dựa trên kết quả tìm kiếm
     private void updateSearchResults(List<Job> results) {
         if (results == null || results.isEmpty()) {
-            // Không có kết quả
             rvRecommended.setVisibility(View.GONE);
             txtNoResults.setVisibility(View.VISIBLE);
         } else {
-            // Có kết quả
             rvRecommended.setVisibility(View.VISIBLE);
             txtNoResults.setVisibility(View.GONE);
             recommendedJobList.clear();

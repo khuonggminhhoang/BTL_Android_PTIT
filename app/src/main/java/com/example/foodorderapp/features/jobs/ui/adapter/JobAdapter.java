@@ -2,7 +2,6 @@ package com.example.foodorderapp.features.jobs.ui.adapter; // Sử dụng packag
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log; // Import Log để debug nếu cần
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,13 +69,13 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         holder.tvSalary.setText(salary);
         holder.tvPostTime.setText(job.getCreatedAt());
 
-        // Load Logo bằng Glide từ URL
+        // Load Logo bằng Glide từ URL (chỉ dùng Glide, không dùng GlideToVectorYou)
         String logoUrl = company != null ? company.getLogoUrl() : null;
         Glide.with(context)
-                .load(logoUrl)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher_round)
-                .into(holder.ivCompanyLogo);
+            .load(logoUrl)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher_round)
+            .into(holder.ivCompanyLogo);
 
         // Cập nhật trạng thái nút favorite
         updateFavoriteIcon(holder.ivFavorite, job.isTopJob());

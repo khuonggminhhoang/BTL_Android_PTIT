@@ -1,7 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    // Nếu bạn dùng Kotlin, bạn sẽ cần thêm plugin kapt ở đây:
-    // alias(libs.plugins.kotlin.kapt) // Giả sử bạn định nghĩa nó trong libs.versions.toml
 }
 
 android {
@@ -44,11 +42,10 @@ dependencies {
     // Các thư viện AndroidX và Material cơ bản (giả định đã định nghĩa trong libs.versions.toml)
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.activity)      // Hoặc libs.androidx.activity nếu bạn đặt tên khác
-    implementation(libs.constraintlayout) // Hoặc libs.androidx.constraintlayout
+    implementation(libs.activity)
+    implementation(libs.constraintlayout)
 
-    // Thư viện RecyclerView (cần thiết cho danh sách)
-    implementation(libs.recyclerview) // <<< THÊM DÒNG NÀY (Giả sử bạn đã định nghĩa trong libs.versions.toml)
+    implementation(libs.recyclerview)
 
     // --- Glide Dependencies ---
     implementation(libs.glide)
