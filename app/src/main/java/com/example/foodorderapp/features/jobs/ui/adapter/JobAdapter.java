@@ -21,6 +21,10 @@ import com.example.foodorderapp.R;
 import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
 import com.example.foodorderapp.core.model.Job; // Import Job model đã sửa
 import com.example.foodorderapp.core.model.Company;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
@@ -67,7 +71,8 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         holder.tvLocation.setText(job.getLocation());
         String salary = job.getSalaryMin() + " - " + job.getSalaryMax() + " / " + job.getSalaryPeriod();
         holder.tvSalary.setText(salary);
-        holder.tvPostTime.setText(job.getCreatedAt());
+        String createdAt = job.getCreatedAt();
+        holder.tvPostTime.setText(formatDate(createdAt));
 
         // Load Logo bằng Glide từ URL (chỉ dùng Glide, không dùng GlideToVectorYou)
         String logoUrl = company != null ? company.getLogoUrl() : null;
@@ -109,25 +114,42 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         });
     }
 
-    // Hàm helper để cập nhật icon favorite
     private void updateFavoriteIcon(ImageView imageView, boolean isFavorite) {
         if (isFavorite) {
             imageView.setImageResource(R.drawable.ic_heart_filled_red); // Dùng icon đỏ
             imageView.clearColorFilter(); // Xóa filter nếu có
         } else {
             imageView.setImageResource(R.drawable.ic_favorite_border); // Dùng icon viền
-            // Có thể thêm màu xám cho viền nếu icon gốc là trắng
             imageView.setColorFilter(ContextCompat.getColor(context, R.color.grey), android.graphics.PorterDuff.Mode.SRC_IN);
         }
     }
 
+    private String formatDate(String isoDate) {
+        if (isoDate == null) return "";
+        String[] formats = {
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd"
+        };
+        for (String fmt : formats) {
+            try {
+                SimpleDateFormat isoFormat = new SimpleDateFormat(fmt, Locale.getDefault());
+                isoFormat.setLenient(true);
+                Date date = isoFormat.parse(isoDate);
+                if (date != null) {
+                    return new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date);
+                }
+            } catch (ParseException ignored) {}
+        }
+        return isoDate;
+    }
 
     @Override
     public int getItemCount() {
         return jobList == null ? 0 : jobList.size();
     }
 
-    // ViewHolder (Giữ nguyên)
     public static class JobViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCompanyLogo, ivFavorite;
         TextView tvCompanyName, tvJobTitle, tvLocation, tvSalary, tvPostTime;
@@ -144,7 +166,6 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         }
     }
 
-    // (Optional) Hàm để cập nhật dữ liệu từ bên ngoài
     public void updateJobList(List<Job> newJobList) {
         this.jobList = newJobList;
         notifyDataSetChanged();

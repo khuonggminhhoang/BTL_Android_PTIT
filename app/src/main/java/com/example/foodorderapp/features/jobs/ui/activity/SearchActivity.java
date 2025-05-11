@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +41,7 @@ public class SearchActivity extends AppCompatActivity {
     private EditText edtLocation;
     private RecyclerView rvRecommended;
     private TextView txtNoResults;
+    private ImageView imgNoResults;
     private JobAdapter recommendedJobAdapter;
     private List<Job> recommendedJobList;
 
@@ -47,15 +49,18 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-
-        Intent intent = getIntent();
-        String search = intent.getStringExtra("search");
-
         findViews();
         setupToolbar();
         setupRecommendedJobs();
         setupListeners();
-        edtSearchJob.setText(search);
+        edtSearchJob.requestFocus();
+        edtSearchJob.postDelayed(() -> {
+            edtSearchJob.requestFocus();
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(edtSearchJob, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+            }
+        }, 200);
     }
 
     private void findViews() {
@@ -65,6 +70,7 @@ public class SearchActivity extends AppCompatActivity {
         edtLocation = findViewById(R.id.search_edt_location);
         rvRecommended = findViewById(R.id.search_rv_recommended);
         txtNoResults = findViewById(R.id.search_txt_no_results);
+        imgNoResults = findViewById(R.id.search_img_no_results);
     }
 
     private void setupToolbar() {
@@ -113,7 +119,6 @@ public class SearchActivity extends AppCompatActivity {
 
         Call<JobSearchResponse> call = apiService.searchJobs(search, searchFields);
 
-        // In ra URL API thực tế
         android.util.Log.d("API_DEBUG", "API URL: " + call.request().url().toString());
 
         call.enqueue(new Callback<JobSearchResponse>() {
@@ -146,9 +151,12 @@ public class SearchActivity extends AppCompatActivity {
         if (results == null || results.isEmpty()) {
             rvRecommended.setVisibility(View.GONE);
             txtNoResults.setVisibility(View.VISIBLE);
+            txtNoResults.setText("Không tìm thấy kết quả");
+            if (imgNoResults != null) imgNoResults.setVisibility(View.VISIBLE);
         } else {
             rvRecommended.setVisibility(View.VISIBLE);
             txtNoResults.setVisibility(View.GONE);
+            if (imgNoResults != null) imgNoResults.setVisibility(View.GONE);
             recommendedJobList.clear();
             recommendedJobList.addAll(results);
             recommendedJobAdapter.notifyDataSetChanged();

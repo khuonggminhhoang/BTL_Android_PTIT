@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.foodorderapp.R;
@@ -33,7 +32,7 @@ public class HomeFragment extends Fragment {
     private List<JobCategory> categoryList;
     private List<Job> jobList;
     private TextView tvHello;
-    private EditText etSearch;
+    private TextView etSearch;
 
     public HomeFragment() {
     }

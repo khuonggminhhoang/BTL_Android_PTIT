@@ -52,7 +52,7 @@
         app:layout_constraintBottom_toBottomOf="@id/tvFindJobs"
         android:contentDescription="@string/notification_content_description" />
 
-    <EditText
+    <TextView
         android:id="@+id/etSearch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -62,13 +62,16 @@
         android:background="@drawable/bg_search_edittext"
         android:drawableStart="@drawable/ic_search"
         android:drawablePadding="12dp"
-        android:hint="@string/search_hint"
+        android:text="@string/search_hint"
+        android:textColor="@color/grey"
         android:padding="14dp"
-        android:inputType="text"
+        android:textSize="14sp"
         android:maxLines="1"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvFindJobs" />
+        app:layout_constraintTop_toBottomOf="@id/tvFindJobs"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardTopJob"
