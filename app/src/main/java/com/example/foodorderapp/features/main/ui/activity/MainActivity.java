@@ -57,12 +57,12 @@ public class MainActivity extends AppCompatActivity {
                     selectedFragment = new NotificationFragment();
                     tag = "CHAT_FRAGMENT";
                 } else if (itemId == R.id.navigation_profile) {
-                    selectedFragment = new ProfileFragment(); // Sử dụng ProfileFragment mới
+                    selectedFragment = new ProfileFragment();
                     tag = "PROFILE_FRAGMENT";
                 }
 
                 if (selectedFragment != null) {
-                    loadFragment(selectedFragment, tag); // Load fragment được chọn với tag
+                    loadFragment(selectedFragment, tag);
                     return true; // Trả về true để hiển thị item được chọn
                 }
                 return false;
