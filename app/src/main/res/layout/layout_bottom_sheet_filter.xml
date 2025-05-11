@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/white"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView
+            android:text="Set Filter"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+        <TextView
+            android:id="@+id/tv_clear_all"
+            android:text="Clear all"
+            android:textColor="@color/blue_primary"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Search keyword -->
+    <EditText
+        android:id="@+id/edt_filter_keyword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Keyword"
+        android:drawableStart="@drawable/ic_search"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Location -->
+    <EditText
+        android:id="@+id/edt_filter_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Location"
+        android:drawableStart="@drawable/ic_location_on"
+        android:layout_marginTop="12dp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/tv_salary_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Salary Range"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/tv_salary_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0đ - 500000đ"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
+    <SeekBar
+        android:id="@+id/seekbar_salary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:text="Job Type"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/layout_job_types"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btn_job_type_remote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remote"
+                android:backgroundTint="@color/blue_primary"
+                android:textColor="@android:color/white"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_job_type_freelance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Freelance"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_job_type_fulltime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full Time"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_job_type_intern"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Intern"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
+    <Button
+        android:id="@+id/btn_apply_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Apply Filter"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/blue_primary"
+        android:textColor="@android:color/white"/>
+</LinearLayout> 

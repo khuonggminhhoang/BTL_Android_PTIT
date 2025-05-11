@@ -75,23 +75,23 @@
     <string name="cv_portfolio_pdf"><![CDATA[CV & Portfolio.pdf]]></string>
 
     <!--verify otp-->
-    <string name="otp_title">Enter Your verification code</string>
-    <string name="otp_subtitle_format">We sent a verification code to %1$s</string>
-    <string name="otp_subtitle_default">We sent a verification code to your email</string>
-    <string name="resend_code">Resend code?</string>
-    <string name="verification_button">Verification</string>
+    <string name="otp_title">Nhập mã xác minh của bạn</string>
+    <string name="otp_subtitle_format">Chúng tôi đã gửi mã xác minh tới %1$s</string>
+    <string name="otp_subtitle_default">Chúng tôi đã gửi mã xác minh đến email của bạn</string>
+    <string name="resend_code">Gửi lại mã?</string>
+    <string name="verification_button">Xác minh</string>
 
     <!--reset password-->
-    <string name="reset_password_title">Reset password</string>
-    <string name="reset_password_subtitle">Please fill in the field below to reset your current password.</string>
-    <string name="new_password_hint">New Password</string>
-    <string name="confirm_new_password_hint">Confirm New Password</string>
-    <string name="reset_password_button">Reset Password</string>
+    <string name="reset_password_title">Đặt lại mật khẩu của bạn</string>
+    <string name="reset_password_subtitle">Vui lòng điền vào ô bên dưới để đặt lại mật khẩu hiện tại của bạn.</string>
+    <string name="new_password_hint">Mật khẩu mới</string>
+    <string name="confirm_new_password_hint">Nhập lại mật khẩu mới</string>
+    <string name="reset_password_button">Đặt lại mật khẩu</string>
 
     <!--search    -->
     <string name="search_title">Search</string>
-    <string name="search_job_hint">Search job</string>
-    <string name="current_location_hint">Current Location</string>
+    <string name="search_job_hint">Tìm kiếm công việc</string>
+    <string name="current_location_hint">Địa điểm</string>
     <string name="search_history_title">Search History</string>
     <string name="arrow_description">Mũi tên</string>
 
