@@ -18,51 +18,51 @@ public class User implements Serializable {
     @SerializedName("username")
     private String username;
 
-    // Giả sử API GET trả về key "phoneNumber" (camelCase) như API POST/Register
-    // Nếu API GET trả về "phone_number" (snake_case) thì giữ nguyên @SerializedName("phone_number")
-    @SerializedName("phoneNumber") // << KIỂM TRA KEY NÀY TỪ JSON RESPONSE CỦA API GET
+    @SerializedName("phone_number")
     private String phoneNumber;
 
-    // Giả sử API GET trả về key "avatar" (camelCase)
     @SerializedName("avatar")
     private String avatar;
 
-    // Giả sử API GET trả về key "headline" (camelCase)
     @SerializedName("headline")
     private String headline;
 
-    // Giả sử API GET trả về key "location" (camelCase)
     @SerializedName("location")
     private String location;
 
-    // *** SỬA CHỖ NÀY ***
-    @SerializedName("dateOfBirth") // << ĐỔI THÀNH "dateOfBirth" (camelCase) để khớp với JSON response của API GET
+    // Giả sử API GET /profile/me trả về key "dateOfBirth" (camelCase) cho ngày sinh
+    // Nếu API GET trả về "date_of_birth" (snake_case), hãy sửa lại @SerializedName ở đây
+    @SerializedName("dateOfBirth")
     private String dateOfBirth;
 
-    // Giả sử API GET trả về key "aboutMe" (camelCase)
-    @SerializedName("aboutMe")
+    @SerializedName("aboutMe") // Sửa thành "aboutMe" để khớp với JSON từ API
     private String aboutMe;
 
-    // Giả sử API GET trả về key "createdAt" (camelCase)
-    @SerializedName("createdAt")
+    @SerializedName("createdAt") // Giả sử API GET trả về "createdAt"
     private String createdAt;
 
-    // Giả sử API GET trả về key "updatedAt" (camelCase)
-    @SerializedName("updatedAt")
+    @SerializedName("updatedAt") // Giả sử API GET trả về "updatedAt"
     private String updatedAt;
 
-    @SerializedName("deletedAt") // Có thể là null, nên kiểu String là ổn
-    private String deletedAt;
-
-
-    private List<Job> jobs;
-    private List<Notification> notifications;
-    private List<Skill> skills;
+    // Giả sử API GET /profile/me trả về danh sách experiences với key là "experiences"
+    @SerializedName("experiences")
     private List<Experience> experiences;
+
+    // Giả sử API GET /profile/me trả về danh sách skills với key là "skills"
+    @SerializedName("skills")
+    private List<Skill> skills;
+
+    // Thêm trường này để lưu URL/tên file CV từ API
+    // Thay "resume_url" bằng key JSON thực tế mà API GET /profile/me trả về cho thông tin CV
+    @SerializedName("resume_url")
+    private String resumeUrl;
+
+    // @SerializedName("resume_last_uploaded") // Ví dụ cho ngày upload CV, nếu API có trả về
+    // private String resumeLastUploaded;
 
     public User() {}
 
-    // Getters and Setters
+    // Getters and Setters (đầy đủ cho các trường bạn cần)
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
@@ -87,14 +87,17 @@ public class User implements Serializable {
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
-    public String getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(String deletedAt) { this.deletedAt = deletedAt; }
-    public List<Job> getJobs() { return jobs; }
-    public void setJobs(List<Job> jobs) { this.jobs = jobs; }
-    public List<Notification> getNotifications() { return notifications; }
-    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
-    public List<Skill> getSkills() { return skills; }
-    public void setSkills(List<Skill> skills) { this.skills = skills; }
     public List<Experience> getExperiences() { return experiences; }
-    public void setExperiences(List<Experience> experiences) { this.experiences = experiences; }
+    public void setExperiences(List<Experience> experiences) {
+        this.experiences = experiences;
+    }
+    public List<Skill> getSkills() { return skills; }
+    public void setSkills(List<Skill> skills) {
+        this.skills = skills;
+    }
+    public String getResumeUrl() { return resumeUrl; }
+    public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
+    // public String getResumeLastUploaded() { return resumeLastUploaded; }
+    // public void setResumeLastUploaded(String resumeLastUploaded) { this.resumeLastUploaded = resumeLastUploaded; }
+
 }

@@ -70,6 +70,28 @@
         <activity
             android:name=".features.profile.ui.activity.ResumeMyInfoActivity"
             android:exported="false" />
+        <activity
+            android:name=".features.profile.ui.activity.ManageDetailsActivity"
+            android:exported="false"
+            android:label="Quản lý Chi tiết Hồ sơ"
+            android:parentActivityName=".features.profile.ui.activity.ResumeMyInfoActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".features.profile.ui.activity.ResumeMyInfoActivity" />
+        </activity>
+        <activity
+            android:name=".features.profile.ui.activity.EditSkillActivity"
+            android:exported="false"
+            android:label="Chỉnh sửa Kỹ năng"
+            android:parentActivityName=".features.profile.ui.activity.ManageDetailsActivity">
+        </activity>
+
+        <activity
+            android:name=".features.profile.ui.activity.EditExperienceActivity"
+            android:exported="false"
+            android:label="Chỉnh sửa Kinh nghiệm"
+            android:parentActivityName=".features.profile.ui.activity.ManageDetailsActivity">
+        </activity>
         <!--        <activity-->
         <!--            android:name=".features.main.ui.fragment.NotificationsActivity"-->
         <!--            android:exported="false"-->

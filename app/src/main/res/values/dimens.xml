@@ -4,7 +4,7 @@
 
     <!-- Thêm dòng này -->
     <dimen name="tag_margin">4dp</dimen>
-
+    <dimen name="dp_1">1dp</dimen>
     <!-- Ví dụ các dimensions khác -->
     <!-- <dimen name="activity_horizontal_margin">16dp</dimen> -->
     <!-- <dimen name="activity_vertical_margin">16dp</dimen> -->

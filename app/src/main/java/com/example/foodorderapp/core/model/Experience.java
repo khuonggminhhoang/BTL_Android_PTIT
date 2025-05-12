@@ -1,56 +1,52 @@
 package com.example.foodorderapp.core.model;
 
+import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 public class Experience implements Serializable {
+    @SerializedName("id")
     private int id;
+
+    @SerializedName("title")
     private String title;
+
+    // SỬA Ở ĐÂY: Khớp với key "companyName" từ JSON API
+    @SerializedName("companyName")
     private String companyName;
+
+    // SỬA Ở ĐÂY: Khớp với key "startDate" từ JSON API
+    @SerializedName("startDate")
     private String startDate;
+
+    // SỬA Ở ĐÂY: Khớp với key "endDate" từ JSON API
+    @SerializedName("endDate")
     private String endDate;
+
+    @SerializedName("description")
     private String description;
-    private int userId;
-    private String createdAt;
-    private String updatedAt;
-    private String deletedAt;
-    private User user;
+
+    // Các trường như userId, createdAt, updatedAt có thể được giữ lại nếu API trả về
+    // và bạn cần dùng chúng, hoặc bỏ đi nếu không cần thiết trong model này.
+    // Ví dụ, nếu JSON API trả về "userId":
+    // @SerializedName("userId")
+    // private int userId;
+
 
     public Experience() {}
 
-    public Experience(int id, String title, String companyName, String startDate, String endDate, String description, int userId, String createdAt, String updatedAt, String deletedAt, User user) {
-        this.id = id;
-        this.title = title;
-        this.companyName = companyName;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.description = description;
-        this.userId = userId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
-        this.user = user;
-    }
-
+    // Getters
     public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
     public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
     public String getCompanyName() { return companyName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
     public String getStartDate() { return startDate; }
-    public void setStartDate(String startDate) { this.startDate = startDate; }
     public String getEndDate() { return endDate; }
-    public void setEndDate(String endDate) { this.endDate = endDate; }
     public String getDescription() { return description; }
+
+    // Setters (Nếu bạn cần tạo đối tượng Experience ở client hoặc cho testing)
+    public void setId(int id) { this.id = id; }
+    public void setTitle(String title) { this.title = title; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
+    public void setStartDate(String startDate) { this.startDate = startDate; }
+    public void setEndDate(String endDate) { this.endDate = endDate; }
     public void setDescription(String description) { this.description = description; }
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-    public String getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
-    public String getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(String deletedAt) { this.deletedAt = deletedAt; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-} 
+}
