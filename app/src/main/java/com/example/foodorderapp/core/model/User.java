@@ -1,6 +1,6 @@
 package com.example.foodorderapp.core.model;
 
-import com.google.gson.annotations.SerializedName; // << QUAN TRỌNG: Thêm import này
+import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
@@ -18,48 +18,51 @@ public class User implements Serializable {
     @SerializedName("username")
     private String username;
 
-    @SerializedName("phone_number") // Khớp với cột DB 'phone_number'
+    // Giả sử API GET trả về key "phoneNumber" (camelCase) như API POST/Register
+    // Nếu API GET trả về "phone_number" (snake_case) thì giữ nguyên @SerializedName("phone_number")
+    @SerializedName("phoneNumber") // << KIỂM TRA KEY NÀY TỪ JSON RESPONSE CỦA API GET
     private String phoneNumber;
 
-    @SerializedName("avatar") // Khớp với cột DB 'avatar'
+    // Giả sử API GET trả về key "avatar" (camelCase)
+    @SerializedName("avatar")
     private String avatar;
 
-    @SerializedName("headline") // Khớp với cột DB 'headline'
+    // Giả sử API GET trả về key "headline" (camelCase)
+    @SerializedName("headline")
     private String headline;
 
-    @SerializedName("location") // Khớp với cột DB 'location'
+    // Giả sử API GET trả về key "location" (camelCase)
+    @SerializedName("location")
     private String location;
 
-    @SerializedName("date_of_birth") // Khớp với cột DB 'date_of_birth'
+    // *** SỬA CHỖ NÀY ***
+    @SerializedName("dateOfBirth") // << ĐỔI THÀNH "dateOfBirth" (camelCase) để khớp với JSON response của API GET
     private String dateOfBirth;
 
-    @SerializedName("about_me") // Khớp với cột DB 'about_me'
+    // Giả sử API GET trả về key "aboutMe" (camelCase)
+    @SerializedName("aboutMe")
     private String aboutMe;
 
-    @SerializedName("created_at")
+    // Giả sử API GET trả về key "createdAt" (camelCase)
+    @SerializedName("createdAt")
     private String createdAt;
 
-    @SerializedName("updated_at")
+    // Giả sử API GET trả về key "updatedAt" (camelCase)
+    @SerializedName("updatedAt")
     private String updatedAt;
 
-    @SerializedName("deleted_at")
+    @SerializedName("deletedAt") // Có thể là null, nên kiểu String là ổn
     private String deletedAt;
 
-    // Các trường quan hệ (nếu API /profile/me có trả về, cũng cần @SerializedName nếu key JSON khác)
-    // Ví dụ:
-    // @SerializedName("user_jobs")
+
     private List<Job> jobs;
-    // @SerializedName("user_notifications")
     private List<Notification> notifications;
-    // @SerializedName("user_skills")
     private List<Skill> skills;
-    // @SerializedName("user_experiences")
     private List<Experience> experiences;
 
     public User() {}
 
-    // Constructor và các getter/setter giữ nguyên như bạn đã có
-    // ... (toàn bộ getters và setters của bạn) ...
+    // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
