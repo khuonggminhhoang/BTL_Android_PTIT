@@ -1,4 +1,3 @@
-// File: com/example/foodorderapp/features/profile/ui/activity/PersonalDataActivity.java
 package com.example.foodorderapp.features.profile.ui.activity;
 
 import android.app.Activity;
@@ -8,7 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
+import android.net.Uri; // Import Uri
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -20,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -39,10 +39,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date; // Import Date
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone; // Thêm import TimeZone
+import java.util.TimeZone;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -56,7 +57,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class PersonalDataActivity extends AppCompatActivity {
 
     private static final String TAG = "PersonalDataActivity";
-    private static final int PICK_IMAGE_REQUEST = 1;
+    // Bỏ PICK_IMAGE_REQUEST nếu không dùng để chọn ảnh trên màn hình này nữa
+    // private static final int PICK_IMAGE_REQUEST = 1;
 
     private ImageView ivBack, ivAvatar;
     private TextView tvTitle, tvSave;
@@ -65,8 +67,9 @@ public class PersonalDataActivity extends AppCompatActivity {
 
     private ApiService apiService;
     private User currentUser;
-    private Uri selectedImageUri;
-    private boolean avatarChanged = false;
+    // Bỏ selectedImageUri và avatarChanged nếu không cho phép thay đổi avatar từ màn hình này
+    // private Uri selectedImageUri;
+    // private boolean avatarChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +87,7 @@ public class PersonalDataActivity extends AppCompatActivity {
         ivBack = findViewById(R.id.iv_back);
         tvTitle = findViewById(R.id.tv_title);
         tvSave = findViewById(R.id.tv_save);
-        ivAvatar = findViewById(R.id.iv_avatar);
+        ivAvatar = findViewById(R.id.iv_avatar); // Đây là ImageView avatar trên màn hình Personal Data
 
         etFullName = findViewById(R.id.et_full_name);
         etEmail = findViewById(R.id.et_email);
@@ -113,33 +116,65 @@ public class PersonalDataActivity extends AppCompatActivity {
         ivBack.setOnClickListener(v -> finish());
         tvSave.setOnClickListener(v -> {
             if (validateInputs()) {
-                saveUserData();
+                saveUserData(); // Hàm saveUserData sẽ không cố gắng upload avatar nếu không có thay đổi
             }
         });
-        ivAvatar.setOnClickListener(v -> openImageChooser());
+
+        // SỬA ĐỔI ONCLICKLISTENER CHO IVAVATAR
+        ivAvatar.setOnClickListener(v -> {
+            if (currentUser != null && currentUser.getAvatar() != null && !currentUser.getAvatar().isEmpty()) {
+                String avatarUrl = currentUser.getAvatar();
+                // Đảm bảo URL có scheme (http hoặc https)
+                if (!avatarUrl.toLowerCase().startsWith("http://") && !avatarUrl.toLowerCase().startsWith("https://")) {
+                    // Nối với base URL của server chứa ảnh (nếu avatarUrl là đường dẫn tương đối)
+                    String imageBaseUrl = Config.BE_URL.replace("/api/v1", ""); // Hoặc URL gốc của server ảnh
+                    avatarUrl = imageBaseUrl + (avatarUrl.startsWith("/") ? "" : "/") + avatarUrl;
+                }
+                Log.d(TAG, "Viewing avatar: " + avatarUrl);
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse(avatarUrl), "image/*");
+                    // Thêm cờ để mở trong ứng dụng khác nếu có thể, tránh lỗi ActivityNotFoundException
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "Could not open avatar URL", e);
+                    Toast.makeText(PersonalDataActivity.this, "Không thể mở ảnh đại diện.", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(PersonalDataActivity.this, "Không có ảnh đại diện để xem.", Toast.LENGTH_SHORT).show();
+            }
+            // KHÔNG GỌI openImageChooser() ở đây nữa
+        });
 
         View.OnClickListener birthDateClickListener = v -> showDatePickerDialog();
         etDay.setOnClickListener(birthDateClickListener);
         etMonth.setOnClickListener(birthDateClickListener);
         etYear.setOnClickListener(birthDateClickListener);
+        // Giữ các EditText ngày tháng không focusable
         etDay.setFocusable(false);
+        etDay.setFocusableInTouchMode(false);
         etMonth.setFocusable(false);
+        etMonth.setFocusableInTouchMode(false);
         etYear.setFocusable(false);
+        etYear.setFocusableInTouchMode(false);
     }
 
     private void showLoading(boolean isLoading) {
+        // ... (giữ nguyên)
         if (progressBarPersonalData != null) {
             progressBarPersonalData.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
     }
 
     private void fetchCurrentUserData() {
+        // ... (giữ nguyên)
         showLoading(true);
         SharedPreferences prefs = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
         String accessToken = prefs.getString("accessToken", null);
 
         if (accessToken == null) {
-            Toast.makeText(this, "Login session expired. Please login again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show();
             showLoading(false);
             navigateToLogin();
             return;
@@ -148,13 +183,13 @@ public class PersonalDataActivity extends AppCompatActivity {
         Call<ProfileApiResponse> call = apiService.getMyProfile("Bearer " + accessToken);
         call.enqueue(new Callback<ProfileApiResponse>() {
             @Override
-            public void onResponse(Call<ProfileApiResponse> call, Response<ProfileApiResponse> response) {
+            public void onResponse(@NonNull Call<ProfileApiResponse> call, @NonNull Response<ProfileApiResponse> response) {
                 showLoading(false);
                 if (!isFinishing() && !isDestroyed()) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         currentUser = response.body().getData();
                         if (currentUser != null) {
-                            Log.d(TAG, "Fetched User for populate - DOB: '" + currentUser.getDateOfBirth() + "', Name: '" + currentUser.getName() + "'");
+                            Log.d(TAG, "Fetched User for populate - DOB: '" + currentUser.getDateOfBirth() + "', Name: '" + currentUser.getName() + "', Avatar: '" + currentUser.getAvatar() + "'");
                             populateUserData(currentUser);
                         } else {
                             Log.e(TAG, "Fetched user data is null from GET /profile/me");
@@ -167,7 +202,7 @@ public class PersonalDataActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ProfileApiResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<ProfileApiResponse> call, @NonNull Throwable t) {
                 showLoading(false);
                 if (!isFinishing() && !isDestroyed()) {
                     Log.e(TAG, "Failed to fetch user data (onFailure)", t);
@@ -178,6 +213,7 @@ public class PersonalDataActivity extends AppCompatActivity {
     }
 
     private void populateUserData(User user) {
+        // ... (phần điền các EditText giữ nguyên) ...
         if (user == null) {
             Log.e(TAG, "populateUserData: User object is null. Cannot populate fields.");
             etFullName.setText("");
@@ -185,7 +221,7 @@ public class PersonalDataActivity extends AppCompatActivity {
             etPassword.setText("********");
             etLocation.setText("");
             etDay.setText(""); etMonth.setText(""); etYear.setText("");
-            loadAvatar(null);
+            loadAvatar(null); // Load placeholder
             return;
         }
         etFullName.setText(user.getName());
@@ -199,42 +235,37 @@ public class PersonalDataActivity extends AppCompatActivity {
             Log.d(TAG, "Populating DOB from API value: '" + dobFromApi + "'");
             Calendar cal = Calendar.getInstance();
             boolean parsedSuccessfully = false;
+            SimpleDateFormat sdfApiDate;
 
-            // Ưu tiên parse định dạng ISO 8601 đầy đủ (mà API POST trả về)
-            try {
-                SimpleDateFormat sdfIsoDateTime;
-                if (dobFromApi.contains(".")) { // Có milliseconds
-                    sdfIsoDateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                } else { // Không có milliseconds
-                    sdfIsoDateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-                }
-                sdfIsoDateTime.setTimeZone(TimeZone.getTimeZone("UTC")); // Quan trọng nếu server trả về giờ UTC (chữ Z)
-                cal.setTime(sdfIsoDateTime.parse(dobFromApi));
-                parsedSuccessfully = true;
-                Log.d(TAG, "Parsed DOB as ISO 8601 date-time.");
-            } catch (ParseException e1) {
-                Log.w(TAG, "Failed to parse DOB as ISO 8601 date-time: '" + dobFromApi + "'. Trying yyyy-MM-dd.", e1);
-                // Nếu parse trên thất bại, thử parse định dạng yyyy-MM-dd (có thể API GET trả về dạng này)
+            if (dobFromApi.contains("T") && dobFromApi.contains("Z")) { // ISO 8601 đầy đủ
+                sdfApiDate = new SimpleDateFormat(dobFromApi.contains(".") ? "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" : "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                sdfApiDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+            } else if (dobFromApi.matches("\\d{4}-\\d{2}-\\d{2}")) { // Chỉ ngày YYYY-MM-DD
+                sdfApiDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            } else {
+                Log.w(TAG, "Unrecognized dateOfBirth format from API: " + dobFromApi);
+                sdfApiDate = null; // Sẽ không parse được
+            }
+
+            if (sdfApiDate != null) {
                 try {
-                    SimpleDateFormat sdfDateOnly = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-                    cal.setTime(sdfDateOnly.parse(dobFromApi));
+                    cal.setTime(sdfApiDate.parse(dobFromApi));
                     parsedSuccessfully = true;
-                    Log.d(TAG, "Parsed DOB as yyyy-MM-dd.");
-                } catch (ParseException e2) {
-                    Log.e(TAG, "Failed to parse DOB with yyyy-MM-dd as well: '" + dobFromApi + "'", e2);
+                    Log.d(TAG, "Parsed DOB successfully.");
+                } catch (ParseException e) {
+                    Log.e(TAG, "Failed to parse DOB: '" + dobFromApi + "'", e);
                 }
             }
 
             if (parsedSuccessfully) {
                 etDay.setText(String.format(Locale.US, "%02d", cal.get(Calendar.DAY_OF_MONTH)));
-                etMonth.setText(String.format(Locale.US, "%02d", cal.get(Calendar.MONTH) + 1)); // Calendar.MONTH là 0-11
+                etMonth.setText(String.format(Locale.US, "%02d", cal.get(Calendar.MONTH) + 1));
                 etYear.setText(String.valueOf(cal.get(Calendar.YEAR)));
-                Log.d(TAG, "Populated EditTexts - Day: " + etDay.getText() + ", Month: " + etMonth.getText() + ", Year: " + etYear.getText());
             } else {
                 etDay.setText(""); etMonth.setText(""); etYear.setText("");
             }
         } else {
-            Log.d(TAG, "date_of_birth from API is null or empty for populate. Clearing date fields.");
+            Log.d(TAG, "dateOfBirth from API is null or empty. Clearing date fields.");
             etDay.setText(""); etMonth.setText(""); etYear.setText("");
         }
         loadAvatar(user.getAvatar());
@@ -242,7 +273,7 @@ public class PersonalDataActivity extends AppCompatActivity {
 
 
     private void loadAvatar(String avatarPath) {
-        // ... (Giữ nguyên hàm loadAvatar đã có Glide listener) ...
+        // ... (giữ nguyên) ...
         if (ivAvatar == null) return;
         Log.d(TAG, "loadAvatar called with path: '" + avatarPath + "'");
         if (avatarPath != null && !avatarPath.isEmpty()) {
@@ -277,51 +308,34 @@ public class PersonalDataActivity extends AppCompatActivity {
         }
     }
 
-    private void openImageChooser() {
-        // ... (Giữ nguyên) ...
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
-    }
+    // Bỏ phương thức openImageChooser() và onActivityResult() nếu không dùng nữa
+    // private void openImageChooser() { ... }
+    // @Override
+    // protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { ... }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        // ... (Giữ nguyên) ...
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-            selectedImageUri = data.getData();
-            Glide.with(this).load(selectedImageUri).circleCrop().into(ivAvatar);
-            avatarChanged = true;
-        }
-    }
 
     private boolean validateInputs() {
-        // ... (Giữ nguyên) ...
+        // ... (giữ nguyên) ...
         if (TextUtils.isEmpty(etFullName.getText().toString().trim())) {
             etFullName.setError("Full name is required");
             etFullName.requestFocus();
             return false;
         }
+        // Thêm các validate khác nếu cần
         return true;
     }
 
     private void saveUserData() {
-        // ... (Hàm saveUserData giữ nguyên như phiên bản bạn đã gửi ở lần trước,
-        //      bao gồm việc tạo dateOfBirthForApi thành "yyyy-MM-dd'T'HH:mm:ss'Z'"
-        //      và gửi key "dateOfBirth" (camelCase))
-        //      Cũng như logic gọi fetchCurrentUserData() sau khi update thành công.
-        //      Đảm bảo bạn đã có các dòng Log chi tiết ở đây.
-        //      Tôi sẽ copy lại phần này từ phiên bản trước để đảm bảo tính đầy đủ.
-        // ...
         showLoading(true);
 
         String fullName = etFullName.getText().toString().trim();
-        String newPassword = etPassword.getText().toString();
+        String newPassword = etPassword.getText().toString(); // Lấy text, có thể là "********"
         String location = etLocation.getText().toString().trim();
 
         String dayStr = etDay.getText().toString().trim();
         String monthStrInput = etMonth.getText().toString().trim();
         String yearStr = etYear.getText().toString().trim();
-        String dateOfBirthForApi = "";
+        String dateOfBirthForApi = ""; // Sẽ là YYYY-MM-DD hoặc ISO tùy API của bạn
 
         Log.d(TAG, "Attempting to save date: Day='" + dayStr + "', MonthInput='" + monthStrInput + "', Year='" + yearStr + "'");
 
@@ -331,9 +345,8 @@ public class PersonalDataActivity extends AppCompatActivity {
                 int year = Integer.parseInt(yearStr);
                 int monthNumber = Integer.parseInt(monthStrInput);
 
-                if (monthNumber < 1 || monthNumber > 12 || day < 1 || day > 31) {
-                    Log.e(TAG, "Invalid date values after parsing: Day=" + day + ", Month=" + monthNumber + ", Year=" + year);
-                    Toast.makeText(this, "Invalid date values selected.", Toast.LENGTH_SHORT).show();
+                if (monthNumber < 1 || monthNumber > 12 || day < 1 || day > 31) { // Validate cơ bản
+                    Toast.makeText(this, "Ngày tháng năm không hợp lệ.", Toast.LENGTH_SHORT).show();
                     showLoading(false);
                     return;
                 }
@@ -341,24 +354,26 @@ public class PersonalDataActivity extends AppCompatActivity {
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(year, monthNumber - 1, day, 0, 0, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
-                SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC")); // Gửi đi dưới dạng UTC
-                dateOfBirthForApi = iso8601Format.format(calendar.getTime());
-                Log.i(TAG, "SUCCESS: Formatted date_of_birth for API (ISO 8601): '" + dateOfBirthForApi + "'");
+
+                // API /profile/me của bạn (trong JSON bạn cung cấp) nhận dateOfBirth dạng "YYYY-MM-DD"
+                // hoặc "YYYY-MM-DDTHH:mm:ss.SSSZ"
+                // Chọn một định dạng nhất quán để gửi lên. Ví dụ, chỉ ngày:
+                SimpleDateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                // Hoặc nếu API PATCH /profile/me yêu cầu ISO đầy đủ:
+                // SimpleDateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+                // apiDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                dateOfBirthForApi = apiDateFormat.format(calendar.getTime());
+                Log.i(TAG, "Formatted date_of_birth for API: '" + dateOfBirthForApi + "'");
 
             } catch (NumberFormatException e) {
-                Log.e(TAG, "ERROR: NumberFormatException for day/month/year. Day: '" + dayStr + "', MonthInput: '" + monthStrInput + "', Year: '" + yearStr + "'", e);
-                Toast.makeText(this, "Invalid day, month, or year number.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Ngày, tháng, hoặc năm không hợp lệ.", Toast.LENGTH_SHORT).show();
                 showLoading(false);
                 return;
             }
         } else if (!dayStr.isEmpty() || !monthStrInput.isEmpty() || !yearStr.isEmpty()){
-            Log.w(TAG, "WARN: Some birth date fields are empty. Day: '"+dayStr+"', Month: '"+monthStrInput+"', Year: '"+yearStr+"'");
-            Toast.makeText(this, "Please complete all birth date fields or leave them all empty.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Vui lòng điền đầy đủ ngày sinh hoặc để trống tất cả.", Toast.LENGTH_LONG).show();
             showLoading(false);
             return;
-        } else {
-            Log.d(TAG, "All birth date fields are empty. dateOfBirthForApi will be empty.");
         }
 
         SharedPreferences prefs = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
@@ -374,149 +389,97 @@ public class PersonalDataActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(location)) {
             fields.put("location", RequestBody.create(MediaType.parse("text/plain"), location));
         }
-
         if (!dateOfBirthForApi.isEmpty()) {
+            // Key phải khớp với API PATCH /profile/me của bạn (ví dụ: "dateOfBirth")
             fields.put("dateOfBirth", RequestBody.create(MediaType.parse("text/plain"), dateOfBirthForApi));
-            Log.i(TAG, "SUCCESS: Adding to request: key='dateOfBirth', value='" + dateOfBirthForApi + "'");
-        } else {
-            Log.w(TAG, "WARN: dateOfBirthForApi is empty, NOT adding 'dateOfBirth' to request.");
         }
-
-        if (!newPassword.isEmpty() && !newPassword.equals("********")) {
+        // Chỉ gửi password nếu nó không phải là "********" (nghĩa là người dùng đã thay đổi)
+        if (!newPassword.equals("********") && !newPassword.isEmpty()) {
             fields.put("password", RequestBody.create(MediaType.parse("text/plain"), newPassword));
         }
 
-        MultipartBody.Part avatarFilePart = null;
-        if (avatarChanged && selectedImageUri != null) {
-            // ... (logic tạo avatarFilePart giữ nguyên) ...
-            Log.d(TAG, "Avatar changed. URI: " + selectedImageUri.toString());
-            try {
-                String realPath = getRealPathFromURI(selectedImageUri);
-                Log.d(TAG, "Real path from URI: " + realPath);
-                if (realPath != null) {
-                    File file = new File(realPath);
-                    if (file.exists()) {
-                        Log.d(TAG, "File exists: " + file.getAbsolutePath() + ", Size: " + file.length());
-                        String mimeType = getContentResolver().getType(selectedImageUri);
-                        Log.d(TAG, "MIME type: " + mimeType);
-                        RequestBody requestFile = RequestBody.create(MediaType.parse(mimeType != null ? mimeType : "image/*"), file);
-                        avatarFilePart = MultipartBody.Part.createFormData("avatar", file.getName(), requestFile);
-                        Log.d(TAG, "Avatar file part created for: " + file.getName());
-                    } else {
-                        Log.e(TAG, "Avatar file does NOT exist at path: " + realPath);
-                        Toast.makeText(this, "Selected image file not found at path.", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Log.e(TAG, "Could not get real path for avatar URI: " + selectedImageUri);
-                    Toast.makeText(this, "Could not process selected image path.", Toast.LENGTH_SHORT).show();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "CRITICAL ERROR creating avatar file part", e);
-                Toast.makeText(this, "Error preparing image for upload. Check logs.", Toast.LENGTH_LONG).show();
-                showLoading(false);
-                return;
-            }
-        } else {
-            Log.d(TAG, "Avatar not changed or URI is null.");
-        }
+        // QUAN TRỌNG: Không gửi avatarFilePart nếu không có thay đổi avatar từ màn hình này
+        // MultipartBody.Part avatarFilePart = null;
+        // if (avatarChanged && selectedImageUri != null) { ... } // Logic này bị loại bỏ
 
-
-        Call<ProfileApiResponse> call = apiService.updateMyProfile("Bearer " + accessToken, fields, avatarFilePart);
+        Log.d(TAG, "Calling updateMyProfile with fields: " + fields.keySet().toString());
+        Call<ProfileApiResponse> call = apiService.updateMyProfile("Bearer " + accessToken, fields, null); // Truyền null cho avatarFilePart
         call.enqueue(new Callback<ProfileApiResponse>() {
             @Override
-            public void onResponse(Call<ProfileApiResponse> call, Response<ProfileApiResponse> response) {
+            public void onResponse(@NonNull Call<ProfileApiResponse> call, @NonNull Response<ProfileApiResponse> response) {
                 showLoading(false);
                 if (!isFinishing() && !isDestroyed()) {
                     Log.d(TAG, "Update API Response Code: " + response.code());
-                    if (response.isSuccessful() && response.body() != null) {
-                        ProfileApiResponse apiResponse = response.body();
-                        Log.d(TAG, "Update API Response Success Flag: " + apiResponse.isSuccess() + ", Message: " + apiResponse.getMessage());
-                        if (apiResponse.isSuccess()) {
-                            Toast.makeText(PersonalDataActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-                            Log.i(TAG, "SUCCESS: Profile updated successfully via API. Re-fetching latest profile data to ensure UI consistency...");
-                            fetchCurrentUserData(); // LUÔN GỌI LẠI ĐỂ LẤY DỮ LIỆU MỚI NHẤT
-                            avatarChanged = false;
-                            selectedImageUri = null;
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Toast.makeText(PersonalDataActivity.this, "Thông tin cá nhân đã được cập nhật!", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "Profile updated successfully. Re-fetching latest profile data...");
+                        // Cập nhật currentUser với dữ liệu mới từ response nếu có
+                        if (response.body().getData() != null) {
+                            currentUser = response.body().getData();
+                            populateUserData(currentUser); // Cập nhật lại UI với dữ liệu mới nhất
                         } else {
-                            Log.e(TAG, "ERROR: API update call returned success=false. Message: " + apiResponse.getMessage());
-                            Toast.makeText(PersonalDataActivity.this, "Update failed: " + apiResponse.getMessage(), Toast.LENGTH_LONG).show();
+                            fetchCurrentUserData(); // Hoặc fetch lại nếu API không trả về user data khi update
                         }
+                        // avatarChanged = false; // Không cần nữa
+                        // selectedImageUri = null; // Không cần nữa
+                        etPassword.setText("********"); // Reset trường password về placeholder
+
+                        // Báo hiệu có thay đổi dữ liệu để ProfileFragment có thể làm mới
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("profileDataChanged", true);
+                        setResult(Activity.RESULT_OK, resultIntent);
+
                     } else {
-                        Log.e(TAG, "ERROR: API update call HTTP error. Code: " + response.code());
+                        Log.e(TAG, "API update call HTTP error. Code: " + response.code());
                         handleApiError(response, prefs);
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<ProfileApiResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<ProfileApiResponse> call, @NonNull Throwable t) {
                 showLoading(false);
                 if (!isFinishing() && !isDestroyed()) {
-                    Log.e(TAG, "CRITICAL ERROR: Failed to call update profile API", t);
-                    Toast.makeText(PersonalDataActivity.this, "Network error during update: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Failed to call update profile API", t);
+                    Toast.makeText(PersonalDataActivity.this, "Lỗi mạng khi cập nhật: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-
-    private String getRealPathFromURI(Uri contentUri) {
-        // ... (Giữ nguyên) ...
-        String result = null;
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = getContentResolver().query(contentUri, proj, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                result = cursor.getString(column_index);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting real path from URI", e);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        Log.d(TAG, "getRealPathFromURI for " + contentUri + " resolved to: " + result);
-        return result;
-    }
-
     private void showDatePickerDialog() {
-        // ... (Giữ nguyên như phiên bản bạn đã cung cấp, nó đã lưu số tháng vào etMonth) ...
+        // ... (giữ nguyên) ...
         final Calendar calendar = Calendar.getInstance();
-        if (currentUser != null && currentUser.getDateOfBirth() != null && !currentUser.getDateOfBirth().isEmpty()) {
-            try {
-                // Thử parse cả ISO date-time và date-only
-                SimpleDateFormat sdfIsoDateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                sdfIsoDateTime.setTimeZone(TimeZone.getTimeZone("UTC"));
-                try {
-                    calendar.setTime(sdfIsoDateTime.parse(currentUser.getDateOfBirth()));
-                } catch (ParseException e1) {
-                    SimpleDateFormat sdfDateOnly = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-                    calendar.setTime(sdfDateOnly.parse(currentUser.getDateOfBirth()));
-                }
-            } catch (ParseException e) {
-                Log.e(TAG, "Error parsing current DOB for DatePicker default: '" + currentUser.getDateOfBirth() + "'", e);
+        // Cố gắng đặt ngày mặc định cho DatePicker từ các EditText nếu đã có giá trị
+        try {
+            if (!etYear.getText().toString().isEmpty() && !etMonth.getText().toString().isEmpty() && !etDay.getText().toString().isEmpty()){
+                int year = Integer.parseInt(etYear.getText().toString());
+                int month = Integer.parseInt(etMonth.getText().toString()) - 1; // Calendar month là 0-11
+                int day = Integer.parseInt(etDay.getText().toString());
+                calendar.set(year, month, day);
             }
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Could not parse date from EditTexts for DatePicker default", e);
+            // Nếu lỗi, DatePicker sẽ dùng ngày hiện tại
         }
+
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH); // 0-11
+        int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, yearSelected, monthOfYear, dayOfMonth) -> {
                     Log.d(TAG, "DatePickerDialog: Day=" + dayOfMonth + ", MonthOfYear=" + monthOfYear + ", Year=" + yearSelected);
                     etDay.setText(String.format(Locale.US, "%02d", dayOfMonth));
-                    etMonth.setText(String.format(Locale.US, "%02d", monthOfYear + 1)); // Lưu số tháng (01-12)
+                    etMonth.setText(String.format(Locale.US, "%02d", monthOfYear + 1));
                     etYear.setText(String.valueOf(yearSelected));
                 }, year, month, day);
-        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis()); // Không cho chọn ngày tương lai
         datePickerDialog.show();
     }
 
     private void navigateToLogin() {
-        // ... (Giữ nguyên) ...
+        // ... (giữ nguyên) ...
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -524,7 +487,8 @@ public class PersonalDataActivity extends AppCompatActivity {
     }
 
     private void handleApiError(Response<?> response, SharedPreferences prefs) {
-        // ... (Giữ nguyên) ...
+        // ... (giữ nguyên) ...
+        if (isFinishing() || isDestroyed()) return;
         if (response.code() == 401) {
             Toast.makeText(this, "Session expired. Please log in again.", Toast.LENGTH_LONG).show();
             if (prefs != null) {
@@ -537,9 +501,7 @@ public class PersonalDataActivity extends AppCompatActivity {
             if (response.errorBody() != null) {
                 try {
                     errorMsg += " - " + response.errorBody().string();
-                } catch (IOException e) {
-                    Log.e(TAG, "Error parsing error body", e);
-                }
+                } catch (IOException e) { Log.e(TAG, "Error parsing error body", e); }
             }
             Log.e(TAG, "API Call Error: " + errorMsg);
             Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();

@@ -1,21 +1,29 @@
 package com.example.foodorderapp.network;
 
-import com.example.foodorderapp.core.model.Experience; // Thêm import này
+import com.example.foodorderapp.core.model.Experience;
 import com.example.foodorderapp.core.model.Skill;
 import com.example.foodorderapp.network.request.CreateExperienceRequest;
 import com.example.foodorderapp.network.request.CreateSkillRequest;
 import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateSkillRequest;
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
-import com.example.foodorderapp.network.response.ExperiencesApiResponse; // Thêm import này
+import com.example.foodorderapp.network.response.ExperiencesApiResponse;
 import com.example.foodorderapp.network.response.ProfileApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
 import com.example.foodorderapp.network.response.SkillsApiResponse;
+// import com.example.foodorderapp.network.response.LogoutResponse; // <<< KHÔNG CẦN NỮA
+
 import java.util.List;
 import java.util.Map;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import com.example.foodorderapp.config.Config;
+import com.example.foodorderapp.features.auth.ui.activity.LoginActivity;
+
+
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
@@ -43,8 +51,7 @@ public interface ApiService {
     @GET("skills")
     Call<SkillsApiResponse> getCurrentUserSkills(@Header("Authorization") String authToken);
 
-    // PHƯƠNG THỨC MỚI ĐỂ LẤY EXPERIENCES
-    @GET("experiences") // Đường dẫn endpoint là /api/v1/experiences
+    @GET("experiences")
     Call<ExperiencesApiResponse> getCurrentUserExperiences(@Header("Authorization") String authToken);
 
     @GET("skills/{id}")
@@ -59,45 +66,45 @@ public interface ApiService {
             @Path("id") int experienceId
     );
 
-    // PHƯƠNG THỨC MỚI ĐỂ XÓA SKILL
     @DELETE("skills/{id}")
-    Call<Void> deleteSkill( // Hoặc Call<BaseApiResponse> nếu API trả về JSON
-                            @Header("Authorization") String authToken,
-                            @Path("id") int skillId
+    Call<Void> deleteSkill(
+            @Header("Authorization") String authToken,
+            @Path("id") int skillId
     );
 
-    // PHƯƠNG THỨC MỚI ĐỂ XÓA EXPERIENCE
     @DELETE("experiences/{id}")
-    Call<Void> deleteExperience( // Hoặc Call<BaseApiResponse>
-                                 @Header("Authorization") String authToken,
-                                 @Path("id") int experienceId
+    Call<Void> deleteExperience(
+            @Header("Authorization") String authToken,
+            @Path("id") int experienceId
     );
 
     @PATCH("skills/{id}")
-    Call<SkillDetailApiResponse> updateSkill( // API trả về đối tượng skill đã cập nhật
-                                              @Header("Authorization") String authToken,
-                                              @Path("id") int skillId,
-                                              @Body UpdateSkillRequest updateSkillRequest // Đối tượng chứa dữ liệu cần cập nhật
+    Call<SkillDetailApiResponse> updateSkill(
+            @Header("Authorization") String authToken,
+            @Path("id") int skillId,
+            @Body UpdateSkillRequest updateSkillRequest
     );
 
-    // PHƯƠNG THỨC MỚI ĐỂ CẬP NHẬT EXPERIENCE
     @PATCH("experiences/{id}")
-    Call<ExperienceDetailApiResponse> updateExperience( // API trả về đối tượng experience đã cập nhật
-                                                        @Header("Authorization") String authToken,
-                                                        @Path("id") int experienceId,
-                                                        @Body UpdateExperienceRequest updateExperienceRequest // Đối tượng chứa dữ liệu cần cập nhật
+    Call<ExperienceDetailApiResponse> updateExperience(
+            @Header("Authorization") String authToken,
+            @Path("id") int experienceId,
+            @Body UpdateExperienceRequest updateExperienceRequest
     );
 
     @POST("skills")
-    Call<SkillDetailApiResponse> createSkill( // API trả về đối tượng skill đã tạo
-                                              @Header("Authorization") String authToken,
-                                              @Body CreateSkillRequest createSkillRequest
+    Call<SkillDetailApiResponse> createSkill(
+            @Header("Authorization") String authToken,
+            @Body CreateSkillRequest createSkillRequest
     );
 
-    // PHƯƠNG THỨC MỚI ĐỂ TẠO EXPERIENCE
     @POST("experiences")
-    Call<ExperienceDetailApiResponse> createExperience( // API trả về đối tượng experience đã tạo
-                                                        @Header("Authorization") String authToken,
-                                                        @Body CreateExperienceRequest createExperienceRequest
+    Call<ExperienceDetailApiResponse> createExperience(
+            @Header("Authorization") String authToken,
+            @Body CreateExperienceRequest createExperienceRequest
     );
+
+    // >>> PHƯƠNG THỨC ĐĂNG XUẤT ĐÃ CẬP NHẬT <<<
+    @POST("auth/logout")
+    Call<Void> logout(@Header("Authorization") String authToken); // <<< THAY ĐỔI Ở ĐÂY
 }

@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">JobFinder</string>
-    <string name="hello_user">Xin chào %1$s</string>
+    <string name="app_name">JobFinder</string> <string name="hello_user">Xin chào %1$s</string>
     <string name="find_your_dream_jobs">Tìm công việc mơ ước của bạn!</string>
     <string name="search_hint">Tìm kiếm</string>
     <string name="top_job_in_month">Công việc hàng đầu trong tháng %1$s</string>
@@ -17,33 +16,29 @@
     <string name="salary_icon_content_description">Biểu tượng lương</string>
     <string name="title_home">Trang chủ</string>
     <string name="title_favorites">Yêu thích</string>
-    <string name="title_chat">Thông báo</string>
-    <string name="title_profile">Hồ sơ</string>
+    <string name="title_chat">Thông báo</string> <string name="title_profile">Hồ sơ</string>
     <string name="job_detail_title">Chi Tiết Công Việc</string>
     <string name="back_button_description">Quay lại</string>
     <string name="applicants_label">Ứng viên</string>
     <string name="tab_description">Mô tả</string>
     <string name="tab_company">Công ty</string>
     <string name="apply_this_job">Ứng Tuyển Ngay</string>
-    <string name="label_website">Website</string>
+    <string name="label_website">Trang web</string>
     <string name="label_industry">Ngành nghề</string>
     <string name="label_company_size">Quy mô công ty</string>
     <string name="label_office_address">Địa chỉ văn phòng</string>
     <string name="hello_user_placeholder">Xin chào!</string>
     <string name="top_job_in_month_placeholder">Công việc hàng đầu</string>
     <string name="favorites_fragment_placeholder">Màn hình Yêu thích</string>
-    <string name="chat_fragment_placeholder">Màn hình Tin nhắn</string>
-    <string name="profile_fraaceholder">Màn hình Hồ sơgment_pl</string>
-    <string name="filter_button_description">Lọc</string>
+    <string name="chat_fragment_placeholder">Màn hình Thông báo</string> <string name="profile_fraaceholder">Màn hình Hồ sơ</string> <string name="filter_button_description">Lọc</string>
     <string name="search_category_hint">Tìm công việc hoặc %1$s...</string>
     <string name="top_companies_title">Công ty hàng đầu</string>
     <string name="recommended_for_you_title">Đề xuất cho bạn</string>
     <string name="apply_job_title">Ứng Tuyển</string>
     <string name="upload_resume_label">Tải lên CV</string>
-    <string name="upload_resume_hint">Tải lên tệp định dạng pdf, tối đa 5mb</string>
-    <string name="upload_resume_icon_description">Biểu tượng tải lên CV</string>
+    <string name="upload_resume_hint">Tải lên tệp định dạng PDF, tối đa 5MB</string> <string name="upload_resume_icon_description">Biểu tượng tải lên CV</string>
     <string name="phone_number_hint">Số điện thoại</string>
-    <string name="cover_letter_hint">Thư xin việc (Cover Letter)</string>
+    <string name="cover_letter_hint">Thư giới thiệu / Xin việc</string>
     <string name="apply_now_button">Nộp Đơn Ngay</string>
     <string name="file_selected_label">Đã chọn: %1$s</string>
     <string name="success_illustration_description">Hình minh họa thành công</string>
@@ -51,57 +46,45 @@
     <string name="success_message_format">Đơn ứng tuyển của bạn tới %1$s cho vị trí %2$s đã được gửi.</string>
     <string name="continue_explore_button">Tiếp tục khám phá</string>
     <string name="error_select_file">Vui lòng tải lên CV của bạn</string>
-    <string name="profile" translatable="false">Profile</string>
-    <string name="personal_data" translatable="false">Personal Data</string>
-    <string name="resume_my_info" translatable="false">Resume &amp; My Info</string>
-    <string name="my_application" translatable="false">My Application</string>
-<!--    <string name="settings" translatable="false">Settings</string>-->
-    <string name="faq" translatable="false">FAQ</string>
-    <string name="privacy_policy" translatable="false">Privacy &amp; Policy</string>
-    <string name="save" translatable="false">Save</string>
-    <string name="full_name" translatable="false">Full Name</string>
-    <string name="email_address" translatable="false">Email Address</string>
-    <string name="password" translatable="false">Password</string>
-    <string name="location" translatable="false">Location</string>
-    <string name="birth_date" translatable="false">Birth Date</string>
-    <string name="back" translatable="false">Back</string>
-    <string name="edit_resume" translatable="false">Edit resume</string>
-    <string name="about_me" translatable="false">About me</string>
-    <string name="work_experience" translatable="false">Work Experience</string>
-    <string name="skills" translatable="false">Skills</string>
-    <string name="detail_experience_skills" translatable="false">Detail Experience &amp; Skills</string>
-    <string name="edit" translatable="false">Edit</string>
-    <string name="company_icon" translatable="false">Company icon</string>
-    <string name="cv_portfolio_pdf"><![CDATA[CV & Portfolio.pdf]]></string>
 
-    <!--verify otp-->
-    <string name="otp_title">Nhập mã xác minh của bạn</string>
+    <string name="profile">Hồ sơ</string>
+    <string name="personal_data">Thông tin cá nhân</string>
+    <string name="resume_my_info">CV &amp; Thông tin của tôi</string>
+    <string name="my_application">Đơn ứng tuyển của tôi</string>
+    <string name="faq">Câu hỏi thường gặp</string>
+    <string name="privacy_policy">Chính sách bảo mật</string>
+    <string name="save">Lưu</string>
+    <string name="full_name">Họ và tên</string>
+    <string name="email_address">Địa chỉ Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="location">Địa điểm</string>
+    <string name="birth_date">Ngày sinh</string>
+    <string name="back">Quay lại</string>
+    <string name="edit_resume">Chỉnh sửa CV</string>
+    <string name="about_me">Giới thiệu bản thân</string>
+    <string name="work_experience">Kinh nghiệm làm việc</string>
+    <string name="skills">Kỹ năng</string>
+    <string name="detail_experience_skills">Chi tiết Kinh nghiệm &amp; Kỹ năng</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="company_icon">Biểu tượng công ty</string>
+    <string name="cv_portfolio_pdf"><![CDATA[CV & Hồ sơ năng lực.pdf]]></string> <string name="otp_title">Nhập mã xác minh của bạn</string>
     <string name="otp_subtitle_format">Chúng tôi đã gửi mã xác minh tới %1$s</string>
     <string name="otp_subtitle_default">Chúng tôi đã gửi mã xác minh đến email của bạn</string>
     <string name="resend_code">Gửi lại mã?</string>
     <string name="verification_button">Xác minh</string>
 
-    <!--reset password-->
     <string name="reset_password_title">Đặt lại mật khẩu của bạn</string>
     <string name="reset_password_subtitle">Vui lòng điền vào ô bên dưới để đặt lại mật khẩu hiện tại của bạn.</string>
     <string name="new_password_hint">Mật khẩu mới</string>
     <string name="confirm_new_password_hint">Nhập lại mật khẩu mới</string>
     <string name="reset_password_button">Đặt lại mật khẩu</string>
 
-    <!--search    -->
-    <string name="search_title">Search</string>
+    <string name="search_title">Tìm kiếm</string>
     <string name="search_job_hint">Tìm kiếm công việc</string>
     <string name="current_location_hint">Địa điểm</string>
-    <string name="search_history_title">Search History</string>
+    <string name="search_history_title">Lịch sử tìm kiếm</string>
     <string name="arrow_description">Mũi tên</string>
 
-    <!--    <string name="profile">Hồ sơ</string> -->
-    <!--    <string name="personal_data">Dữ liệu cá nhân</string>-->
-    <!--    <string name="resume_my_info">CV &amp; Thông tin</string>-->
-    <!--    <string name="my_application">Đơn ứng tuyển</string>-->
-    <!--    <string name="settings">Cài đặt</string>-->
-    <!--    <string name="faq">Câu hỏi thường gặp</string>-->
-    <!--    <string name="privacy_policy">Chính sách bảo mật</string>-->
     <string name="avatar_content_description">Ảnh đại diện</string>
     <string name="edit_avatar_content_description">Sửa ảnh đại diện</string>
     <string name="applied_label">Đã ứng tuyển</string>
@@ -110,47 +93,42 @@
     <string name="account_section_title">TÀI KHOẢN</string>
     <string name="other_section_title">KHÁC</string>
 
-    <string name="settings_title">Settings</string>
-    <string name="settings_general_header">GENERAL SETTINGS</string>
-    <string name="settings_contact_us_title">Contact Us</string>
-    <string name="settings_contact_us_subtitle">Questions about the application</string>
-    <string name="settings_share_title">Share The App</string>
-    <string name="settings_share_subtitle">Share with people close to you</string>
-    <string name="settings_rate_us_title">Rate Us</string>
-    <string name="settings_rate_us_subtitle">Your review is useful for us</string>
-    <string name="settings_notification_header">NOTIFICATION</string>
-    <string name="settings_app_notification_title">App Notification</string>
-    <string name="settings_dark_mode_title">Dark Mode</string>
-    <string name="settings_logout_title">Logout</string>
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_general_header">CÀI ĐẶT CHUNG</string>
+    <string name="settings_contact_us_title">Liên hệ chúng tôi</string>
+    <string name="settings_contact_us_subtitle">Các câu hỏi về ứng dụng</string>
+    <string name="settings_share_title">Chia sẻ ứng dụng</string>
+    <string name="settings_share_subtitle">Chia sẻ với những người thân thiết</string>
+    <string name="settings_rate_us_title">Đánh giá chúng tôi</string>
+    <string name="settings_rate_us_subtitle">Đánh giá của bạn rất hữu ích cho chúng tôi</string>
+    <string name="settings_notification_header">THÔNG BÁO</string>
+    <string name="settings_app_notification_title">Thông báo ứng dụng</string>
+    <string name="settings_logout_title">Đăng xuất</string>
 
-    <!-- Share Intent -->
-    <string name="share_subject">Check out this cool app!</string>
-    <string name="share_text">Download [FoodOrderApp] here: [Link App của bạn]</string>
-    <string name="share_via">Share via</string>
+    <string name="share_subject">Xem ứng dụng thú vị này!</string>
+    <string name="share_text">Tải về JobFinder tại đây: https://github.com/khuonggminhhoang/BTL_Android_PTIT</string> <string name="share_via">Chia sẻ qua</string>
 
-    <!-- Accessibility descriptions -->
-    <string name="content_description_setting_icon">Setting Icon</string>
-    <string name="content_description_navigation_arrow">Go to details</string>
-    <string name="content_description_back_button">Back</string>
-    <string name="content_description_more_options">More options</string>
+    <string name="content_description_setting_icon">Biểu tượng cài đặt</string>
+    <string name="content_description_navigation_arrow">Đi đến chi tiết</string>
+    <string name="content_description_back_button">Quay lại</string>
+    <string name="content_description_more_options">Thêm tuỳ chọn</string>
 
-    <string name="favorites_title">Favorite</string>
-    <string name="favorites_empty_title">No favorite yet!</string>
-    <string name="favorites_empty_subtitle">Any item you favorite will appear here</string>
-    <string name="favorites_explore_now">Explore now</string>
-    <string name="content_description_favorite_item_icon">Company logo</string>
-    <string name="content_description_unfavorite_button">Unfavorite</string>
-    <string name="content_description_empty_favorite_illustration">Empty favorites illustration</string>
+    <string name="favorites_title">Yêu thích</string>
+    <string name="favorites_empty_title">Không có mục yêu thích nào!</string>
+    <string name="favorites_empty_subtitle">Mọi mục bạn yêu thích sẽ xuất hiện ở đây</string>
+    <string name="favorites_explore_now">Khám phá ngay</string>
+    <string name="content_description_favorite_item_icon">Logo công ty</string>
+    <string name="content_description_unfavorite_button">Bỏ yêu thích</string>
+    <string name="content_description_empty_favorite_illustration">Hình minh họa mục yêu thích trống</string>
 
-    <string name="notifications_title">Notification</string>
-<!--    <string name="notifications_empty_title">No notification yet!</string>-->
-    <string name="notifications_empty_subtitle">Any notification will appear here</string>
-    <string name="content_description_notification_logo">Company logo</string>
-    <string name="content_description_notification_time_icon">Time icon</string>
-    <string name="content_description_empty_notification_illustration">Empty notification illustration</string>
+    <string name="notifications_title">Thông báo</string>
+    <string name="notifications_empty_subtitle">Mọi thông báo sẽ xuất hiện ở đây</string>
+    <string name="content_description_notification_logo">Logo công ty</string>
+    <string name="content_description_notification_time_icon">Biểu tượng thời gian</string>
+    <string name="content_description_empty_notification_illustration">Hình minh họa thông báo trống</string>
 
-    <string name="content_description_notification_icon">Notification Icon</string>
-    <string name="empty_notification_title">No Notifications Yet</string>
-    <string name="empty_notification_subtitle">You will see important updates here.</string>
+    <string name="content_description_notification_icon">Biểu tượng Thông báo</string>
+    <string name="empty_notification_title">Chưa có thông báo</string>
+    <string name="empty_notification_subtitle">Bạn sẽ thấy các cập nhật quan trọng tại đây.</string>
     <string name="no_results_found">Không tìm thấy kết quả phù hợp</string>
 </resources>
