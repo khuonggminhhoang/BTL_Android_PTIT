@@ -12,7 +12,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
         <TextView
-            android:text="Set Filter"
+            android:text="Bộ lọc tìm kiếm"
             android:textStyle="bold"
             android:textSize="18sp"
             android:layout_width="0dp"
@@ -20,7 +20,7 @@
             android:layout_weight="1"/>
         <TextView
             android:id="@+id/tv_clear_all"
-            android:text="Clear all"
+            android:text="Xóa tất cả"
             android:textColor="@color/blue_primary"
             android:textStyle="bold"
             android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
         android:id="@+id/edt_filter_keyword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Keyword"
+        android:hint="Từ khóa"
         android:drawableStart="@drawable/ic_search"
         android:layout_marginTop="16dp"/>
 
@@ -41,7 +41,7 @@
         android:id="@+id/edt_filter_location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Location"
+        android:hint="Địa điểm"
         android:drawableStart="@drawable/ic_location_on"
         android:layout_marginTop="12dp"/>
 
@@ -55,14 +55,14 @@
             android:id="@+id/tv_salary_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Salary Range"
+            android:text="Khoảng lương"
             android:layout_alignParentStart="true" />
 
         <TextView
             android:id="@+id/tv_salary_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0đ - 500000đ"
+            android:text="0đ - 10.000.000đ"
             android:layout_alignParentEnd="true" />
     </RelativeLayout>
     <SeekBar
@@ -73,7 +73,7 @@
         android:layout_marginTop="8dp"/>
 
     <TextView
-        android:text="Job Type"
+        android:text="Loại công việc"
         android:textStyle="bold"
         android:layout_marginTop="16dp"
         android:layout_width="wrap_content"
@@ -94,7 +94,7 @@
                 android:id="@+id/btn_job_type_remote"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Remote"
+                android:text="Từ xa"
                 android:backgroundTint="@color/blue_primary"
                 android:textColor="@android:color/white"
                 android:layout_marginEnd="8dp"/>
@@ -110,14 +110,14 @@
                 android:id="@+id/btn_job_type_fulltime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Full Time"
+                android:text="Toàn thời gian"
                 android:layout_marginEnd="8dp"/>
 
             <Button
                 android:id="@+id/btn_job_type_intern"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Intern"/>
+                android:text="Thực tập"/>
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -126,7 +126,7 @@
         android:id="@+id/btn_apply_filter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Apply Filter"
+        android:text="Áp dụng bộ lọc"
         android:layout_marginTop="24dp"
         android:backgroundTint="@color/blue_primary"
         android:textColor="@android:color/white"/>
