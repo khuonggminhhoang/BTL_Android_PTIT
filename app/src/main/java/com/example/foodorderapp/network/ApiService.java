@@ -8,6 +8,8 @@ import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateSkillRequest;
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
 import com.example.foodorderapp.network.response.ExperiencesApiResponse;
+import com.example.foodorderapp.network.response.NotificationDetailApiResponse;
+import com.example.foodorderapp.network.response.NotificationsApiResponse;
 import com.example.foodorderapp.network.response.ProfileApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
 import com.example.foodorderapp.network.response.SkillsApiResponse;
@@ -109,14 +111,22 @@ public interface ApiService {
     @POST("auth/logout")
     Call<Void> logout(@Header("Authorization") String authToken);
 
-    // --- Các API mới cho CV/Portfolio ---
     @Multipart
-    @POST("profile/me/portfolio") // Endpoint cho việc upload CV/portfolio
-    Call<ProfileApiResponse> uploadPortfolio( // Giả sử API trả về thông tin profile đã cập nhật (bao gồm resumeUrl mới)
+    @POST("profile/me/portfolio")
+    Call<ProfileApiResponse> uploadPortfolio(
                                               @Header("Authorization") String authToken,
-                                              @Part MultipartBody.Part file // 'file' là tên của trường chứa tệp PDF trong form data
+                                              @Part MultipartBody.Part file
     );
 
-    @DELETE("profile/me/portfolio") // Endpoint cho việc xóa CV/portfolio
-    Call<Void> deletePortfolio(@Header("Authorization") String authToken); // Giả sử API trả về Void khi xóa thành công
+    @DELETE("profile/me/portfolio")
+    Call<Void> deletePortfolio(@Header("Authorization") String authToken);
+
+    @GET("notifications")
+    Call<NotificationsApiResponse> getNotifications(@Header("Authorization") String authToken);
+
+    @GET("notifications/{id}")
+    Call<NotificationDetailApiResponse> getNotificationDetail(@Header("Authorization") String authToken, @Path("id") int notificationId);
+
+    @PATCH("notifications/{id}/read")
+    Call<NotificationDetailApiResponse> markNotificationAsRead(@Header("Authorization") String authToken, @Path("id") int notificationId);
 }

@@ -4,7 +4,7 @@ import com.example.foodorderapp.core.model.Skill;
 
 import java.util.List;
 
-public class SkillsApiResponse { // Bạn nên tạo file riêng cho class này
+public class SkillsApiResponse {
     @com.google.gson.annotations.SerializedName("success")
     private boolean success;
     @com.google.gson.annotations.SerializedName("statusCode")

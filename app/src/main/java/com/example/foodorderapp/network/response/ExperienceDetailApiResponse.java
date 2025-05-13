@@ -14,14 +14,14 @@ public class ExperienceDetailApiResponse {
     @SerializedName("message")
     private String message;
 
-    @SerializedName("error") // Thêm trường error nếu API của bạn có trả về
+    @SerializedName("error")
     private String error;
 
     @SerializedName("data")
-    private Experience data; // Dữ liệu là một đối tượng Experience duy nhất
+    private Experience data;
 
-    @SerializedName("meta") // Thêm trường meta nếu API của bạn có trả về
-    private Object meta; // Kiểu Object vì chúng ta không biết rõ cấu trúc của meta, hoặc bạn có thể tạo lớp Meta nếu cần
+    @SerializedName("meta")
+    private Object meta;
 
 
     // Getters

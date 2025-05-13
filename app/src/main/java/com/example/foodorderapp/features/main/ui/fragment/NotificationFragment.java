@@ -1,14 +1,14 @@
 package com.example.foodorderapp.features.main.ui.fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,12 +18,25 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.config.Config;
+import com.example.foodorderapp.core.model.Job;
 import com.example.foodorderapp.core.model.Notification;
+import com.example.foodorderapp.features.auth.ui.activity.LoginActivity;
 import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
+import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
 import com.example.foodorderapp.features.main.ui.adapter.NotificationsAdapter;
+import com.example.foodorderapp.network.ApiService;
+import com.example.foodorderapp.network.response.NotificationDetailApiResponse;
+import com.example.foodorderapp.network.response.NotificationsApiResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NotificationFragment extends Fragment implements NotificationsAdapter.OnNotificationClickListener {
 
@@ -35,139 +48,164 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     private LinearLayout emptyStateLayout;
     private ProgressBar progressBar;
 
+    private ApiService apiService;
+    private String currentAccessToken;
+
     public NotificationFragment() {
-        // Constructor rỗng
+        // Hàm khởi tạo rỗng
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Khởi tạo danh sách thông báo và API
         notificationList = new ArrayList<>();
+        initApiService();
+        loadAuthToken();
+    }
+
+    // Khởi tạo dịch vụ API
+    private void initApiService() {
+        String baseUrl = Config.BE_URL;
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            Log.e(TAG, "Lỗi cấu hình BE_URL");
+            if (getContext() != null) Toast.makeText(getContext(), "Lỗi cấu hình máy chủ.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (!baseUrl.endsWith("/")) baseUrl += "/";
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiService = retrofit.create(ApiService.class);
+        Log.d(TAG, "Khởi tạo ApiService với URL: " + baseUrl);
+    }
+
+    // Tải access token từ SharedPreferences
+    private void loadAuthToken() {
+        if (getContext() != null) {
+            SharedPreferences prefs = getContext().getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
+            currentAccessToken = prefs.getString("accessToken", null);
+            Log.d(TAG, currentAccessToken == null ? "Token rỗng" : "Đã tải token");
+        } else {
+            Log.e(TAG, "Context rỗng, không tải được token");
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_notifications, container, false);
+        // Gán layout cho fragment
+        View view = inflater.inflate(R.layout.fragment_notifications, container, false);
+        recyclerViewNotifications = view.findViewById(R.id.recyclerView_notifications);
+        emptyStateLayout = view.findViewById(R.id.layout_empty_notifications);
+        progressBar = view.findViewById(R.id.progressBar_notifications);
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // Ánh xạ view
-        recyclerViewNotifications = view.findViewById(R.id.recyclerView_notifications);
-        emptyStateLayout = view.findViewById(R.id.layout_empty_notifications);
-        progressBar = view.findViewById(R.id.progressBar_notifications);
-
-        // Cài đặt RecyclerView
+        // Thiết lập RecyclerView và tải thông báo
         setupRecyclerView();
-
-        // Tải thông báo
+        if (currentAccessToken == null && getContext() != null) loadAuthToken();
         loadNotifications();
     }
 
-    // Cài đặt RecyclerView
+    // Thiết lập RecyclerView
     private void setupRecyclerView() {
-        if (adapter == null) {
-            adapter = new NotificationsAdapter(getContext(), notificationList, this);
+        if (getContext() == null) {
+            Log.e(TAG, "Context rỗng, không thiết lập được RecyclerView");
+            return;
         }
+        if (adapter == null) adapter = new NotificationsAdapter(getContext(), notificationList, this);
         recyclerViewNotifications.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewNotifications.setAdapter(adapter);
     }
 
     // Tải danh sách thông báo
     private void loadNotifications() {
-        showLoading(true);
-        notificationList.clear();
-        if (adapter != null) {
-            adapter.updateData(new ArrayList<>(notificationList));
+        if (getContext() == null) {
+            Log.e(TAG, "Context rỗng, không tải được thông báo");
+            showLoading(false);
+            updateEmptyStateVisibility();
+            return;
+        }
+        if (apiService == null) {
+            Log.e(TAG, "ApiService rỗng, khởi tạo lại");
+            initApiService();
+            if (apiService == null) {
+                Toast.makeText(getContext(), "Lỗi dịch vụ.", Toast.LENGTH_SHORT).show();
+                showLoading(false);
+                updateEmptyStateVisibility();
+                return;
+            }
+        }
+        if (currentAccessToken == null) {
+            Log.w(TAG, "Token rỗng, yêu cầu đăng nhập");
+            Toast.makeText(getContext(), "Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show();
+            showLoading(false);
+            updateEmptyStateVisibility();
+            return;
         }
 
-        // Giả lập tải dữ liệu
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            List<Notification> fetchedNotifications = getMockNotifications();
-
-            if (getActivity() != null && isAdded()) {
-                getActivity().runOnUiThread(() -> {
-                    showLoading(false);
-                    notificationList.addAll(fetchedNotifications);
-                    if (adapter != null) {
-                        adapter.updateData(new ArrayList<>(notificationList));
+        showLoading(true);
+        Log.d(TAG, "Tải thông báo...");
+        Call<NotificationsApiResponse> call = apiService.getNotifications("Bearer " + currentAccessToken);
+        call.enqueue(new Callback<NotificationsApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<NotificationsApiResponse> call, @NonNull Response<NotificationsApiResponse> response) {
+                showLoading(false);
+                if (getActivity() != null && isAdded()) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Log.d(TAG, "Đã tải thông báo: " + (response.body().getData() != null ? response.body().getData().size() : 0));
+                        notificationList.clear();
+                        if (response.body().getData() != null) notificationList.addAll(response.body().getData());
+                        if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
+                    } else {
+                        Log.e(TAG, "Lỗi tải thông báo: " + response.code());
+                        if (response.code() == 401) {
+                            Toast.makeText(getContext(), "Phiên đăng nhập hết hạn.", Toast.LENGTH_LONG).show();
+                            navigateToLogin();
+                        } else {
+                            Toast.makeText(getContext(), "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                        notificationList.clear();
+                        if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
                     }
                     updateEmptyStateVisibility();
-                });
+                }
             }
-        }, 1000);
+
+            @Override
+            public void onFailure(@NonNull Call<NotificationsApiResponse> call, @NonNull Throwable t) {
+                showLoading(false);
+                if (getActivity() != null && isAdded()) {
+                    Log.e(TAG, "Lỗi mạng khi tải thông báo", t);
+                    Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    notificationList.clear();
+                    if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
+                    updateEmptyStateVisibility();
+                }
+            }
+        });
     }
 
-    // Tạo dữ liệu thông báo mẫu
-    private List<Notification> getMockNotifications() {
-        List<Notification> mockList = new ArrayList<>();
-        Notification n1 = new Notification();
-        n1.setId(1);
-        n1.setTitle("Application Sent");
-        n1.setMessage("Your application for UI/UX Designer has been sent to Twitter.");
-        n1.setCreatedAt("10:00 AM");
-        n1.setRead(false);
-        n1.setUserId(1);
-        n1.setApplicationId(123);
-        mockList.add(n1);
-
-        Notification n2 = new Notification();
-        n2.setId(2);
-        n2.setTitle("Application Viewed");
-        n2.setMessage("Your application for Front-end Developer at Slack was viewed.");
-        n2.setCreatedAt("Yesterday");
-        n2.setRead(false);
-        n2.setUserId(1);
-        n2.setApplicationId(456);
-        mockList.add(n2);
-
-        Notification n3 = new Notification();
-        n3.setId(3);
-        n3.setTitle("New Message");
-        n3.setMessage("You have a new message from John Doe.");
-        n3.setCreatedAt("09:30 AM");
-        n3.setRead(false);
-        n3.setUserId(1);
-        n3.setApplicationId(789);
-        mockList.add(n3);
-
-        Notification n4 = new Notification();
-        n4.setId(4);
-        n4.setTitle("Password Changed");
-        n4.setMessage("Your password was successfully changed.");
-        n4.setCreatedAt("2 days ago");
-        n4.setRead(true);
-        n4.setUserId(1);
-        n4.setApplicationId(0);
-        mockList.add(n4);
-
-        return mockList;
-    }
-
-    // Hiển thị/ẩn ProgressBar
+    // Hiển thị trạng thái tải
     private void showLoading(boolean isLoading) {
-        if (progressBar != null) {
-            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        }
-        if (!isLoading) {
-            updateEmptyStateVisibility();
-        } else {
-            if (recyclerViewNotifications != null) recyclerViewNotifications.setVisibility(View.GONE);
-            if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.GONE);
-        }
+        if (progressBar != null) progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        if (recyclerViewNotifications != null) recyclerViewNotifications.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+        if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.GONE);
+        if (!isLoading) updateEmptyStateVisibility();
     }
 
-    // Cập nhật trạng thái giao diện
+    // Cập nhật trạng thái giao diện khi không có thông báo
     private void updateEmptyStateVisibility() {
-        if (adapter == null || recyclerViewNotifications == null || emptyStateLayout == null) {
-            return;
-        }
+        if (adapter == null || recyclerViewNotifications == null || emptyStateLayout == null || getContext() == null) return;
         if (progressBar != null && progressBar.getVisibility() == View.VISIBLE) {
+            recyclerViewNotifications.setVisibility(View.GONE);
+            emptyStateLayout.setVisibility(View.GONE);
             return;
         }
-
         if (adapter.getItemCount() == 0) {
             recyclerViewNotifications.setVisibility(View.GONE);
             emptyStateLayout.setVisibility(View.VISIBLE);
@@ -177,24 +215,86 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         }
     }
 
-    // Xử lý click thông báo
+    // Xử lý khi nhấn vào thông báo
     @Override
     public void onNotificationClick(Notification notification, int position) {
         if (getContext() == null || notification == null) return;
-        Log.d(TAG, "Clicked notification ID: " + notification.getId());
+        Log.d(TAG, "Nhấn thông báo ID: " + notification.getId());
 
-        if (!notification.isRead()) {
-            if (adapter != null) {
-                adapter.markItemAsRead(position);
+        if (apiService == null) {
+            Log.e(TAG, "ApiService rỗng, khởi tạo lại");
+            initApiService();
+            if (apiService == null) {
+                Toast.makeText(getContext(), "Lỗi dịch vụ.", Toast.LENGTH_SHORT).show();
+                proceedWithNotificationAction(notification);
+                return;
             }
         }
+        if (currentAccessToken == null) {
+            Log.w(TAG, "Token rỗng");
+            Toast.makeText(getContext(), "Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show();
+            proceedWithNotificationAction(notification);
+            return;
+        }
 
-        if (notification.getApplicationId() > 0) {
+        if (!notification.isRead()) {
+            Call<NotificationDetailApiResponse> call = apiService.markNotificationAsRead("Bearer " + currentAccessToken, notification.getId());
+            call.enqueue(new Callback<NotificationDetailApiResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<NotificationDetailApiResponse> call, @NonNull Response<NotificationDetailApiResponse> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Notification updatedNotification = response.body().getData();
+                        if (updatedNotification != null && updatedNotification.isRead()) {
+                            Log.d(TAG, "Đã đánh dấu thông báo " + notification.getId() + " là đã đọc");
+                            if (position >= 0 && position < notificationList.size()) {
+                                notificationList.get(position).setRead(true);
+                                if (adapter != null) adapter.notifyItemChanged(position);
+                            }
+                        }
+                    } else {
+                        Log.e(TAG, "Lỗi đánh dấu thông báo: " + response.code());
+                    }
+                    proceedWithNotificationAction(notification);
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<NotificationDetailApiResponse> call, @NonNull Throwable t) {
+                    Log.e(TAG, "Lỗi mạng khi đánh dấu thông báo", t);
+                    proceedWithNotificationAction(notification);
+                }
+            });
+        } else {
+            proceedWithNotificationAction(notification);
+        }
+    }
+
+    // Chuyển hướng dựa trên thông báo
+    private void proceedWithNotificationAction(Notification notification) {
+        if (getContext() == null || notification == null) return;
+        if (notification.getApplication() != null && notification.getApplication().getJob() != null) {
+            Job jobToView = notification.getApplication().getJob();
             Intent intent = new Intent(getContext(), JobDetailActivity.class);
-            intent.putExtra("JOB_ID", String.valueOf(notification.getApplicationId()));
+            intent.putExtra(JobAdapter.JOB_DETAIL_KEY, jobToView);
+            startActivity(intent);
+        } else if (notification.getApplicationId() > 0) {
+            Log.w(TAG, "Thông báo thiếu dữ liệu công việc, dùng ID");
+            Intent intent = new Intent(getContext(), JobDetailActivity.class);
+            Job tempJob = new Job();
+            tempJob.setId(notification.getApplicationId());
+            intent.putExtra(JobAdapter.JOB_DETAIL_KEY, tempJob);
             startActivity(intent);
         } else {
-            Toast.makeText(getContext(), "Không có hành động cho thông báo này.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Không có chi tiết cho thông báo này.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Điều hướng đến màn hình đăng nhập
+    private void navigateToLogin() {
+        if (getActivity() != null && isAdded()) {
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            getActivity().finish();
         }
     }
 }
