@@ -1,4 +1,4 @@
-package com.example.foodorderapp.features.jobs.ui.activity; // Package của bạn
+package com.example.foodorderapp.features.jobs.ui.activity;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -7,13 +7,17 @@ import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor; // <<< THÊM IMPORT CURSOR
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns; // <<< THÊM IMPORT OPENABLECOLUMNS
+import android.provider.OpenableColumns;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -22,29 +26,49 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-// --- THÊM IMPORT GLIDE ---
 import com.bumptech.glide.Glide;
-
 import com.example.foodorderapp.R;
-// Đảm bảo import đúng JobAdapter và Job model
-import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter; // Kiểm tra lại đường dẫn nếu cần
+import com.example.foodorderapp.config.Config;
 import com.example.foodorderapp.core.model.Job;
+import com.example.foodorderapp.features.auth.ui.activity.LoginActivity;
+import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
 import com.example.foodorderapp.features.main.ui.activity.MainActivity;
+import com.example.foodorderapp.network.ApiService;
+import com.example.foodorderapp.network.response.ApplicationResponse;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApplyJobActivity extends AppCompatActivity {
 
+    private static final String TAG = "ApplyJobActivity";
     private ImageView ivCompanyLogoApply;
     private TextView tvCompanyNameApply, tvJobTitleApply, tvUploadHint;
-    private ImageButton btnBackApply, btnFavoriteApply;
+    private ImageButton btnBackApply;
     private LinearLayout layoutUploadResume;
     private EditText etPhoneNumber, etCoverLetter;
     private Button btnApplyNow;
+    private ProgressBar progressBarApplyJob;
 
-    private Job currentJob; // Sử dụng Job model đã sửa (có id và companyLogoUrl)
+    private Job currentJob;
     private Uri selectedFileUri;
+    private ApiService apiService;
+    private String currentAccessToken;
+
 
     private final ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -54,9 +78,8 @@ public class ApplyJobActivity extends AppCompatActivity {
                     if (selectedFileUri != null) {
                         String fileName = getFileNameFromUri(selectedFileUri);
                         if(tvUploadHint != null) {
-                            tvUploadHint.setText(getString(R.string.file_selected_label, fileName)); // Cần định nghĩa string này
-                            // Đổi màu chữ để báo hiệu đã chọn file
-                            tvUploadHint.setTextColor(ContextCompat.getColor(this, R.color.setting_icon_tint)); // <<< Hoặc màu phù hợp khác
+                            tvUploadHint.setText(getString(R.string.file_selected_label, fileName));
+                            tvUploadHint.setTextColor(ContextCompat.getColor(this, R.color.setting_icon_tint));
                         }
                         Toast.makeText(this, "Đã chọn file: " + fileName, Toast.LENGTH_SHORT).show();
                     } else {
@@ -75,20 +98,54 @@ public class ApplyJobActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apply_job);
 
+        initApiService();
+        loadAuthToken();
         findViews();
         getIntentData();
 
         if (currentJob != null) {
-            populateJobSummary(); // <<< HÀM NÀY SẼ ĐƯỢC SỬA
-//            updateFavoriteButton(currentJob.isFavorite());
-            updateFavoriteButton(true);
+            populateJobSummary();
         } else {
             Toast.makeText(this, "Không thể tải thông tin công việc.", Toast.LENGTH_SHORT).show();
-            finish(); // Thoát nếu không có dữ liệu Job
+            finish();
             return;
         }
-
         setupClickListeners();
+    }
+
+    private void initApiService() {
+        String baseUrl = Config.BE_URL;
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            Log.e(TAG, "BE_URL is not configured!");
+            Toast.makeText(this, "Lỗi cấu hình máy chủ.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        if (!baseUrl.endsWith("/")) {
+            baseUrl += "/";
+        }
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiService = retrofit.create(ApiService.class);
+    }
+
+    private void loadAuthToken() {
+        SharedPreferences prefs = getSharedPreferences("AuthPrefs", MODE_PRIVATE);
+        currentAccessToken = prefs.getString("accessToken", null);
+        if (currentAccessToken == null) {
+            Toast.makeText(this, "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            navigateToLogin();
+        }
+    }
+
+    private void navigateToLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void findViews() {
@@ -96,66 +153,42 @@ public class ApplyJobActivity extends AppCompatActivity {
         tvCompanyNameApply = findViewById(R.id.tvCompanyNameApply);
         tvJobTitleApply = findViewById(R.id.tvJobTitleApply);
         btnBackApply = findViewById(R.id.btnBackApply);
-        btnFavoriteApply = findViewById(R.id.btnFavoriteApply);
         layoutUploadResume = findViewById(R.id.layoutUploadResume);
-        etPhoneNumber = findViewById(R.id.etPhoneNumber);
+        etPhoneNumber = findViewById(R.id.etPhoneNumber); // Mặc dù không gửi, vẫn giữ để không lỗi UI
         etCoverLetter = findViewById(R.id.etCoverLetter);
         btnApplyNow = findViewById(R.id.btnApplyNow);
-        tvUploadHint = findViewById(R.id.tvUploadHint); // Đảm bảo ID này có trong R.layout.activity_apply_job
+        tvUploadHint = findViewById(R.id.tvUploadHint);
+        progressBarApplyJob = findViewById(R.id.progressBarApplyJob);
     }
 
     private void getIntentData() {
         Intent intent = getIntent();
-        // Kiểm tra key truyền từ JobAdapter (hoặc nơi gọi)
-        String jobDetailKey = JobAdapter.JOB_DETAIL_KEY; // <<< Hoặc key bạn dùng để truyền Job
+        String jobDetailKey = JobAdapter.JOB_DETAIL_KEY;
         if (intent != null && intent.hasExtra(jobDetailKey)) {
-            // Nhận Job object đã được sửa (Serializable)
             currentJob = (Job) intent.getSerializableExtra(jobDetailKey);
         }
     }
 
     private void populateJobSummary() {
-        // --- SỬA Ở ĐÂY: Dùng Glide để load ảnh từ URL ---
         String logoUrl = currentJob.getCompany() != null ? currentJob.getCompany().getLogoUrl() : null;
-        Glide.with(this) // Context là Activity này
-                .load(logoUrl) // Load từ URL
-                .placeholder(R.mipmap.ic_launcher) // Ảnh tạm (thay bằng ảnh phù hợp)
-                .error(R.mipmap.ic_launcher_round)      // Ảnh lỗi (thay bằng ảnh phù hợp)
-                // .circleCrop() // Tùy chọn: Bo tròn nếu cần
-                .into(ivCompanyLogoApply); // ImageView đích
+        if (logoUrl != null && !logoUrl.toLowerCase().startsWith("http")) {
+            String imageBaseUrl = Config.BE_URL.replace("/api/v1", "");
+            logoUrl = imageBaseUrl + (logoUrl.startsWith("/") ? "" : "/") + logoUrl;
+        }
 
-        // --- Các phần khác giữ nguyên ---
+        Glide.with(this)
+                .load(logoUrl)
+                .placeholder(R.drawable.ic_company_logo_placeholder)
+                .error(R.drawable.ic_company_logo_placeholder)
+                .into(ivCompanyLogoApply);
+
         tvCompanyNameApply.setText(currentJob.getCompany() != null ? currentJob.getCompany().getName() : "");
         tvJobTitleApply.setText(currentJob.getTitle());
     }
 
-    private void updateFavoriteButton(boolean isFavorite) {
-        if (isFavorite) {
-            btnFavoriteApply.setImageResource(R.drawable.ic_heart_filled_red); // Dùng icon trái tim đỏ đã tạo
-            // Không cần setColorFilter nếu drawable đã có màu đỏ
-            // btnFavoriteApply.setColorFilter(ContextCompat.getColor(this, R.color.red), android.graphics.PorterDuff.Mode.SRC_IN);
-        } else {
-            // Cần icon trái tim viền (tạo drawable ic_heart_outline_gray.xml hoặc tương tự)
-            btnFavoriteApply.setImageResource(R.drawable.ic_favorite_border); // Thay bằng icon viền phù hợp
-            // btnFavoriteApply.clearColorFilter(); // Xóa filter nếu có
-            // Hoặc set màu viền nếu icon là vector trắng
-            // btnFavoriteApply.setColorFilter(ContextCompat.getColor(this, R.color.grey), android.graphics.PorterDuff.Mode.SRC_IN);
-        }
-    }
 
     private void setupClickListeners() {
         btnBackApply.setOnClickListener(v -> finish());
-
-        btnFavoriteApply.setOnClickListener(v -> {
-//            if (currentJob == null) return; // Kiểm tra job không null
-//
-//            boolean isNowFavorite = !currentJob.isFavorite(); // Đảo trạng thái
-//            currentJob.setFavorite(isNowFavorite); // Cập nhật trạng thái trong object Job
-//            updateFavoriteButton(isNowFavorite); // Cập nhật UI nút favorite
-//
-//            // TODO: Lưu trạng thái isNowFavorite và currentJob.getId() vào DB/SharedPreferences
-//            Toast.makeText(this, isNowFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
-        });
 
         layoutUploadResume.setOnClickListener(v -> openFilePicker());
 
@@ -168,35 +201,122 @@ public class ApplyJobActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng tải lên CV của bạn", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (currentAccessToken == null) {
+                Toast.makeText(this, "Vui lòng đăng nhập để ứng tuyển.", Toast.LENGTH_SHORT).show();
+                navigateToLogin();
+                return;
+            }
 
-            // TODO: Thực hiện logic ứng tuyển (upload file, gọi API...)
-            // Sau khi xử lý thành công:
-            showSuccessDialog();
+            submitApplication();
         });
     }
+
+    private void submitApplication() {
+        progressBarApplyJob.setVisibility(android.view.View.VISIBLE);
+        btnApplyNow.setEnabled(false);
+
+        String jobIdStr = String.valueOf(currentJob.getId());
+        String coverLetterStr = etCoverLetter.getText().toString().trim();
+
+        RequestBody jobIdBody = RequestBody.create(MediaType.parse("text/plain"), jobIdStr);
+        RequestBody coverLetterBody = RequestBody.create(MediaType.parse("text/plain"), coverLetterStr);
+
+        MultipartBody.Part filePart = prepareFilePart("file", selectedFileUri);
+        if (filePart == null) {
+            progressBarApplyJob.setVisibility(android.view.View.GONE);
+            btnApplyNow.setEnabled(true);
+            Toast.makeText(this, "Không thể chuẩn bị tệp CV.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Call<ApplicationResponse> call = apiService.applyForJob("Bearer " + currentAccessToken, jobIdBody, coverLetterBody, filePart);
+        call.enqueue(new Callback<ApplicationResponse>() {
+            @Override
+            public void onResponse(Call<ApplicationResponse> call, Response<ApplicationResponse> response) {
+                progressBarApplyJob.setVisibility(android.view.View.GONE);
+                btnApplyNow.setEnabled(true);
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    showSuccessDialog();
+                } else {
+                    String errorMsg = "Lỗi khi nộp đơn.";
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " Mã lỗi: " + response.code() + " - " + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Lỗi đọc errorBody", e);
+                        }
+                    } else {
+                        errorMsg += " Mã lỗi: " + response.code();
+                    }
+                    Toast.makeText(ApplyJobActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "API Error: " + errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApplicationResponse> call, Throwable t) {
+                progressBarApplyJob.setVisibility(android.view.View.GONE);
+                btnApplyNow.setEnabled(true);
+                Log.e(TAG, "Lỗi mạng khi nộp đơn: " + t.getMessage(), t);
+                Toast.makeText(ApplyJobActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private MultipartBody.Part prepareFilePart(String partName, Uri fileUri) {
+        ContentResolver contentResolver = getContentResolver();
+        String fileName = getFileNameFromUri(fileUri);
+        try {
+            InputStream inputStream = contentResolver.openInputStream(fileUri);
+            if (inputStream == null) {
+                Toast.makeText(this, "Không thể mở tệp.", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+
+            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+            int bufferSize = 1024;
+            byte[] buffer = new byte[bufferSize];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                byteBuffer.write(buffer, 0, len);
+            }
+            byte[] fileBytes = byteBuffer.toByteArray();
+            inputStream.close();
+
+            String mimeType = contentResolver.getType(fileUri);
+            if (mimeType == null || mimeType.isEmpty()) {
+                mimeType = "application/pdf"; // Mặc định là PDF nếu không xác định được
+            }
+            RequestBody requestFile = RequestBody.create(MediaType.parse(mimeType), fileBytes);
+            return MultipartBody.Part.createFormData(partName, fileName, requestFile);
+        } catch (IOException e) {
+            Log.e(TAG, "Lỗi khi chuẩn bị tệp: " + e.getMessage());
+            Toast.makeText(this, "Lỗi khi chuẩn bị tệp.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+    }
+
 
     private void showSuccessDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_apply_success); // Đảm bảo layout này tồn tại
+        dialog.setContentView(R.layout.dialog_apply_success);
 
         TextView tvSuccessMessage = dialog.findViewById(R.id.tvSuccessMessage);
         Button btnContinueExplore = dialog.findViewById(R.id.btnContinueExplore);
 
-        // Lấy đúng tên công ty và tiêu đề từ currentJob
-        String successMsg = getString(R.string.success_message_format, // Cần định nghĩa string này
+        String successMsg = getString(R.string.success_message_format,
                 currentJob.getCompany() != null ? currentJob.getCompany().getName() : "",
                 currentJob.getTitle());
         tvSuccessMessage.setText(successMsg);
 
         btnContinueExplore.setOnClickListener(v -> {
             dialog.dismiss();
-            // Có thể quay lại màn hình trước đó hoặc màn hình chính
-            // finish(); // Đóng màn hình apply
-            Intent mainIntent = new Intent(this, MainActivity.class); // <<< Hoặc Activity chính của bạn
+            Intent mainIntent = new Intent(this, MainActivity.class);
             mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(mainIntent);
-            finish(); // Đóng activity hiện tại
+            finish();
         });
 
         if (dialog.getWindow() != null) {
@@ -211,30 +331,25 @@ public class ApplyJobActivity extends AppCompatActivity {
 
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        // Giới hạn kiểu file nếu muốn, ví dụ PDF và DOCX:
-        intent.setType("*/*"); // Cho phép chọn mọi loại file
-        // String[] mimeTypes = {"application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
-        // intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-        // intent.addCategory(Intent.CATEGORY_OPENABLE); // Quan trọng khi dùng ACTION_GET_CONTENT
+        intent.setType("application/pdf"); // Chỉ cho phép chọn file PDF
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
 
         try {
-            filePickerLauncher.launch(Intent.createChooser(intent, "Chọn CV/Resume"));
+            filePickerLauncher.launch(Intent.createChooser(intent, "Chọn CV/Resume (PDF)"));
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(this, "Vui lòng cài đặt trình quản lý file.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // Hàm reset text hint upload
     private void resetUploadHint() {
         if(tvUploadHint != null) {
-            tvUploadHint.setText(getString(R.string.upload_resume_hint)); // Cần định nghĩa string này
-            tvUploadHint.setTextColor(ContextCompat.getColor(this, R.color.grey)); // Màu mặc định
+            tvUploadHint.setText(getString(R.string.upload_resume_hint));
+            tvUploadHint.setTextColor(ContextCompat.getColor(this, R.color.grey));
         }
     }
 
     private String getFileNameFromUri(Uri uri) {
         String fileName = null;
-        // Thử lấy tên file từ ContentResolver trước
         Cursor cursor = null;
         try {
             cursor = getContentResolver().query(uri, null, null, null, null);
@@ -245,14 +360,13 @@ public class ApplyJobActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e("ApplyJobActivity", "Error getting file name from ContentResolver", e);
+            Log.e(TAG, "Lỗi lấy tên tệp từ ContentResolver", e);
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
 
-        // Nếu không lấy được từ ContentResolver, thử lấy từ path
         if (fileName == null) {
             String path = uri.getPath();
             if (path != null) {
@@ -260,10 +374,10 @@ public class ApplyJobActivity extends AppCompatActivity {
                 if (cut != -1) {
                     fileName = path.substring(cut + 1);
                 } else {
-                    fileName = path; // Nếu path không có dấu /
+                    fileName = path;
                 }
             }
         }
-        return fileName != null ? fileName : "unknown_file"; // Trả về tên mặc định nếu không tìm được
+        return fileName != null ? fileName : "unknown_cv.pdf";
     }
 }

@@ -3,12 +3,13 @@ package com.example.foodorderapp.network;
 import com.example.foodorderapp.core.model.Experience;
 import com.example.foodorderapp.core.model.Job;
 import com.example.foodorderapp.core.model.Skill;
-import com.example.foodorderapp.core.model.User; // Thêm import này
+import com.example.foodorderapp.core.model.User;
 import com.example.foodorderapp.network.request.CreateExperienceRequest;
 import com.example.foodorderapp.network.request.CreateSkillRequest;
 import com.example.foodorderapp.network.request.SaveJobDto;
 import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateSkillRequest;
+import com.example.foodorderapp.network.response.ApplicationResponse;
 import com.example.foodorderapp.network.response.CompaniesApiResponse;
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
 import com.example.foodorderapp.network.response.ExperiencesApiResponse;
@@ -18,7 +19,7 @@ import com.example.foodorderapp.network.response.PaginatedJobResponse;
 import com.example.foodorderapp.network.response.NotificationDetailApiResponse;
 import com.example.foodorderapp.network.response.NotificationsApiResponse;
 import com.example.foodorderapp.network.response.ProfileApiResponse;
-import com.example.foodorderapp.network.response.SavedJobsApiResponse; // Thêm import này
+import com.example.foodorderapp.network.response.SavedJobsApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
 import com.example.foodorderapp.network.response.SkillsApiResponse;
 
@@ -163,5 +164,14 @@ public interface ApiService {
     Call<Void> unsaveJob(@Header("Authorization") String authToken, @Path("jobId") int jobId);
 
     @GET("users/saved-jobs")
-    Call<SavedJobsApiResponse> getSavedJobs(@Header("Authorization") String authToken); // Thay đổi ở đây
+    Call<SavedJobsApiResponse> getSavedJobs(@Header("Authorization") String authToken);
+
+    @Multipart
+    @POST("applications")
+    Call<ApplicationResponse> applyForJob(
+            @Header("Authorization") String authToken,
+            @Part("jobId") RequestBody jobId,
+            @Part("coverLetter") RequestBody coverLetter,
+            @Part MultipartBody.Part file // CV file
+    );
 }

@@ -6,7 +6,7 @@ import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build; // <<< THÊM IMPORT NÀY
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
@@ -52,21 +52,22 @@ public class JobDetailActivity extends AppCompatActivity {
 
     private ImageView ivCompanyLogoDetail;
     private TextView tvCompanyNameDetail, tvJobTitleDetail, tvLocationDetail, tvApplicants, tvSalaryDetail;
-    private ImageButton btnBack, btnFavoriteDetail;
+    private ImageButton btnBack;
+    // btnFavoriteDetail đã được xóa
     private Button btnApply;
     private TabLayout tabLayout;
-    private LinearLayout layoutTags; // Layout để chứa các tag (ví dụ: Full-time, Remote)
+    private LinearLayout layoutTags;
     private FrameLayout tabContentContainer;
-    private LinearLayout layoutDescriptionContent; // Layout cho tab mô tả
+    private LinearLayout layoutDescriptionContent;
     private TextView tvDescription;
-    private LinearLayout layoutCompanyContent; // Layout cho tab công ty
+    private LinearLayout layoutCompanyContent;
     private TextView tvCompanyDescription, tvWebsite, tvIndustry, tvCompanySize, tvOfficeAddress;
-    private ProgressBar progressBarJobDetail; // ProgressBar để hiển thị khi tải dữ liệu
+    private ProgressBar progressBarJobDetail;
 
     private ApiService apiService;
-    private Job currentJob; // Job object nhận từ Intent (có thể chỉ chứa ID ban đầu)
-    private int jobIdToFetch = -1; // ID công việc để fetch chi tiết
-    private String currentAccessToken; // Token để lưu/bỏ lưu công việc
+    private Job currentJob;
+    private int jobIdToFetch = -1;
+    private String currentAccessToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,20 +76,19 @@ public class JobDetailActivity extends AppCompatActivity {
 
         findViews();
         initApiService();
-        setupToolbar(); // Thiết lập toolbar (nút back)
+        setupToolbar();
 
         SharedPreferences prefs = getSharedPreferences("AuthPrefs", MODE_PRIVATE);
         currentAccessToken = prefs.getString("accessToken", null);
 
-        getIntentData(); // Lấy jobId từ Intent
+        getIntentData();
 
         if (jobIdToFetch != -1) {
-            fetchJobDetails(jobIdToFetch); // Gọi API để lấy chi tiết công việc
+            fetchJobDetails(jobIdToFetch);
         } else {
             Toast.makeText(this, "Không tìm thấy thông tin công việc.", Toast.LENGTH_SHORT).show();
-            finish(); // Đóng activity nếu không có jobId
+            finish();
         }
-        // Các listener sẽ được setup sau khi có dữ liệu
     }
 
     private void findViews() {
@@ -96,10 +96,10 @@ public class JobDetailActivity extends AppCompatActivity {
         tvCompanyNameDetail = findViewById(R.id.tvCompanyNameDetail);
         tvJobTitleDetail = findViewById(R.id.tvJobTitleDetail);
         tvLocationDetail = findViewById(R.id.tvLocationDetail);
-        tvApplicants = findViewById(R.id.tvApplicants); // Sẽ cập nhật sau nếu API có
+        tvApplicants = findViewById(R.id.tvApplicants);
         tvSalaryDetail = findViewById(R.id.tvSalaryDetail);
         btnBack = findViewById(R.id.btnBack);
-        btnFavoriteDetail = findViewById(R.id.btnFavoriteDetail);
+        // btnFavoriteDetail đã được xóa khỏi đây
         btnApply = findViewById(R.id.btnApply);
         tabLayout = findViewById(R.id.tabLayout);
         layoutTags = findViewById(R.id.layoutTags);
@@ -112,7 +112,7 @@ public class JobDetailActivity extends AppCompatActivity {
         tvIndustry = findViewById(R.id.tvIndustry);
         tvCompanySize = findViewById(R.id.tvCompanySize);
         tvOfficeAddress = findViewById(R.id.tvOfficeAddress);
-        progressBarJobDetail = findViewById(R.id.progressBarJobDetail); // Ánh xạ ProgressBar
+        progressBarJobDetail = findViewById(R.id.progressBarJobDetail);
     }
 
     private void initApiService() {
@@ -141,12 +141,11 @@ public class JobDetailActivity extends AppCompatActivity {
     private void getIntentData() {
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(JobAdapter.JOB_DETAIL_KEY)) {
-            // Nhận toàn bộ object Job từ Intent
             Job jobFromIntent = (Job) intent.getSerializableExtra(JobAdapter.JOB_DETAIL_KEY);
             if (jobFromIntent != null) {
-                jobIdToFetch = jobFromIntent.getId(); // Lấy ID từ object
+                jobIdToFetch = jobFromIntent.getId();
             }
-        } else if (intent != null && intent.hasExtra("JOB_ID")) { // Dự phòng nếu chỉ truyền ID
+        } else if (intent != null && intent.hasExtra("JOB_ID")) {
             jobIdToFetch = intent.getIntExtra("JOB_ID", -1);
         }
     }
@@ -155,7 +154,7 @@ public class JobDetailActivity extends AppCompatActivity {
         if (progressBarJobDetail != null) {
             progressBarJobDetail.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
-        View contentLayout = findViewById(R.id.scrollView);
+        View contentLayout = findViewById(R.id.scrollViewJobDetail);
         if (contentLayout != null) {
             contentLayout.setVisibility(isLoading ? View.GONE : View.VISIBLE);
         }
@@ -291,13 +290,12 @@ public class JobDetailActivity extends AppCompatActivity {
 
         tvApplicants.setText("- Ứng viên");
 
-        updateFavoriteButton(currentJob.isTopJob());
+        // updateFavoriteButton(currentJob.isFavorite()); // Đã xóa dòng này
         displayTags();
     }
 
     private void populateDescriptionTab() {
         if (currentJob != null && tvDescription != null) {
-            // Kiểm tra phiên bản Android để sử dụng phương thức fromHtml phù hợp
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 tvDescription.setText(Html.fromHtml(currentJob.getDescription(), Html.FROM_HTML_MODE_COMPACT));
             } else {
@@ -355,36 +353,19 @@ public class JobDetailActivity extends AppCompatActivity {
         }
     }
 
-
-    private void updateFavoriteButton(boolean isFavorite) {
-        if (isFavorite) {
-            btnFavoriteDetail.setImageResource(R.drawable.ic_heart_filled_red);
-            btnFavoriteDetail.clearColorFilter();
-        } else {
-            btnFavoriteDetail.setImageResource(R.drawable.ic_favorite_border);
-            btnFavoriteDetail.setColorFilter(ContextCompat.getColor(this, R.color.red), android.graphics.PorterDuff.Mode.SRC_IN);
-        }
-    }
+    // Phương thức updateFavoriteButton đã được xóa
 
     private void setupClickListeners() {
         if (currentJob == null) return;
 
-        btnFavoriteDetail.setOnClickListener(v -> {
-            if (currentAccessToken == null || currentAccessToken.isEmpty()) {
-                Toast.makeText(this, "Vui lòng đăng nhập để sử dụng tính năng này.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            boolean isNowFavorite = !currentJob.isTopJob();
-            // TODO: Gọi API để lưu/bỏ lưu công việc
-            currentJob.setTopJob(isNowFavorite);
-            updateFavoriteButton(isNowFavorite);
-            Toast.makeText(this, isNowFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
-        });
+        // Logic cho btnFavoriteDetail đã được xóa
 
         btnApply.setOnClickListener(v -> {
             if (currentAccessToken == null || currentAccessToken.isEmpty()) {
                 Toast.makeText(this, "Vui lòng đăng nhập để ứng tuyển.", Toast.LENGTH_SHORT).show();
+                // Cân nhắc điều hướng đến LoginActivity nếu cần
+                // Intent loginIntent = new Intent(JobDetailActivity.this, LoginActivity.class);
+                // startActivity(loginIntent);
                 return;
             }
             Intent applyIntent = new Intent(JobDetailActivity.this, ApplyJobActivity.class);
