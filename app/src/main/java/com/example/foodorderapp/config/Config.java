@@ -4,6 +4,6 @@ public class Config {
 //    public static String BE_URL = "http://172.11.13.53:3001/api/v1";
 //    public static String BE_URL = "http://192.168.60.103:3001/api/v1";
 //    public static String BE_URL = "http://192.168.2.108:3001/api/v1";
-    public static String BE_URL = "http://192.168.245.252:3001/api/v1";
+    public static String BE_URL = "http://10.60.170.48:3001/api/v1";
 
 }

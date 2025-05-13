@@ -8,6 +8,7 @@ import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateSkillRequest;
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
 import com.example.foodorderapp.network.response.ExperiencesApiResponse;
+import com.example.foodorderapp.network.response.PaginatedJobResponse; // Import mới
 import com.example.foodorderapp.network.response.ProfileApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
 import com.example.foodorderapp.network.response.SkillsApiResponse;
@@ -34,14 +35,17 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.PartMap;
 import retrofit2.http.Path;
+import retrofit2.http.Query; // Import Query
 
 public interface ApiService {
+
+    // Các phương thức hiện có...
 
     @GET("profile/me")
     Call<ProfileApiResponse> getMyProfile(@Header("Authorization") String authToken);
 
     @Multipart
-    @POST("profile/me")
+    @POST("profile/me") // Sử dụng POST hoặc PATCH tùy theo thiết kế API của bạn cho update
     Call<ProfileApiResponse> updateMyProfile(
             @Header("Authorization") String authToken,
             @PartMap Map<String, RequestBody> fields,
@@ -104,7 +108,22 @@ public interface ApiService {
             @Body CreateExperienceRequest createExperienceRequest
     );
 
-    // >>> PHƯƠNG THỨC ĐĂNG XUẤT ĐÃ CẬP NHẬT <<<
     @POST("auth/logout")
-    Call<Void> logout(@Header("Authorization") String authToken); // <<< THAY ĐỔI Ở ĐÂY
+    Call<Void> logout(@Header("Authorization") String authToken);
+
+    // --- THÊM PHƯƠNG THỨC MỚI CHO PHÂN TRANG CÔNG VIỆC ---
+    /**
+     * Lấy danh sách công việc có phân trang.
+     * Backend của bạn (NestJS) dường như sử dụng các query param là 'pageNumber' và 'pageSize'.
+     * Endpoint là /api/v1/jobs (dựa trên phân tích file Node.js)
+     */
+    @GET("jobs") // Đường dẫn API cho danh sách công việc
+    Call<PaginatedJobResponse> getJobsPaginated(
+            // Không cần @Header("Authorization") String authToken nếu API này public
+            // Nếu API yêu cầu token, hãy thêm vào. Dựa trên JobController.ts, nó là public (@SkipAuth).
+            @Query("pageNumber") int pageNumber,
+            @Query("pageSize") int pageSize,
+            @Query("sort") String sort // Ví dụ: "createdAt,DESC" hoặc "-createdAt" tùy theo backend
+            // Dựa trên FilterJobDto, backend có thể nhận 'id,-createdAt'
+    );
 }
