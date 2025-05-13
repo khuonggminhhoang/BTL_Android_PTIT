@@ -27,25 +27,27 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.PartMap;
 import retrofit2.http.Path;
-import androidx.annotation.Nullable; // Thêm import này
+import androidx.annotation.Nullable;
 
 public interface ApiService {
 
     @GET("profile/me")
+    @Headers("Cache-Control: no-cache")
     Call<ProfileApiResponse> getMyProfile(@Header("Authorization") String authToken);
 
     @Multipart
-    @POST("profile/me") // Endpoint này đã có, giả sử dùng để cập nhật thông tin chung và avatar
+    @POST("profile/me")
     Call<ProfileApiResponse> updateMyProfile(
             @Header("Authorization") String authToken,
             @PartMap Map<String, RequestBody> fields,
-            @Part @Nullable MultipartBody.Part avatarFile // Có thể avatar là tùy chọn khi cập nhật profile
+            @Part @Nullable MultipartBody.Part avatarFile
     );
 
     @GET("skills")
