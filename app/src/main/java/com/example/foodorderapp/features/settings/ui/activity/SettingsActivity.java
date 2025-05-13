@@ -2,7 +2,6 @@ package com.example.foodorderapp.features.settings.ui.activity;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-// import androidx.appcompat.app.AppCompatDelegate; // Bỏ nếu không dùng Dark Mode nữa
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,8 +10,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MenuItem; // Vẫn cần cho nút back của toolbar nếu không dùng setNavigationOnClickListener
 import android.widget.Toast;
 
 import com.example.foodorderapp.R;
@@ -57,21 +55,18 @@ public class SettingsActivity extends AppCompatActivity implements SettingsAdapt
         super.onCreate(savedInstanceState);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        // Nếu bạn đã loại bỏ hoàn toàn Dark Mode, không cần dòng applyDarkMode() này nữa.
-        // Hoặc nếu bạn muốn app vẫn theo theme hệ thống nhưng chỉ bỏ switch, thì giữ lại.
-        // Giả sử bạn bỏ hoàn toàn:
-        // applyDarkMode(isDarkModeEnabled());
-
         setContentView(R.layout.activity_settings);
 
-        initApiService(); // Khởi tạo apiService
+        initApiService();
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar_settings);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+
 
         recyclerViewSettings = findViewById(R.id.recyclerView_settings);
         recyclerViewSettings.setLayoutManager(new LinearLayoutManager(this));
@@ -84,40 +79,29 @@ public class SettingsActivity extends AppCompatActivity implements SettingsAdapt
 
     private void initApiService() {
         String baseUrl = Config.BE_URL;
-        // Đảm bảo baseUrl không null và kết thúc bằng dấu /
         if (baseUrl != null && !baseUrl.isEmpty()) {
             if (!baseUrl.endsWith("/")) {
-                baseUrl += "/"; // Thêm dấu / nếu thiếu
+                baseUrl += "/";
             }
         } else {
             Log.e(TAG, "Config.BE_URL is null or empty!");
             Toast.makeText(this, "Lỗi cấu hình URL máy chủ.", Toast.LENGTH_LONG).show();
-            // Cân nhắc finish() activity hoặc không cho phép thực hiện các hành động API
-            // finish(); // Hoặc return để ngăn khởi tạo Retrofit
             return;
         }
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl) // baseUrl bây giờ đã được đảm bảo có dấu /
+                .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiService = retrofit.create(ApiService.class);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.settings_menu, menu);
-        return true;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Xử lý sự kiện click cho nút home/back trên toolbar
         if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        if (item.getItemId() == R.id.action_more) {
-            Toast.makeText(this, "More options clicked!", Toast.LENGTH_SHORT).show();
+            finish(); // Hoặc onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -137,7 +121,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsAdapt
         settingItems.add(new SettingItem(getString(R.string.settings_notification_header)));
         settingItems.add(new SettingItem(R.drawable.ic_notifications_24,
                 getString(R.string.settings_app_notification_title), isAppNotificationEnabled(), ACTION_APP_NOTIFICATION));
-        // Đã bỏ mục Dark Mode
 
         settingItems.add(new SettingItem(SettingItem.TYPE_ACTION, R.drawable.ic_logout_24,
                 getString(R.string.settings_logout_title), null, ACTION_LOGOUT));
@@ -193,7 +176,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsAdapt
         SharedPreferences authPrefs = getSharedPreferences("AuthPrefs", MODE_PRIVATE);
         String accessToken = authPrefs.getString("accessToken", null);
 
-        if (apiService == null) { // Kiểm tra apiService đã được khởi tạo chưa
+        if (apiService == null) {
             Toast.makeText(this, "Lỗi: Dịch vụ API chưa sẵn sàng.", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "ApiService is null in performLogout. Check initApiService.");
             return;

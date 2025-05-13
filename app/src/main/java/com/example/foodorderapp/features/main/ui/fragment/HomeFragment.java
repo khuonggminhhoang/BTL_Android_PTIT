@@ -35,11 +35,11 @@ public class HomeFragment extends Fragment {
     private TextView etSearch;
 
     public HomeFragment() {
+        // Constructor rỗng
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -47,34 +47,32 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Ánh xạ view
         rvCategories = view.findViewById(R.id.rvCategories);
         rvJobs = view.findViewById(R.id.rvJobs);
         tvHello = view.findViewById(R.id.tvHello);
         etSearch = view.findViewById(R.id.etSearch);
 
+        // Khởi tạo dữ liệu và giao diện
         initData();
         setupCategoryRecyclerView();
         setupJobRecyclerView();
 
-        etSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), SearchActivity.class);
-                intent.putExtra("search", etSearch.getText().toString());
-                startActivity(intent);
-            }
+        // Xử lý click tìm kiếm
+        etSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SearchActivity.class);
+            intent.putExtra("search", etSearch.getText().toString());
+            startActivity(intent);
         });
     }
 
+    // Khởi tạo dữ liệu mẫu
     private void initData() {
         categoryList = new ArrayList<>();
         jobList = new ArrayList<>();
         String defaultDescription = "Building new user-facing features...\nAssisting with optimising build pipelines...\nImproving performance...\nAdding analytics...";
-        String twitterCompanyInfo = "Twitter Indonesia is a solution for seafood addicts! We strive to express a positive impression and are committed to producing only good quality without preservatives food products.";
-        String googleCompanyInfo = "Google LLC is an American multinational technology company that specializes in Internet-related services and products.";
-        String facebookCompanyInfo = "Facebook is an online social media and social networking service owned by American company Meta Platforms.";
-        String defaultAddress = "Jl. Muara Baru Ujung Blok T. No. 8 Pergudangan BOSCO , RT.22 / RW.17 , Penjaringan , North Jakarta City , Jakarta 14440";
 
+        // Công việc mẫu 1
         Job job1 = new Job();
         job1.setId(1);
         job1.setTitle("Remote UI/UX Designer");
@@ -88,7 +86,6 @@ public class HomeFragment extends Fragment {
         job1.setDescription(defaultDescription);
         job1.setCreatedAt("1 hours ago");
         job1.setUpdatedAt("1 hours ago");
-        job1.setDeletedAt(null);
         Company company1 = new Company();
         company1.setName("Twitter");
         company1.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/512px-Logo_of_Twitter.svg.png");
@@ -96,6 +93,7 @@ public class HomeFragment extends Fragment {
         job1.setUsers(new ArrayList<>());
         jobList.add(job1);
 
+        // Công việc mẫu 2
         Job job2 = new Job();
         job2.setId(2);
         job2.setTitle("Android Developer");
@@ -109,7 +107,6 @@ public class HomeFragment extends Fragment {
         job2.setDescription("Developing awesome Android applications...");
         job2.setCreatedAt("3 hours ago");
         job2.setUpdatedAt("3 hours ago");
-        job2.setDeletedAt(null);
         Company company2 = new Company();
         company2.setName("Google");
         company2.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg");
@@ -117,6 +114,7 @@ public class HomeFragment extends Fragment {
         job2.setUsers(new ArrayList<>());
         jobList.add(job2);
 
+        // Công việc mẫu 3
         Job job3 = new Job();
         job3.setId(3);
         job3.setTitle("Frontend Engineer");
@@ -130,7 +128,6 @@ public class HomeFragment extends Fragment {
         job3.setDescription("Building user interfaces with React...");
         job3.setCreatedAt("5 hours ago");
         job3.setUpdatedAt("5 hours ago");
-        job3.setDeletedAt(null);
         Company company3 = new Company();
         company3.setName("Facebook");
         company3.setLogoUrl("https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png");
@@ -139,6 +136,7 @@ public class HomeFragment extends Fragment {
         jobList.add(job3);
     }
 
+    // Cài đặt RecyclerView danh mục
     private void setupCategoryRecyclerView() {
         if (categoryList == null) {
             categoryList = new ArrayList<>();
@@ -150,6 +148,7 @@ public class HomeFragment extends Fragment {
         rvCategories.setHasFixedSize(true);
     }
 
+    // Cài đặt RecyclerView công việc
     private void setupJobRecyclerView() {
         if (jobList == null) {
             jobList = new ArrayList<>();
@@ -161,4 +160,3 @@ public class HomeFragment extends Fragment {
         rvJobs.setHasFixedSize(true);
     }
 }
-

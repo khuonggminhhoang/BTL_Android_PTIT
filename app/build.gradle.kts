@@ -32,7 +32,7 @@ android {
     // Thêm khối này nếu bạn gặp lỗi liên quan đến duplicate classes khi dùng Java 11+
     // packagingOptions {
     //     resources {
-    //         excludes += '/META-INF/{AL2.0,LGPL2.1}'
+    //         excludes += "/META-INF/{AL2.0,LGPL2.1}"
     //     }
     // }
 }
@@ -49,10 +49,21 @@ dependencies {
 
     // --- Glide Dependencies ---
     implementation(libs.glide)
-    annotationProcessor(libs.glide.compiler)
+    annotationProcessor(libs.glide.compiler) // Giữ nguyên nếu bạn dùng Java
+    // Hoặc nếu bạn dùng Kotlin và KAPT:
+    // kapt(libs.glide.compiler)
+
+
+    // --- Volley (Nếu vẫn còn sử dụng) ---
     implementation("com.android.volley:volley:1.2.1")
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // --- Retrofit & Gson ---
+    implementation("com.squareup.retrofit2:retrofit:2.11.0") // Kiểm tra phiên bản mới nhất nếu muốn
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0") // Kiểm tra phiên bản mới nhất nếu muốn
+
+    // --- OkHttp & Logging Interceptor (THÊM VÀO) ---
+    implementation("com.squareup.okhttp3:okhttp:4.12.0") // Hoặc phiên bản OkHttp3 mới nhất
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0") // Phiên bản này nên khớp với phiên bản okhttp ở trên
 
     // Dependencies cho Testing
     testImplementation(libs.junit)

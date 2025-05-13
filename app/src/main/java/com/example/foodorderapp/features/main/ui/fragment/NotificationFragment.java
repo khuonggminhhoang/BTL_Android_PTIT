@@ -1,4 +1,4 @@
-package com.example.foodorderapp.features.main.ui.fragment; // Package của bạn
+package com.example.foodorderapp.features.main.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,7 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.foodorderapp.R;
-// Import các Activity bạn muốn điều hướng đến
 import com.example.foodorderapp.core.model.Notification;
 import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
 import com.example.foodorderapp.features.main.ui.adapter.NotificationsAdapter;
@@ -30,26 +29,24 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
 
     private static final String TAG = "NotificationFragment";
 
-    // --- Biến thành viên ---
     private RecyclerView recyclerViewNotifications;
-    private NotificationsAdapter adapter; // Adapter là biến thành viên
+    private NotificationsAdapter adapter;
     private List<Notification> notificationList;
     private LinearLayout emptyStateLayout;
     private ProgressBar progressBar;
-    // private Toolbar toolbar; // Bỏ comment nếu layout fragment_notifications.xml có Toolbar
 
-    public NotificationFragment() { } // Constructor trống
+    public NotificationFragment() {
+        // Constructor rỗng
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        notificationList = new ArrayList<>(); // Khởi tạo list ở đây
-        // setHasOptionsMenu(true); // Chỉ gọi nếu Fragment này có menu riêng
+        notificationList = new ArrayList<>();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_notifications, container, false);
     }
 
@@ -57,32 +54,20 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // --- Ánh xạ Views ---
-        // toolbar = view.findViewById(R.id.toolbar_notifications); // Bỏ comment nếu có Toolbar
+        // Ánh xạ view
         recyclerViewNotifications = view.findViewById(R.id.recyclerView_notifications);
         emptyStateLayout = view.findViewById(R.id.layout_empty_notifications);
         progressBar = view.findViewById(R.id.progressBar_notifications);
 
-        // --- Setup UI ---
-        // setupToolbar(); // Bỏ comment nếu có Toolbar riêng
+        // Cài đặt RecyclerView
         setupRecyclerView();
 
-        // --- Load dữ liệu ---
+        // Tải thông báo
         loadNotifications();
     }
 
-    /* // Bỏ comment nếu có Toolbar riêng
-    private void setupToolbar() {
-        if (getActivity() instanceof AppCompatActivity) {
-            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-            // Optional: Set tiêu đề nếu cần
-            // ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Notifications");
-        }
-    }
-    */
-
+    // Cài đặt RecyclerView
     private void setupRecyclerView() {
-        // Chỉ khởi tạo adapter một lần
         if (adapter == null) {
             adapter = new NotificationsAdapter(getContext(), notificationList, this);
         }
@@ -90,40 +75,32 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         recyclerViewNotifications.setAdapter(adapter);
     }
 
+    // Tải danh sách thông báo
     private void loadNotifications() {
         showLoading(true);
-        // Luôn clear list trước khi thêm dữ liệu mới (quan trọng khi load lại)
         notificationList.clear();
-        // Cập nhật adapter ngay cả khi list rỗng để xóa item cũ trên UI
         if (adapter != null) {
-            adapter.updateData(new ArrayList<>(notificationList)); // Update với list rỗng
+            adapter.updateData(new ArrayList<>(notificationList));
         }
 
-        // === TODO: Thay thế bằng logic gọi API/Database thực tế ===
-        // Ví dụ gọi API/DB ở đây...
-        // Giả lập thành công sau 1 giây
+        // Giả lập tải dữ liệu
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            List<Notification> fetchedNotifications = getMockNotifications(); // Hàm lấy dữ liệu mẫu
+            List<Notification> fetchedNotifications = getMockNotifications();
 
-            // --- Xử lý kết quả ---
-            if (getActivity() != null && isAdded()) { // Kiểm tra Fragment còn tồn tại
-                getActivity().runOnUiThread(() -> { // Đảm bảo chạy trên Main Thread
+            if (getActivity() != null && isAdded()) {
+                getActivity().runOnUiThread(() -> {
                     showLoading(false);
-                    notificationList.addAll(fetchedNotifications); // Thêm dữ liệu mới vào list
+                    notificationList.addAll(fetchedNotifications);
                     if (adapter != null) {
-                        // Cập nhật adapter với dữ liệu mới
                         adapter.updateData(new ArrayList<>(notificationList));
                     }
-                    updateEmptyStateVisibility(); // Cập nhật trạng thái trống/có
+                    updateEmptyStateVisibility();
                 });
             }
-            // --- Kết thúc xử lý kết quả ---
-
-        }, 1000); // Delay 1 giây
-        // === Kết thúc TODO ===
+        }, 1000);
     }
 
-    // Hàm tạo dữ liệu mẫu (thay bằng logic thật)
+    // Tạo dữ liệu thông báo mẫu
     private List<Notification> getMockNotifications() {
         List<Notification> mockList = new ArrayList<>();
         Notification n1 = new Notification();
@@ -169,27 +146,24 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         return mockList;
     }
 
-
+    // Hiển thị/ẩn ProgressBar
     private void showLoading(boolean isLoading) {
         if (progressBar != null) {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
-        // Chỉ ẩn/hiện list và empty state SAU KHI load xong
         if (!isLoading) {
-            updateEmptyStateVisibility(); // Cập nhật lại trạng thái hiển thị
+            updateEmptyStateVisibility();
         } else {
-            // Ẩn cả hai khi đang load
             if (recyclerViewNotifications != null) recyclerViewNotifications.setVisibility(View.GONE);
             if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.GONE);
         }
     }
 
+    // Cập nhật trạng thái giao diện
     private void updateEmptyStateVisibility() {
-        // Kiểm tra null an toàn hơn
         if (adapter == null || recyclerViewNotifications == null || emptyStateLayout == null) {
-            return; // Views chưa sẵn sàng
+            return;
         }
-        // Chỉ cập nhật nếu không đang loading
         if (progressBar != null && progressBar.getVisibility() == View.VISIBLE) {
             return;
         }
@@ -203,42 +177,24 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         }
     }
 
-    // --- Xử lý Click ---
+    // Xử lý click thông báo
     @Override
     public void onNotificationClick(Notification notification, int position) {
         if (getContext() == null || notification == null) return;
         Log.d(TAG, "Clicked notification ID: " + notification.getId());
-        // Đánh dấu đã đọc
+
         if (!notification.isRead()) {
             if (adapter != null) {
                 adapter.markItemAsRead(position);
             }
-            // TODO: Gọi hàm cập nhật trạng thái trong Database/API
         }
-        // Điều hướng ví dụ: mở JobDetailActivity nếu có applicationId
+
         if (notification.getApplicationId() > 0) {
             Intent intent = new Intent(getContext(), JobDetailActivity.class);
             intent.putExtra("JOB_ID", String.valueOf(notification.getApplicationId()));
             startActivity(intent);
         } else {
-            Toast.makeText(getContext(), "No action defined for this notification.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Không có hành động cho thông báo này.", Toast.LENGTH_SHORT).show();
         }
     }
-
-    // --- TODO: Hàm gọi backend/DB để đánh dấu đã đọc ---
-    // private void markNotificationAsReadInBackend(String notificationId) { ... }
-
-    /* // Bỏ comment nếu cần xử lý menu item trong fragment này
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        // inflater.inflate(R.menu.your_notification_menu, menu); // Tạo file menu riêng nếu cần
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // if (item.getItemId() == R.id.action_delete_all_notifications) { ... }
-        return super.onOptionsItemSelected(item);
-    }
-    */
 }

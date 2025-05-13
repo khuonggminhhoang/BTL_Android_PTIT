@@ -1,5 +1,4 @@
-package com.example.foodorderapp.features.main.ui.adapter; // Tạo package này nếu chưa có
-
+package com.example.foodorderapp.features.main.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -13,7 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.foodorderapp.R; // Đảm bảo import R đúng
+import com.example.foodorderapp.R;
 import com.example.foodorderapp.core.model.Notification;
 import com.example.foodorderapp.core.model.Application;
 import com.example.foodorderapp.core.model.Job;
@@ -28,6 +27,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     private final Context context;
     private final OnNotificationClickListener listener;
 
+    // Interface xử lý sự kiện click
     public interface OnNotificationClickListener {
         void onNotificationClick(Notification notification, int position);
     }
@@ -51,9 +51,9 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
         holder.tvTitle.setText(notification.getTitle());
         holder.tvMessage.setText(notification.getMessage());
-        holder.tvTimestamp.setText(notification.getCreatedAt()); // TODO: Format timestamp nếu cần
+        holder.tvTimestamp.setText(notification.getCreatedAt());
 
-        // Kiểm tra null an toàn cho application, job, company
+        // Tải logo công ty nếu có
         String logoUrl = null;
         Application application = notification.getApplication();
         if (application != null) {
@@ -67,23 +67,23 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         }
         Glide.with(context)
                 .load(logoUrl)
-                .placeholder(R.mipmap.ic_launcher_round) // Thay placeholder
-                .error(R.drawable.ic_notifications_24) // Icon chuông mặc định
+                .placeholder(R.mipmap.ic_launcher_round)
+                .error(R.drawable.ic_notifications_24)
                 .circleCrop()
                 .into(holder.ivIcon);
 
+        // Cập nhật giao diện theo trạng thái đã đọc
         if (notification.isRead()) {
             holder.tvTitle.setTypeface(null, Typeface.NORMAL);
-            // Sử dụng màu đã định nghĩa trong colors.xml
             holder.tvMessage.setTextColor(ContextCompat.getColor(context, R.color.grey_medium));
             holder.unreadIndicator.setVisibility(View.GONE);
         } else {
             holder.tvTitle.setTypeface(null, Typeface.BOLD);
-            // Sử dụng màu đã định nghĩa trong colors.xml
             holder.tvMessage.setTextColor(ContextCompat.getColor(context, R.color.grey_dark));
             holder.unreadIndicator.setVisibility(View.VISIBLE);
         }
 
+        // Xử lý click item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 int currentPosition = holder.getBindingAdapterPosition();
@@ -99,13 +99,13 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         return notifications.size();
     }
 
-    // Cập nhật dữ liệu
+    // Cập nhật danh sách thông báo
     public void updateData(List<Notification> newNotifications) {
         this.notifications = newNotifications != null ? new ArrayList<>(newNotifications) : new ArrayList<>();
-        notifyDataSetChanged(); // Hoặc dùng DiffUtil
+        notifyDataSetChanged();
     }
 
-    // Đánh dấu item đã đọc (chỉ cập nhật UI)
+    // Đánh dấu thông báo đã đọc
     public void markItemAsRead(int position) {
         if (position >= 0 && position < notifications.size()) {
             Notification item = notifications.get(position);
@@ -116,7 +116,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         }
     }
 
-    // ViewHolder
+    // ViewHolder cho item
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivIcon;
         TextView tvTitle;
