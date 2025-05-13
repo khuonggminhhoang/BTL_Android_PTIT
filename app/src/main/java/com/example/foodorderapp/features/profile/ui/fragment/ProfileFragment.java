@@ -229,7 +229,6 @@ public class ProfileFragment extends Fragment {
     private String getPathFromUri(Uri contentUri) {
         String filePath = null;
         if (getContext() == null || contentUri == null) return null;
-        // Thử cách lấy đường dẫn chuẩn hơn
         String[] projection = {MediaStore.Images.Media.DATA};
         Cursor cursor = null;
         try {
@@ -240,7 +239,6 @@ public class ProfileFragment extends Fragment {
             }
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Error getting path from URI (IllegalArgumentException): " + contentUri.toString(), e);
-            // Thử một cách khác nếu cách trên thất bại (ví dụ cho một số URI đặc biệt)
             if ("file".equalsIgnoreCase(contentUri.getScheme())) {
                 filePath = contentUri.getPath();
             }
@@ -265,7 +263,6 @@ public class ProfileFragment extends Fragment {
         String filePath = getPathFromUri(imageUri);
         if (filePath == null) {
             Toast.makeText(getContext(), "Không thể lấy đường dẫn tệp ảnh.", Toast.LENGTH_SHORT).show();
-            // Khôi phục avatar cũ nếu có
             if (currentUser != null) loadAvatarIntoView(currentUser.getAvatar());
             return;
         }
@@ -283,7 +280,6 @@ public class ProfileFragment extends Fragment {
 
         String mimeType = requireContext().getContentResolver().getType(imageUri);
         if (mimeType == null) {
-            // Đoán mime type từ phần mở rộng file nếu không lấy được từ ContentResolver
             String extension = filePath.substring(filePath.lastIndexOf(".") + 1).toLowerCase();
             if (extension.equals("jpg") || extension.equals("jpeg")) {
                 mimeType = "image/jpeg";
@@ -300,20 +296,7 @@ public class ProfileFragment extends Fragment {
         MultipartBody.Part body = MultipartBody.Part.createFormData("photoFile", file.getName(), requestFile);
 
         Map<String, RequestBody> fields = new HashMap<>();
-        // Nếu API yêu cầu gửi các trường khác ngay cả khi chỉ upload avatar,
-        // bạn cần điền chúng vào đây từ currentUser.
-        // Ví dụ, nếu API yêu cầu 'name' phải có:
-        // if (currentUser != null && currentUser.getName() != null) {
-        //     fields.put("name", RequestBody.create(MediaType.parse("text/plain"), currentUser.getName()));
-        // } else {
-        //     // Xử lý trường hợp currentUser hoặc name là null nếu 'name' là bắt buộc
-        //     Toast.makeText(getContext(), "Thiếu thông tin tên người dùng.", Toast.LENGTH_SHORT).show();
-        //     showLoading(false);
-        //     ivCameraIcon.setEnabled(true);
-        //     if (currentUser != null) loadAvatarIntoView(currentUser.getAvatar());
-        //     return;
-        // }
-        // Hiện tại, giả sử API chấp nhận chỉ gửi photoFile khi các trường khác không thay đổi.
+
 
         Log.d(TAG, "Uploading avatar: " + file.getName() + " with MIME type: " + mimeType);
         apiService.updateMyProfile("Bearer " + currentAccessToken, fields, body)
@@ -367,7 +350,6 @@ public class ProfileFragment extends Fragment {
 
 
     private void setHeadlineEditState(boolean editing) {
-        // ... (giữ nguyên)
         isHeadlineEditing = editing;
         etProfileHeadline.setEnabled(editing);
         etProfileHeadline.setFocusable(editing);
@@ -394,7 +376,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void saveHeadlineChanges() {
-        // ... (giữ nguyên)
         String newHeadline = etProfileHeadline.getText().toString().trim();
 
         if (currentUser != null && currentUser.getHeadline() != null && currentUser.getHeadline().equals(newHeadline)) {
@@ -447,7 +428,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void showLoading(boolean isLoading) {
-        // ... (giữ nguyên)
         if (progressBarProfile != null) {
             progressBarProfile.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
@@ -457,11 +437,9 @@ public class ProfileFragment extends Fragment {
         if (ivAvatar != null) ivAvatar.setVisibility(dataVisibility);
         if (ivEditProfileHeadline != null) ivEditProfileHeadline.setVisibility(dataVisibility);
         if (tilProfileHeadline != null) tilProfileHeadline.setVisibility(dataVisibility);
-        // Giữ ivCameraIcon luôn hiển thị trừ khi đang upload, được xử lý riêng trong uploadAvatar
     }
 
     private void fetchUserProfile() {
-        // ... (giữ nguyên)
         if (getContext() == null || currentAccessToken == null) {
             return;
         }
@@ -506,7 +484,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void handleApiError(Response<?> response, SharedPreferences prefs) {
-        // ... (giữ nguyên)
         if (response.code() == 401) {
             Toast.makeText(getContext(), "Session expired. Please log in again.", Toast.LENGTH_LONG).show();
             if (prefs != null) {
@@ -529,7 +506,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void updateUIWithUserData(User user) {
-        // ... (phần tvName, etProfileHeadline, stats giữ nguyên) ...
         if (user == null || getContext() == null) {
             Log.w(TAG, "Attempted to update UI with null user or null context.");
             return;
@@ -576,7 +552,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void navigateToLogin() {
-        // ... (giữ nguyên)
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

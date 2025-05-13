@@ -11,7 +11,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock; // Thêm để đo thời gian
+import android.os.SystemClock;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
@@ -52,9 +52,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient; // Thêm
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import okhttp3.logging.HttpLoggingInterceptor; // Thêm
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,10 +67,8 @@ public class PersonalDataActivity extends AppCompatActivity {
 
     private ImageView ivBack, ivAvatar;
     private TextView tvTitle, tvSave;
-    private EditText etFullName, etEmail, etLocation, etDay, etMonth, etYear;
-    private EditText etPhoneNumber;
+    private EditText etFullName, etEmail, etLocation, etDay, etMonth, etYear, etPhoneNumber;
     private ProgressBar progressBarPersonalData;
-
     private NestedScrollView scrollViewPersonalDataContent;
     private LinearLayout layoutErrorRetryPersonalData;
     private TextView tvErrorMessagePersonalData;
@@ -79,35 +77,33 @@ public class PersonalDataActivity extends AppCompatActivity {
     private ApiService apiService;
     private User currentUser;
 
-    // Định dạng ngày tháng thống nhất
     private final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    private final SimpleDateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US); // Chỉ ngày, tháng, năm cho API
+    private final SimpleDateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private final SimpleDateFormat iso8601WithMillisFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
     private final SimpleDateFormat iso8601WithoutMillisFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal_data);
 
-        // Thiết lập TimeZone cho các định dạng ISO
+        // Cài đặt TimeZone cho định dạng ISO
         iso8601WithMillisFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         iso8601WithoutMillisFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-
+        // Khởi tạo giao diện và API
         initViews();
         initApiService();
         setupClickListeners();
         fetchCurrentUserData();
     }
 
+    // Khởi tạo view
     private void initViews() {
         ivBack = findViewById(R.id.iv_back);
         tvTitle = findViewById(R.id.tv_title);
         tvSave = findViewById(R.id.tv_save);
         ivAvatar = findViewById(R.id.iv_avatar);
-
         etFullName = findViewById(R.id.et_full_name);
         etEmail = findViewById(R.id.et_email);
         etPhoneNumber = findViewById(R.id.et_phone_number);
@@ -116,92 +112,63 @@ public class PersonalDataActivity extends AppCompatActivity {
         etMonth = findViewById(R.id.et_month);
         etYear = findViewById(R.id.et_year);
         progressBarPersonalData = findViewById(R.id.progressBar_personal_data);
-
         scrollViewPersonalDataContent = findViewById(R.id.scroll_view_personal_data_content);
         layoutErrorRetryPersonalData = findViewById(R.id.layout_error_retry_personal_data);
         tvErrorMessagePersonalData = findViewById(R.id.tv_error_message_personal_data);
         btnRetryPersonalData = findViewById(R.id.btn_retry_personal_data);
     }
 
+    // Khởi tạo dịch vụ API
     private void initApiService() {
         String baseUrl = Config.BE_URL;
         if (baseUrl == null || baseUrl.isEmpty()) {
-            Log.e(TAG, "BE_URL is not configured!");
+            Log.e(TAG, "BE_URL chưa được cấu hình!");
             Toast.makeText(this, "Lỗi cấu hình máy chủ.", Toast.LENGTH_LONG).show();
             return;
         }
-        if (!baseUrl.endsWith("/")) {
-            baseUrl += "/";
-        }
-
-        // Thêm HttpLoggingInterceptor để debug network calls
+        if (!baseUrl.endsWith("/")) baseUrl += "/";
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> Log.d("OkHttp", message));
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
                 .build();
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
-                .client(client) // Sử dụng OkHttpClient đã cấu hình
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiService = retrofit.create(ApiService.class);
     }
 
+    // Cài đặt sự kiện click
     private void setupClickListeners() {
         ivBack.setOnClickListener(v -> finish());
         tvSave.setOnClickListener(v -> {
-            if (validateInputs()) {
-                saveUserData();
-            }
+            if (validateInputs()) saveUserData();
         });
-        ivAvatar.setOnClickListener(v -> {
-            if (currentUser != null && currentUser.getAvatar() != null && !currentUser.getAvatar().isEmpty()) {
-                String avatarUrl = currentUser.getAvatar();
-                if (!avatarUrl.toLowerCase().startsWith("http://") && !avatarUrl.toLowerCase().startsWith("https://")) {
-                    String imageBaseUrl = Config.BE_URL.replace("/api/v1", ""); // Giả sử BE_URL có /api/v1
-                    avatarUrl = imageBaseUrl + (avatarUrl.startsWith("/") ? "" : "/") + avatarUrl;
-                }
-                Log.d(TAG, "Viewing avatar: " + avatarUrl);
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(avatarUrl), "image/*");
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Cần thiết nếu mở từ context không phải Activity
-                    startActivity(intent);
-                } catch (Exception e) {
-                    Log.e(TAG, "Could not open avatar URL", e);
-                    Toast.makeText(PersonalDataActivity.this, "Không thể mở ảnh đại diện.", Toast.LENGTH_LONG).show();
-                }
-            } else {
-                Toast.makeText(PersonalDataActivity.this, "Không có ảnh đại diện để xem.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        ivAvatar.setOnClickListener(v -> viewAvatar());
         View.OnClickListener birthDateClickListener = v -> showDatePickerDialog();
         etDay.setOnClickListener(birthDateClickListener);
         etMonth.setOnClickListener(birthDateClickListener);
         etYear.setOnClickListener(birthDateClickListener);
-
-        // Ngăn bàn phím hiện khi click vào EditText ngày tháng
         etDay.setFocusable(false);
         etDay.setFocusableInTouchMode(false);
         etMonth.setFocusable(false);
         etMonth.setFocusableInTouchMode(false);
         etYear.setFocusable(false);
         etYear.setFocusableInTouchMode(false);
-
         btnRetryPersonalData.setOnClickListener(v -> fetchCurrentUserData());
     }
 
+    // Hiển thị trạng thái tải
     private void showLoadingState(boolean show) {
         if (progressBarPersonalData != null) progressBarPersonalData.setVisibility(show ? View.VISIBLE : View.GONE);
         if (scrollViewPersonalDataContent != null) scrollViewPersonalDataContent.setVisibility(show ? View.GONE : View.VISIBLE);
-        if (layoutErrorRetryPersonalData != null) layoutErrorRetryPersonalData.setVisibility(View.GONE); // Luôn ẩn lỗi khi bắt đầu load
-        tvSave.setEnabled(!show); // Vô hiệu hóa nút Save khi đang tải
+        if (layoutErrorRetryPersonalData != null) layoutErrorRetryPersonalData.setVisibility(View.GONE);
+        tvSave.setEnabled(!show);
     }
 
+    // Hiển thị nội dung
     private void showContentState() {
         if (progressBarPersonalData != null) progressBarPersonalData.setVisibility(View.GONE);
         if (scrollViewPersonalDataContent != null) scrollViewPersonalDataContent.setVisibility(View.VISIBLE);
@@ -209,70 +176,50 @@ public class PersonalDataActivity extends AppCompatActivity {
         tvSave.setEnabled(true);
     }
 
+    // Hiển thị trạng thái lỗi
     private void showErrorState(String message) {
         if (progressBarPersonalData != null) progressBarPersonalData.setVisibility(View.GONE);
         if (scrollViewPersonalDataContent != null) scrollViewPersonalDataContent.setVisibility(View.GONE);
         if (layoutErrorRetryPersonalData != null) layoutErrorRetryPersonalData.setVisibility(View.VISIBLE);
         if (tvErrorMessagePersonalData != null) tvErrorMessagePersonalData.setText(message);
-        tvSave.setEnabled(true); // Cho phép thử lưu lại nếu lỗi không phải do xác thực
+        tvSave.setEnabled(true);
     }
 
+    // Tải dữ liệu người dùng
     private void fetchCurrentUserData() {
         if (apiService == null) {
-            showErrorState("Lỗi cấu hình dịch vụ. Vui lòng thử lại sau.");
+            showErrorState("Lỗi cấu hình dịch vụ.");
             return;
         }
         showLoadingState(true);
-        long startTime = SystemClock.elapsedRealtime(); // Đo thời gian bắt đầu
-
+        long startTime = SystemClock.elapsedRealtime();
         SharedPreferences prefs = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
         String accessToken = prefs.getString("accessToken", null);
-
         if (accessToken == null) {
-            showErrorState("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.");
-            btnRetryPersonalData.setEnabled(false); // Không cho retry nếu token mất
+            showErrorState("Phiên làm việc hết hạn. Vui lòng đăng nhập lại.");
+            btnRetryPersonalData.setEnabled(false);
             new android.os.Handler(getMainLooper()).postDelayed(this::navigateToLogin, 2000);
             return;
         }
-        btnRetryPersonalData.setEnabled(true); // Cho phép retry nếu có token
-
-        Log.d(TAG, "API_CALL_START: getMyProfile");
+        btnRetryPersonalData.setEnabled(true);
+        Log.d(TAG, "Bắt đầu gọi API: getMyProfile");
         Call<ProfileApiResponse> call = apiService.getMyProfile("Bearer " + accessToken);
         call.enqueue(new Callback<ProfileApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ProfileApiResponse> call, @NonNull Response<ProfileApiResponse> response) {
                 long endTime = SystemClock.elapsedRealtime();
-                Log.d(TAG, "API_CALL_END: getMyProfile onResponse. Time taken: " + (endTime - startTime) + "ms. Code: " + response.code() + ", isSuccessful: " + response.isSuccessful());
-
-                // Log response thô (đã có interceptor, nhưng log ở đây cũng tốt để đối chiếu)
-                // if (response.body() != null) {
-                //     Log.d(TAG, "GET_Profile_Response_ParsedBody_GSON: " + new Gson().toJson(response.body()));
-                // } else if (response.errorBody() != null) {
-                //     try { Log.e(TAG, "GET_Profile_ErrorBody_String: " + response.errorBody().string()); }
-                //     catch (IOException e) { Log.e(TAG, "Error reading error body", e); }
-                // }
-
+                Log.d(TAG, "Kết thúc gọi API: getMyProfile. Thời gian: " + (endTime - startTime) + "ms. Mã: " + response.code());
                 if (isFinishing() || isDestroyed()) return;
-
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     currentUser = response.body().getData();
                     if (currentUser != null) {
-                        Log.d(TAG, "GET_PROFILE_DATA_PARSED: Name='" + currentUser.getName() +
-                                "', Phone='" + currentUser.getPhoneNumber() + // Đã sửa key
-                                "', Avatar='" + currentUser.getAvatar() +
-                                "', Portfolio='" + currentUser.getResumeUrl() + "'");
                         populateUserData(currentUser);
                         showContentState();
                     } else {
-                        Log.e(TAG, "Fetched user data (from response.body().getData()) is null from GET /profile/me");
-                        showErrorState("Không thể lấy dữ liệu người dùng (dữ liệu rỗng).");
+                        Log.e(TAG, "Dữ liệu người dùng rỗng từ API GET /profile/me");
+                        showErrorState("Không thể lấy dữ liệu người dùng.");
                     }
                 } else {
-                    String logMsg = "GET /profile/me failed or body indicates failure. Code: " + response.code();
-                    if(response.body() != null) {
-                        logMsg += ", BodySuccess: " + response.body().isSuccess() + ", BodyMsg: " + response.body().getMessage();
-                    }
-                    Log.e(TAG, logMsg);
                     handleApiError(response, prefs, "Lỗi khi tải dữ liệu cá nhân.");
                 }
             }
@@ -280,7 +227,7 @@ public class PersonalDataActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<ProfileApiResponse> call, @NonNull Throwable t) {
                 long endTime = SystemClock.elapsedRealtime();
-                Log.e(TAG, "API_CALL_FAILURE: getMyProfile onFailure. Time taken: " + (endTime - startTime) + "ms", t);
+                Log.e(TAG, "Lỗi mạng khi tải dữ liệu. Thời gian: " + (endTime - startTime) + "ms", t);
                 if (!isFinishing() && !isDestroyed()) {
                     showErrorState("Lỗi mạng: " + t.getMessage() + ". Vui lòng thử lại.");
                 }
@@ -288,167 +235,164 @@ public class PersonalDataActivity extends AppCompatActivity {
         });
     }
 
+    // Điền dữ liệu người dùng vào giao diện
     private void populateUserData(User user) {
         if (user == null) {
-            Log.e(TAG, "POPULATE_USER_DATA: User object is null. Cannot populate fields.");
-            showErrorState("Dữ liệu người dùng không hợp lệ để hiển thị.");
+            Log.e(TAG, "Dữ liệu người dùng rỗng.");
+            showErrorState("Dữ liệu người dùng không hợp lệ.");
             return;
         }
         long populateStartTime = SystemClock.elapsedRealtime();
-        Log.d(TAG, "POPULATE_USER_DATA_START: Populating with Name=" + user.getName());
-
+        Log.d(TAG, "Bắt đầu điền dữ liệu: Tên=" + user.getName());
         etFullName.setText(user.getName());
         etEmail.setText(user.getEmail());
-        etEmail.setEnabled(false); // Email thường không cho sửa
-
+        etEmail.setEnabled(false);
         etPhoneNumber.setText(user.getPhoneNumber() != null ? user.getPhoneNumber() : "");
         etLocation.setText(user.getLocation() != null ? user.getLocation() : "");
-
-        // Xử lý ngày sinh
         String dobFromApi = user.getDateOfBirth();
         if (dobFromApi != null && !dobFromApi.isEmpty()) {
-            Log.d(TAG, "Populating DOB from API value: '" + dobFromApi + "'");
             Date parsedDate = parseDateString(dobFromApi);
             if (parsedDate != null) {
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(parsedDate);
                 etDay.setText(String.format(Locale.US, "%02d", cal.get(Calendar.DAY_OF_MONTH)));
-                etMonth.setText(String.format(Locale.US, "%02d", cal.get(Calendar.MONTH) + 1)); // Calendar.MONTH bắt đầu từ 0
+                etMonth.setText(String.format(Locale.US, "%02d", cal.get(Calendar.MONTH) + 1));
                 etYear.setText(String.valueOf(cal.get(Calendar.YEAR)));
             } else {
-                Log.w(TAG, "Failed to parse DOB: '" + dobFromApi + "'. Clearing date fields.");
+                Log.w(TAG, "Không thể phân tích ngày sinh: '" + dobFromApi + "'.");
                 clearDateFields();
             }
         } else {
-            Log.d(TAG, "dateOfBirth from API is null or empty. Clearing date fields.");
             clearDateFields();
         }
-
         loadAvatar(user.getAvatar());
         long populateEndTime = SystemClock.elapsedRealtime();
-        Log.d(TAG, "POPULATE_USER_DATA_END. Time taken: " + (populateEndTime - populateStartTime) + "ms");
+        Log.d(TAG, "Kết thúc điền dữ liệu. Thời gian: " + (populateEndTime - populateStartTime) + "ms");
     }
 
+    // Xóa các trường ngày tháng
     private void clearDateFields() {
         etDay.setText("");
         etMonth.setText("");
         etYear.setText("");
     }
 
+    // Phân tích chuỗi ngày tháng
     private Date parseDateString(String dateString) {
         if (dateString == null || dateString.isEmpty()) return null;
-
-        // Thử định dạng ISO 8601 có milliseconds
-        try { return iso8601WithMillisFormat.parse(dateString); }
-        catch (ParseException e) { /* Thử định dạng tiếp theo */ }
-
-        // Thử định dạng ISO 8601 không có milliseconds
-        try { return iso8601WithoutMillisFormat.parse(dateString); }
-        catch (ParseException e) { /* Thử định dạng tiếp theo */ }
-
-        // Thử định dạng yyyy-MM-dd
-        try { return apiDateFormat.parse(dateString); }
-        catch (ParseException e) { /* Thử định dạng tiếp theo */ }
-
-        // Thử định dạng dd/MM/yyyy (nếu có thể nhập liệu thủ công)
-        try { return displayDateFormat.parse(dateString); }
-        catch (ParseException e) { Log.w(TAG, "Could not parse date string with any known format: " + dateString); }
-
+        try { return iso8601WithMillisFormat.parse(dateString); } catch (ParseException e) {}
+        try { return iso8601WithoutMillisFormat.parse(dateString); } catch (ParseException e) {}
+        try { return apiDateFormat.parse(dateString); } catch (ParseException e) {}
+        try { return displayDateFormat.parse(dateString); } catch (ParseException e) {
+            Log.w(TAG, "Không thể phân tích ngày: " + dateString);
+        }
         return null;
     }
 
-
+    // Tải ảnh đại diện
     private void loadAvatar(String avatarPath) {
         if (ivAvatar == null || isFinishing() || isDestroyed()) return;
-        Log.d(TAG, "loadAvatar called with path: '" + avatarPath + "'");
-
+        Log.d(TAG, "Tải ảnh đại diện: '" + avatarPath + "'");
         String fullAvatarUrl = avatarPath;
         if (avatarPath != null && !avatarPath.isEmpty()) {
             if (!avatarPath.toLowerCase().startsWith("http://") && !avatarPath.toLowerCase().startsWith("https://")) {
-                String imageBaseUrl = Config.BE_URL.replace("/api/v1", ""); // Đảm bảo logic này đúng
+                String imageBaseUrl = Config.BE_URL.replace("/api/v1", "");
                 fullAvatarUrl = imageBaseUrl + (avatarPath.startsWith("/") ? "" : "/") + avatarPath;
             }
         } else {
-            // Nếu path rỗng hoặc null, load placeholder
             Glide.with(this).load(R.drawable.ic_placeholder_avatar).circleCrop().into(ivAvatar);
-            Log.d(TAG, "loadAvatar: Path is null or empty, loading placeholder.");
+            Log.d(TAG, "Không có ảnh đại diện, sử dụng placeholder.");
             return;
         }
-
-        Log.d(TAG, "loadAvatar: Using URL: '" + fullAvatarUrl + "'");
+        Log.d(TAG, "Tải ảnh từ URL: '" + fullAvatarUrl + "'");
         Glide.with(this).load(fullAvatarUrl)
                 .placeholder(R.drawable.ic_placeholder_avatar)
-                .error(R.drawable.ic_placeholder_avatar) // Quan trọng: fallback nếu lỗi
+                .error(R.drawable.ic_placeholder_avatar)
                 .circleCrop()
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        Log.e(TAG, "GLIDE_LOAD_FAILED for model: " + model, e);
-                        return false; // false để Glide xử lý error drawable
+                        Log.e(TAG, "Tải ảnh thất bại: " + model, e);
+                        return false;
                     }
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
-                        Log.d(TAG, "GLIDE_LOAD_SUCCESS for model: " + model);
+                        Log.d(TAG, "Tải ảnh thành công: " + model);
                         return false;
                     }
                 })
                 .into(ivAvatar);
     }
 
+    // Xem ảnh đại diện
+    private void viewAvatar() {
+        if (currentUser != null && currentUser.getAvatar() != null && !currentUser.getAvatar().isEmpty()) {
+            String avatarUrl = currentUser.getAvatar();
+            if (!avatarUrl.toLowerCase().startsWith("http://") && !avatarUrl.toLowerCase().startsWith("https://")) {
+                String imageBaseUrl = Config.BE_URL.replace("/api/v1", "");
+                avatarUrl = imageBaseUrl + (avatarUrl.startsWith("/") ? "" : "/") + avatarUrl;
+            }
+            Log.d(TAG, "Xem ảnh đại diện: " + avatarUrl);
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.parse(avatarUrl), "image/*");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Không thể mở ảnh đại diện", e);
+                Toast.makeText(PersonalDataActivity.this, "Không thể mở ảnh đại diện.", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(PersonalDataActivity.this, "Không có ảnh đại diện.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Xác thực đầu vào
     private boolean validateInputs() {
         if (TextUtils.isEmpty(etFullName.getText().toString().trim())) {
             etFullName.setError("Họ và tên không được để trống");
             etFullName.requestFocus();
             return false;
         }
-        // Thêm các validate khác nếu cần (ví dụ: định dạng số điện thoại)
         return true;
     }
 
+    // Lưu dữ liệu người dùng
     private void saveUserData() {
-        showLoadingState(true); // Hiển thị loading khi bắt đầu lưu
-
+        showLoadingState(true);
         String fullName = etFullName.getText().toString().trim();
         String phoneNumber = etPhoneNumber.getText().toString().trim();
         String location = etLocation.getText().toString().trim();
         String dayStr = etDay.getText().toString().trim();
-        String monthStrInput = etMonth.getText().toString().trim(); // Đã là tháng (1-12)
+        String monthStrInput = etMonth.getText().toString().trim();
         String yearStr = etYear.getText().toString().trim();
         String dateOfBirthForApi = "";
-
-        Log.d(TAG, "SaveUserData: Attempting to save date: Day='" + dayStr + "', MonthInput='" + monthStrInput + "', Year='" + yearStr + "'");
-
+        Log.d(TAG, "Lưu dữ liệu: Ngày='" + dayStr + "', Tháng='" + monthStrInput + "', Năm='" + yearStr + "'");
         if (!dayStr.isEmpty() && !monthStrInput.isEmpty() && !yearStr.isEmpty()) {
             try {
                 int day = Integer.parseInt(dayStr);
-                int month = Integer.parseInt(monthStrInput); // Đã là tháng 1-12
+                int month = Integer.parseInt(monthStrInput);
                 int year = Integer.parseInt(yearStr);
-
-                // Validate ngày tháng năm cơ bản
                 if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900 || year > Calendar.getInstance().get(Calendar.YEAR)) {
                     Toast.makeText(this, "Ngày tháng năm không hợp lệ.", Toast.LENGTH_SHORT).show();
-                    showContentState(); // Trả về trạng thái content
+                    showContentState();
                     return;
                 }
-                // Tạo Calendar để lấy Date object
                 Calendar calendar = Calendar.getInstance();
-                calendar.set(year, month - 1, day, 0,0,0); // Calendar.MONTH là 0-11
+                calendar.set(year, month - 1, day, 0, 0, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
-
                 dateOfBirthForApi = apiDateFormat.format(calendar.getTime());
-                Log.i(TAG, "SaveUserData: Formatted date_of_birth for API: '" + dateOfBirthForApi + "'");
-
+                Log.i(TAG, "Ngày sinh định dạng cho API: '" + dateOfBirthForApi + "'");
             } catch (NumberFormatException e) {
-                Toast.makeText(this, "Ngày, tháng, hoặc năm không đúng định dạng số.", Toast.LENGTH_SHORT).show();
-                showContentState(); return;
+                Toast.makeText(this, "Ngày, tháng, hoặc năm không đúng định dạng.", Toast.LENGTH_SHORT).show();
+                showContentState();
+                return;
             }
         } else if (!dayStr.isEmpty() || !monthStrInput.isEmpty() || !yearStr.isEmpty()) {
-            // Nếu một trong các trường ngày tháng có dữ liệu nhưng không đủ cả 3
-            Toast.makeText(this, "Vui lòng điền đầy đủ ngày, tháng, năm sinh hoặc để trống tất cả.", Toast.LENGTH_LONG).show();
-            showContentState(); return;
+            Toast.makeText(this, "Vui lòng điền đầy đủ ngày, tháng, năm hoặc để trống.", Toast.LENGTH_LONG).show();
+            showContentState();
+            return;
         }
-
-
         SharedPreferences prefs = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
         String accessToken = prefs.getString("accessToken", null);
         if (accessToken == null) {
@@ -457,12 +401,8 @@ public class PersonalDataActivity extends AppCompatActivity {
             navigateToLogin();
             return;
         }
-
         Map<String, RequestBody> fields = new HashMap<>();
         fields.put("name", RequestBody.create(MediaType.parse("text/plain"), fullName));
-
-        // Chỉ gửi các trường nếu chúng có giá trị hoặc API yêu cầu gửi rỗng để xóa
-        // Hiện tại, nếu rỗng thì không gửi, server sẽ giữ giá trị cũ (nếu có) hoặc null
         if (!TextUtils.isEmpty(phoneNumber)) {
             fields.put("phoneNumber", RequestBody.create(MediaType.parse("text/plain"), phoneNumber));
         }
@@ -472,88 +412,71 @@ public class PersonalDataActivity extends AppCompatActivity {
         if (!dateOfBirthForApi.isEmpty()) {
             fields.put("dateOfBirth", RequestBody.create(MediaType.parse("text/plain"), dateOfBirthForApi));
         }
-        // Nếu muốn xóa một trường trên server bằng cách gửi giá trị rỗng, bạn cần đảm bảo API hỗ trợ:
-        // Ví dụ: fields.put("location", RequestBody.create(MediaType.parse("text/plain"), ""));
-
-
-        Log.d(TAG, "SaveUserData: Calling updateMyProfile with fields: " + new Gson().toJson(fields.keySet()));
-        Call<ProfileApiResponse> call = apiService.updateMyProfile("Bearer " + accessToken, fields, null); // Giả sử không cập nhật avatar ở đây
+        Log.d(TAG, "Gọi API updateMyProfile với các trường: " + new Gson().toJson(fields.keySet()));
+        Call<ProfileApiResponse> call = apiService.updateMyProfile("Bearer " + accessToken, fields, null);
         call.enqueue(new Callback<ProfileApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ProfileApiResponse> call, @NonNull Response<ProfileApiResponse> response) {
-                // Không gọi showContentState() ngay, vì có thể là lỗi
-                Log.d(TAG, "SaveUserData_onResponse: Code = " + response.code() + ", isSuccessful = " + response.isSuccessful());
-                // Log chi tiết hơn
-                // if (response.body() != null) Log.d(TAG, "SaveUserData_onResponse: Body as JSON = " + new Gson().toJson(response.body()));
-                // else if (response.errorBody() != null) try { Log.e(TAG, "SaveUserData_onResponse: ErrorBody = " + response.errorBody().string()); } catch (IOException e) { /* ignore */ }
-
+                Log.d(TAG, "Kết quả cập nhật: Mã = " + response.code());
                 if (isFinishing() || isDestroyed()) return;
-
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(PersonalDataActivity.this, "Thông tin cá nhân đã được cập nhật!", Toast.LENGTH_SHORT).show();
                     User updatedUser = response.body().getData();
                     if (updatedUser != null) {
                         currentUser = updatedUser;
-                        Log.d(TAG, "SAVE_SUCCESS_DATA_AFTER_UPDATE: Name=" + currentUser.getName() +
-                                ", Phone=" + currentUser.getPhoneNumber() +
-                                ", Location=" + currentUser.getLocation());
-                        populateUserData(currentUser); // Cập nhật UI với dữ liệu mới nhất từ server
+                        Log.d(TAG, "Cập nhật thành công: Tên=" + currentUser.getName());
+                        populateUserData(currentUser);
                     } else {
-                        Log.d(TAG, "SAVE_SUCCESS_NO_DATA_IN_RESPONSE: response.body().getData() is null. Re-fetching profile.");
-                        fetchCurrentUserData(); // Lấy lại nếu API update không trả data
+                        Log.d(TAG, "Không có dữ liệu trong phản hồi, tải lại dữ liệu.");
+                        fetchCurrentUserData();
                     }
-                    showContentState(); // Hiển thị content sau khi thành công
+                    showContentState();
                     Intent resultIntent = new Intent();
-                    resultIntent.putExtra("profileDataChanged", true); // Báo cho Activity trước đó biết có thay đổi
+                    resultIntent.putExtra("profileDataChanged", true);
                     setResult(Activity.RESULT_OK, resultIntent);
-                    // Không finish() ở đây, để người dùng xem lại thông tin đã cập nhật
-
                 } else {
-                    Log.e(TAG, "API update call HTTP error or body indicates failure.");
+                    Log.e(TAG, "Lỗi cập nhật từ API.");
                     handleApiError(response, prefs, "Lỗi khi cập nhật thông tin.");
-                    // showErrorState đã được gọi trong handleApiError nếu cần
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ProfileApiResponse> call, @NonNull Throwable t) {
                 if (isFinishing() || isDestroyed()) return;
-                Log.e(TAG, "SaveUserData_onFailure: Network failure", t);
+                Log.e(TAG, "Lỗi mạng khi cập nhật", t);
                 showErrorState("Lỗi mạng khi cập nhật: " + t.getMessage());
             }
         });
     }
 
+    // Hiển thị hộp thoại chọn ngày
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
-        // Lấy ngày hiện tại từ EditText nếu có, nếu không dùng ngày hiện tại
         try {
-            if (!etYear.getText().toString().isEmpty() && !etMonth.getText().toString().isEmpty() && !etDay.getText().toString().isEmpty()){
+            if (!etYear.getText().toString().isEmpty() && !etMonth.getText().toString().isEmpty() && !etDay.getText().toString().isEmpty()) {
                 int year = Integer.parseInt(etYear.getText().toString());
-                int month = Integer.parseInt(etMonth.getText().toString()) - 1; // Calendar.MONTH là 0-11
+                int month = Integer.parseInt(etMonth.getText().toString()) - 1;
                 int day = Integer.parseInt(etDay.getText().toString());
                 calendar.set(year, month, day);
             }
         } catch (NumberFormatException e) {
-            Log.w(TAG, "Could not parse date from EditTexts for DatePicker default", e);
-            // Nếu parse lỗi, calendar sẽ giữ ngày hiện tại
+            Log.w(TAG, "Không thể phân tích ngày từ EditText", e);
         }
-
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, yearSelected, monthOfYear, dayOfMonth) -> {
-                    Log.d(TAG, "DatePickerDialog: Day=" + dayOfMonth + ", MonthOfYear=" + monthOfYear + ", Year=" + yearSelected);
+                    Log.d(TAG, "Chọn ngày: Ngày=" + dayOfMonth + ", Tháng=" + monthOfYear + ", Năm=" + yearSelected);
                     etDay.setText(String.format(Locale.US, "%02d", dayOfMonth));
-                    etMonth.setText(String.format(Locale.US, "%02d", monthOfYear + 1)); // Hiển thị tháng 1-12
+                    etMonth.setText(String.format(Locale.US, "%02d", monthOfYear + 1));
                     etYear.setText(String.valueOf(yearSelected));
                 }, year, month, day);
-        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis()); // Không cho chọn ngày tương lai
+        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
         datePickerDialog.show();
     }
 
+    // Điều hướng đến màn hình đăng nhập
     private void navigateToLogin() {
         if (isFinishing() || isDestroyed()) return;
         Intent intent = new Intent(this, LoginActivity.class);
@@ -562,43 +485,39 @@ public class PersonalDataActivity extends AppCompatActivity {
         finish();
     }
 
+    // Xử lý lỗi API
     private void handleApiError(Response<?> response, SharedPreferences prefs, String defaultMessagePrefix) {
         if (isFinishing() || isDestroyed()) return;
-
         String errorMessage = defaultMessagePrefix;
-        if (response.code() == 401) { // Unauthorized
-            showErrorState("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-            btnRetryPersonalData.setEnabled(false); // Không cho retry nếu token hết hạn
+        if (response.code() == 401) {
+            showErrorState("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+            btnRetryPersonalData.setEnabled(false);
             if (prefs != null) {
                 SharedPreferences.Editor editor = prefs.edit();
-                editor.clear().apply(); // Xóa token
+                editor.clear().apply();
             }
             new android.os.Handler(getMainLooper()).postDelayed(this::navigateToLogin, 2000);
-            return; // Không xử lý thêm
+            return;
         } else {
             errorMessage = defaultMessagePrefix + " (Mã lỗi: " + response.code() + ")";
             if (response.errorBody() != null) {
                 try {
-                    String errorBodyStr = response.errorBody().string(); // Đọc errorBody một lần
-                    Log.e(TAG, "Error body string from handleApiError: " + errorBodyStr);
-                    // Cố gắng parse JSON nếu có thể
+                    String errorBodyStr = response.errorBody().string();
+                    Log.e(TAG, "Thông báo lỗi: " + errorBodyStr);
                     if (errorBodyStr.trim().startsWith("{")) {
                         org.json.JSONObject errorJson = new org.json.JSONObject(errorBodyStr);
-                        errorMessage += ": " + errorJson.optString("message", errorJson.optString("error", "Lỗi không xác định từ máy chủ."));
-                    } else if (!errorBodyStr.isEmpty()){
-                        errorMessage += ": " + errorBodyStr; // Hiển thị text nếu không phải JSON
+                        errorMessage += ": " + errorJson.optString("message", errorJson.optString("error", "Lỗi không xác định."));
+                    } else if (!errorBodyStr.isEmpty()) {
+                        errorMessage += ": " + errorBodyStr;
                     }
                 } catch (IOException | org.json.JSONException e) {
-                    Log.e(TAG, "Error parsing error body for API in handleApiError", e);
-                    // errorMessage đã có mã lỗi, không cần thêm gì
+                    Log.e(TAG, "Lỗi phân tích thông báo lỗi", e);
                 }
-            } else if (response.message() != null && !response.message().isEmpty()){
+            } else if (response.message() != null && !response.message().isEmpty()) {
                 errorMessage += ". " + response.message();
             }
         }
-        Log.e(TAG, "API Call Error (handleApiError): " + errorMessage);
-        showErrorState(errorMessage); // Hiển thị lỗi cho người dùng
-        // Không tự động ẩn ProgressBar ở đây, showErrorState sẽ xử lý
+        Log.e(TAG, "Lỗi API: " + errorMessage);
+        showErrorState(errorMessage);
     }
 }
-

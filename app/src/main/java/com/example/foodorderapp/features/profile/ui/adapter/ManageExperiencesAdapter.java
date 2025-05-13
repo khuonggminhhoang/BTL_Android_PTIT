@@ -25,11 +25,11 @@ public class ManageExperiencesAdapter extends RecyclerView.Adapter<ManageExperie
     private Context context;
     private OnExperienceManageClickListener listener;
 
-    // Interface để xử lý các sự kiện click từ Activity
+    // Giao diện xử lý sự kiện click
     public interface OnExperienceManageClickListener {
         void onEditExperienceClicked(Experience experience, int position);
         void onDeleteExperienceClicked(Experience experience, int position);
-        void onItemExperienceClicked(Experience experience, int position); // Để xem mô tả chi tiết
+        void onItemExperienceClicked(Experience experience, int position);
     }
 
     public ManageExperiencesAdapter(Context context, List<Experience> experienceList, OnExperienceManageClickListener listener) {
@@ -41,6 +41,7 @@ public class ManageExperiencesAdapter extends RecyclerView.Adapter<ManageExperie
     @NonNull
     @Override
     public ExperienceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Tạo view cho item kinh nghiệm
         View view = LayoutInflater.from(context).inflate(R.layout.item_experience_manage, parent, false);
         return new ExperienceViewHolder(view);
     }
@@ -48,13 +49,11 @@ public class ManageExperiencesAdapter extends RecyclerView.Adapter<ManageExperie
     @Override
     public void onBindViewHolder(@NonNull ExperienceViewHolder holder, int position) {
         Experience experience = experienceList.get(position);
-        if (experience == null) {
-            return;
-        }
+        if (experience == null) return;
 
+        // Gán dữ liệu cho view
         holder.tvJobTitle.setText(experience.getTitle() != null ? experience.getTitle() : "N/A");
         holder.tvCompanyName.setText(experience.getCompanyName() != null ? experience.getCompanyName() : "N/A");
-
         String startDateFormatted = formatDateString(experience.getStartDate(), "MMM yyyy");
         String endDateFormatted = (experience.getEndDate() != null && !experience.getEndDate().isEmpty()) ?
                 formatDateString(experience.getEndDate(), "MMM yyyy") : "Hiện tại";
@@ -63,37 +62,19 @@ public class ManageExperiencesAdapter extends RecyclerView.Adapter<ManageExperie
         // Hiển thị hoặc ẩn mô tả
         if (experience.getDescription() != null && !experience.getDescription().isEmpty()) {
             holder.tvDescription.setText(experience.getDescription());
-            // Bạn có thể quyết định mặc định là GONE hay VISIBLE
-            // holder.tvDescription.setVisibility(View.VISIBLE);
         } else {
             holder.tvDescription.setVisibility(View.GONE);
         }
 
-        // Gán sự kiện click cho nút sửa
+        // Gán sự kiện click
         holder.ivEdit.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onEditExperienceClicked(experience, holder.getAdapterPosition());
-            }
+            if (listener != null) listener.onEditExperienceClicked(experience, holder.getAdapterPosition());
         });
-
-        // Gán sự kiện click cho nút xóa
         holder.ivDelete.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onDeleteExperienceClicked(experience, holder.getAdapterPosition());
-            }
+            if (listener != null) listener.onDeleteExperienceClicked(experience, holder.getAdapterPosition());
         });
-
-        // Gán sự kiện click cho toàn bộ item (ví dụ để toggle mô tả)
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemExperienceClicked(experience, holder.getAdapterPosition());
-            }
-            // Ví dụ: Toggle visibility của mô tả
-            // if (holder.tvDescription.getVisibility() == View.VISIBLE) {
-            //     holder.tvDescription.setVisibility(View.GONE);
-            // } else {
-            //     holder.tvDescription.setVisibility(View.VISIBLE);
-            // }
+            if (listener != null) listener.onItemExperienceClicked(experience, holder.getAdapterPosition());
         });
     }
 
@@ -102,14 +83,14 @@ public class ManageExperiencesAdapter extends RecyclerView.Adapter<ManageExperie
         return experienceList == null ? 0 : experienceList.size();
     }
 
+    // Cập nhật danh sách kinh nghiệm
     public void updateExperiences(List<Experience> newExperiences) {
         this.experienceList.clear();
-        if (newExperiences != null) {
-            this.experienceList.addAll(newExperiences);
-        }
+        if (newExperiences != null) this.experienceList.addAll(newExperiences);
         notifyDataSetChanged();
     }
 
+    // Xóa item khỏi danh sách
     public void removeItem(int position) {
         if (position >= 0 && position < experienceList.size()) {
             experienceList.remove(position);
@@ -118,7 +99,7 @@ public class ManageExperiencesAdapter extends RecyclerView.Adapter<ManageExperie
         }
     }
 
-
+    // ViewHolder cho item kinh nghiệm
     static class ExperienceViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCompanyIcon, ivEdit, ivDelete;
         TextView tvJobTitle, tvCompanyName, tvDuration, tvDescription;
@@ -135,29 +116,29 @@ public class ManageExperiencesAdapter extends RecyclerView.Adapter<ManageExperie
         }
     }
 
-    // Hàm định dạng ngày (tương tự như trong ResumeMyInfoActivity)
+    // Định dạng chuỗi ngày tháng
     private String formatDateString(String dateString, String outputFormatPattern) {
         if (dateString == null || dateString.isEmpty()) return "N/A";
         try {
             SimpleDateFormat sdfFromApi;
-            if (dateString.contains("T") && dateString.contains("Z")) { // ISO 8601
+            if (dateString.contains("T") && dateString.contains("Z")) {
                 sdfFromApi = new SimpleDateFormat(dateString.contains(".") ? "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" : "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
                 sdfFromApi.setTimeZone(TimeZone.getTimeZone("UTC"));
-            } else if (dateString.matches("\\d{4}-\\d{2}-\\d{2}")) { // yyyy-MM-dd
+            } else if (dateString.matches("\\d{4}-\\d{2}-\\d{2}")) {
                 sdfFromApi = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
             } else {
-                Log.w(TAG, "Unrecognized date format for: " + dateString);
-                return dateString; // Trả về chuỗi gốc nếu không nhận dạng được
+                Log.w(TAG, "Định dạng ngày không nhận diện: " + dateString);
+                return dateString;
             }
             Calendar cal = Calendar.getInstance();
             cal.setTime(sdfFromApi.parse(dateString));
             SimpleDateFormat sdfOutput = new SimpleDateFormat(outputFormatPattern, Locale.getDefault());
             return sdfOutput.format(cal.getTime());
         } catch (ParseException e) {
-            Log.e(TAG, "Error parsing date string: '" + dateString + "'", e);
+            Log.e(TAG, "Lỗi phân tích ngày: '" + dateString + "'", e);
             return dateString;
         } catch (IllegalArgumentException iae) {
-            Log.e(TAG, "Error formatting date string (illegal argument): '" + dateString + "'", iae);
+            Log.e(TAG, "Lỗi định dạng ngày: '" + dateString + "'", iae);
             return dateString;
         }
     }

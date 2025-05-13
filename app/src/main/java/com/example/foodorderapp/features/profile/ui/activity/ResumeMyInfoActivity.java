@@ -420,7 +420,7 @@ public class ResumeMyInfoActivity extends AppCompatActivity {
 
             String mimeType = resolver.getType(pdfUri);
             if (mimeType == null) {
-                mimeType = "application/pdf"; // Fallback MIME type
+                mimeType = "application/pdf";
             }
             requestFile = RequestBody.create(MediaType.parse(mimeType), tempFile);
 
@@ -428,7 +428,7 @@ public class ResumeMyInfoActivity extends AppCompatActivity {
             Log.e(TAG, "Error creating RequestBody from Uri", e);
             Toast.makeText(this, "Lỗi khi đọc tệp PDF.", Toast.LENGTH_SHORT).show();
             showLoading(false);
-            if (tempFile != null && tempFile.exists()) { // Xóa file tạm nếu có lỗi
+            if (tempFile != null && tempFile.exists()) {
                 tempFile.delete();
             }
             return;
@@ -478,7 +478,6 @@ public class ResumeMyInfoActivity extends AppCompatActivity {
                             fetchUserProfileData();
                         }
                     } else {
-                        // Giữ nguyên phần xử lý lỗi đã có trước đó
                         String errorMessage = "Lỗi tải lên CV.";
                         if (response.body() != null && response.body().getMessage() != null && !response.body().getMessage().equals("OK")) { // API có thể trả về message "OK" dù statusCode không phải 2xx
                             errorMessage += " (" + response.body().getMessage() + ")";
@@ -563,13 +562,12 @@ public class ResumeMyInfoActivity extends AppCompatActivity {
                 showLoading(false);
                 Log.d(TAG, "Delete_onResponse: Code = " + response.code() + ", isSuccessful = " + response.isSuccessful());
                 if (!isFinishing()) {
-                    if (response.isSuccessful()) { // Đối với Void, isSuccessful thường là 200, 204
+                    if (response.isSuccessful()) {
                         Toast.makeText(ResumeMyInfoActivity.this, "CV đã được xóa!", Toast.LENGTH_SHORT).show();
                         if (currentUser != null) {
                             currentUser.setResumeUrl(null);
                         }
                         populateCvSection(currentUser); // Cập nhật UI
-                        // fetchUserProfileData(); // Cân nhắc fetch lại toàn bộ profile để đảm bảo đồng bộ
                     } else {
                         try {
                             String errorBody = response.errorBody() != null ? response.errorBody().string() : "Lỗi không xác định";
