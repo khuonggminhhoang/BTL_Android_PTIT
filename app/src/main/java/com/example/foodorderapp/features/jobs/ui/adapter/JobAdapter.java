@@ -1,4 +1,4 @@
-package com.example.foodorderapp.features.jobs.ui.adapter; // Sử dụng package của bạn
+package com.example.foodorderapp.features.jobs.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,23 +14,24 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList; // Thêm import này
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.config.Config;
 import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
 import com.example.foodorderapp.core.model.Job;
 import com.example.foodorderapp.core.model.Company;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
     private Context context;
-    private List<Job> jobList; // Giữ nguyên là ArrayList để dễ dàng thêm/xóa
+    private List<Job> jobList;
     public static final String JOB_DETAIL_KEY = "JOB_DETAIL";
 
     public interface OnJobInteractionListener {
@@ -39,16 +40,15 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
     }
     private OnJobInteractionListener listener;
 
-    // Constructor có thể nhận thêm listener
-    public JobAdapter(Context context, List<Job> jobList) {
-        this(context, jobList, null);
-    }
-
     public JobAdapter(Context context, List<Job> jobList, OnJobInteractionListener listener) {
         this.context = context;
-        // Khởi tạo jobList nếu nó là null để tránh NullPointerException
         this.jobList = (jobList == null) ? new ArrayList<>() : jobList;
         this.listener = listener;
+    }
+
+    // Constructor cũ (nếu vẫn cần thiết ở đâu đó, nhưng nên dùng constructor có listener)
+    public JobAdapter(Context context, List<Job> jobList) {
+        this(context, jobList, null);
     }
 
 
@@ -80,14 +80,22 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         String createdAt = job.getCreatedAt();
         holder.tvPostTime.setText(formatDate(createdAt));
 
-        String logoUrl = company != null ? company.getLogoUrl() : null;
+        String logoUrl = null;
+        if (company != null && company.getLogoUrl() != null && !company.getLogoUrl().isEmpty()) {
+            logoUrl = company.getLogoUrl();
+            if (!logoUrl.toLowerCase().startsWith("http")) {
+                String imageBaseUrl = Config.BE_URL.replace("/api/v1", "");
+                logoUrl = imageBaseUrl + (logoUrl.startsWith("/") ? "" : "/") + logoUrl;
+            }
+        }
+
         Glide.with(context)
-                .load(logoUrl)
-                .placeholder(R.mipmap.ic_launcher) // Ảnh placeholder mặc định
-                .error(R.mipmap.ic_launcher_round) // Ảnh lỗi mặc định
+                .load(logoUrl) // Nếu logoUrl null, Glide sẽ tự xử lý (có thể hiển thị placeholder/error)
+                .placeholder(R.drawable.ic_company_logo_placeholder)
+                .error(R.drawable.ic_company_logo_placeholder)
                 .into(holder.ivCompanyLogo);
 
-        updateFavoriteIcon(holder.ivFavorite, job.isTopJob()); // Giả sử isTopJob là trạng thái yêu thích
+        updateFavoriteIcon(holder.ivFavorite, job.isFavorite());
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -100,15 +108,13 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         });
 
         holder.ivFavorite.setOnClickListener(v -> {
-            boolean isNowFavorite = !job.isTopJob();
-            job.setTopJob(isNowFavorite); // Cập nhật trạng thái trong model
-            updateFavoriteIcon(holder.ivFavorite, isNowFavorite);
-
             if (listener != null) {
+                boolean isNowFavorite = !job.isFavorite();
+                // Không thay đổi job.setFavorite(isNowFavorite) ở đây.
+                // HomeFragment sẽ xử lý việc này sau khi API call thành công.
                 listener.onFavoriteToggle(job, holder.getAdapterPosition(), isNowFavorite);
             } else {
-                // TODO: Xử lý lưu trạng thái yêu thích vào SharedPreferences hoặc Database nếu không dùng listener
-                Toast.makeText(context, isNowFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Favorite listener not set", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -116,41 +122,36 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
     private void updateFavoriteIcon(ImageView imageView, boolean isFavorite) {
         if (isFavorite) {
             imageView.setImageResource(R.drawable.ic_heart_filled_red);
-            imageView.clearColorFilter();
+            imageView.clearColorFilter(); // Xóa tint nếu icon đã có màu đỏ
         } else {
-            imageView.setImageResource(R.drawable.ic_favorite_border);
-            imageView.setColorFilter(ContextCompat.getColor(context, R.color.grey), android.graphics.PorterDuff.Mode.SRC_IN);
+            imageView.setImageResource(R.drawable.ic_favorite_border); // Icon viền
+            imageView.setColorFilter(ContextCompat.getColor(context, R.color.grey), android.graphics.PorterDuff.Mode.SRC_IN); // Màu xám cho viền
         }
     }
 
     private String formatDate(String isoDate) {
         if (isoDate == null) return "N/A";
-        // Thử các định dạng phổ biến mà API có thể trả về
         String[] formats = {
-                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", // ISO 8601 với milliseconds và Z timezone
-                "yyyy-MM-dd'T'HH:mm:ss'Z'",    // ISO 8601 không có milliseconds và Z timezone
-                "yyyy-MM-dd HH:mm:ss",         // Định dạng phổ biến khác
-                "yyyy-MM-dd"                   // Chỉ ngày
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd"
         };
 
         for (String fmt : formats) {
             try {
                 SimpleDateFormat isoFormat = new SimpleDateFormat(fmt, Locale.US);
-                // Quan trọng: Đặt TimeZone là UTC nếu API trả về thời gian UTC (có 'Z')
                 if (fmt.endsWith("'Z'")) {
-                    isoFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                    isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 }
                 Date date = isoFormat.parse(isoDate);
                 if (date != null) {
-                    // Chuyển đổi sang định dạng hiển thị mong muốn (ví dụ: "dd/MM/yyyy" hoặc "MMM dd, yyyy")
                     return new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date);
                 }
             } catch (ParseException ignored) {
-                // Thử định dạng tiếp theo nếu parse lỗi
             }
         }
-        // Nếu không parse được với các định dạng đã biết, trả về chuỗi gốc hoặc một giá trị mặc định
-        return isoDate; // Hoặc "Unknown date"
+        return isoDate;
     }
 
 
@@ -175,12 +176,6 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         }
     }
 
-    // --- CÁC PHƯƠNG THỨC MỚI CHO PHÂN TRANG ---
-
-    /**
-     * Thêm danh sách công việc mới vào cuối danh sách hiện tại.
-     * @param newJobs Danh sách công việc mới cần thêm.
-     */
     public void addJobs(List<Job> newJobs) {
         if (newJobs != null) {
             int startPosition = jobList.size();
@@ -189,9 +184,6 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         }
     }
 
-    /**
-     * Xóa tất cả công việc khỏi danh sách.
-     */
     public void clearJobs() {
         if (jobList != null) {
             jobList.clear();
@@ -199,13 +191,16 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         }
     }
 
-    /**
-     * Cập nhật toàn bộ danh sách công việc.
-     * Dùng khi tải lại dữ liệu từ đầu hoặc áp dụng bộ lọc.
-     * @param newJobList Danh sách công việc mới.
-     */
     public void updateJobList(List<Job> newJobList) {
         this.jobList = (newJobList == null) ? new ArrayList<>() : newJobList;
         notifyDataSetChanged();
+    }
+
+    // Phương thức để cập nhật một item cụ thể (ví dụ sau khi thay đổi trạng thái favorite)
+    public void updateJobItem(int position, Job job) {
+        if (position >= 0 && position < jobList.size()) {
+            jobList.set(position, job);
+            notifyItemChanged(position);
+        }
     }
 }

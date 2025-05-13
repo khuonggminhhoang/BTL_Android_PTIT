@@ -12,7 +12,7 @@ public class Job implements Serializable {
     private String salaryMax;
     private String salaryPeriod;
     private String jobType;
-    private boolean isTopJob;
+    private boolean isTopJob; // Trường này có thể vẫn dùng cho mục đích "top job" từ server
     private String status;
     private String createdAt;
     private String updatedAt;
@@ -22,6 +22,9 @@ public class Job implements Serializable {
     private Company company;
     private JobCategory category;
     private List<User> users;
+
+    // Trường mới để quản lý trạng thái yêu thích ở client
+    private transient boolean isFavorite = false;
 
     public Job() {}
 
@@ -82,4 +85,8 @@ public class Job implements Serializable {
     public void setCategory(JobCategory category) { this.category = category; }
     public List<User> getUsers() { return users; }
     public void setUsers(List<User> users) { this.users = users; }
+
+    // Getters and Setters for isFavorite
+    public boolean isFavorite() { return isFavorite; }
+    public void setFavorite(boolean favorite) { isFavorite = favorite; }
 }

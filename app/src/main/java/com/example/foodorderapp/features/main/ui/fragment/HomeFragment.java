@@ -21,17 +21,24 @@ import android.widget.Toast;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.config.Config;
 import com.example.foodorderapp.core.model.JobCategory;
+import com.example.foodorderapp.features.auth.ui.activity.LoginActivity;
+import com.example.foodorderapp.features.jobs.ui.activity.JobDetailActivity;
 import com.example.foodorderapp.features.jobs.ui.activity.SearchActivity;
 import com.example.foodorderapp.features.jobs.ui.adapter.CategoryAdapter;
 import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
 import com.example.foodorderapp.core.model.Job;
+import com.example.foodorderapp.core.model.User;
 import com.example.foodorderapp.network.ApiService;
+import com.example.foodorderapp.network.request.SaveJobDto;
 import com.example.foodorderapp.network.response.JobCategoryResponse;
 import com.example.foodorderapp.network.response.PaginatedJobResponse;
+import com.example.foodorderapp.network.response.SavedJobsApiResponse; // Thêm import này
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,46 +46,49 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements JobAdapter.OnJobInteractionListener {
 
-    private static final String TAG = "HomeFragment"; // Tag để logging
+    private static final String TAG = "HomeFragment";
 
-    // Views
-    private RecyclerView rvCategories; // RecyclerView cho danh mục
-    private RecyclerView rvJobs; // RecyclerView cho công việc
-    private CategoryAdapter categoryAdapter; // Adapter cho danh mục
-    private JobAdapter jobAdapter; // Adapter cho công việc
-    private List<JobCategory> categoryList; // Danh sách dữ liệu danh mục
-    private List<Job> jobList; // Danh sách dữ liệu công việc
-    private TextView tvHello; // TextView chào mừng
-    private TextView etSearch; // TextView hoạt động như một EditText để tìm kiếm
-    private NestedScrollView nestedScrollView; // Để cuộn nội dung
-    private ProgressBar pbLoadingJobs, pbLoadingMoreJobs, pbLoadingCategories; // ProgressBars cho các trạng thái tải
+    private RecyclerView rvCategories;
+    private RecyclerView rvJobs;
+    private CategoryAdapter categoryAdapter;
+    private JobAdapter jobAdapter;
+    private List<JobCategory> categoryList;
+    private List<Job> jobList;
+    private TextView tvHello;
+    private TextView etSearch;
+    private NestedScrollView nestedScrollView;
+    private ProgressBar pbLoadingJobs, pbLoadingMoreJobs, pbLoadingCategories;
 
-    // API và Pagination
-    private ApiService apiService; // Đối tượng dịch vụ API
-    private boolean isLoadingJobs = false; // Cờ theo dõi trạng thái tải công việc
-    private boolean isLoadingCategories = false; // Cờ theo dõi trạng thái tải danh mục
-    private boolean isLastPage = false; // Cờ cho biết đã đến trang cuối cùng của danh sách công việc chưa
-    private int currentPage = 1; // Trang hiện tại của danh sách công việc
-    private final int PAGE_SIZE = 5; // Số lượng công việc trên mỗi trang
+    private ApiService apiService;
+    private boolean isLoadingJobs = false;
+    private boolean isLoadingCategories = false;
+    private boolean isLastPage = false;
+    private int currentPage = 1;
+    private final int PAGE_SIZE = 5;
+
+    private String currentAccessToken;
+    private Set<Integer> savedJobIds;
 
     public HomeFragment() {
-        // Constructor rỗng là bắt buộc cho Fragment
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initApiService(); // Khởi tạo dịch vụ API
-        jobList = new ArrayList<>(); // Khởi tạo danh sách công việc
-        categoryList = new ArrayList<>(); // Khởi tạo danh sách danh mục
+        initApiService();
+        jobList = new ArrayList<>();
+        categoryList = new ArrayList<>();
+        savedJobIds = new HashSet<>();
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
+        currentAccessToken = prefs.getString("accessToken", null);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate layout cho fragment này
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -86,7 +96,6 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Ánh xạ các view từ layout
         rvCategories = view.findViewById(R.id.rvCategories);
         rvJobs = view.findViewById(R.id.rvJobs);
         tvHello = view.findViewById(R.id.tvHello);
@@ -94,117 +103,167 @@ public class HomeFragment extends Fragment {
         nestedScrollView = view.findViewById(R.id.nestedScrollViewHome);
         pbLoadingJobs = view.findViewById(R.id.pbLoadingJobs);
         pbLoadingMoreJobs = view.findViewById(R.id.pbLoadingMoreJobs);
-        pbLoadingCategories = view.findViewById(R.id.pbLoadingCategories); // Ánh xạ ProgressBar cho danh mục
+        pbLoadingCategories = view.findViewById(R.id.pbLoadingCategories);
 
-        // Thiết lập RecyclerViews
         setupCategoryRecyclerView();
         setupJobRecyclerView();
 
-        // Thiết lập Listeners
         setupSearchListener();
-        setupScrollListener(); // Thiết lập listener cho NestedScrollView để tải thêm khi cuộn xuống cuối
+        setupScrollListener();
 
-        // Tải dữ liệu ban đầu
         loadInitialData();
     }
 
-    // Khởi tạo Retrofit và ApiService
     private void initApiService() {
-        String baseUrl = Config.BE_URL; // Lấy URL cơ sở từ Config
+        String baseUrl = Config.BE_URL;
         if (baseUrl == null || baseUrl.isEmpty()) {
-            Log.e(TAG, "BE_URL is not configured!"); // Ghi log lỗi nếu URL không được cấu hình
+            Log.e(TAG, "BE_URL is not configured!");
             if (getContext() != null) {
                 Toast.makeText(getContext(), "Lỗi cấu hình máy chủ.", Toast.LENGTH_LONG).show();
             }
             return;
         }
-        // Đảm bảo URL kết thúc bằng dấu "/"
         if (!baseUrl.endsWith("/")) {
             baseUrl += "/";
         }
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl) // Đặt URL cơ sở
-                .addConverterFactory(GsonConverterFactory.create()) // Sử dụng Gson để chuyển đổi JSON
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        apiService = retrofit.create(ApiService.class); // Tạo instance của ApiService
+        apiService = retrofit.create(ApiService.class);
     }
 
-    // Thiết lập RecyclerView cho danh mục
     private void setupCategoryRecyclerView() {
         if (getContext() != null) {
             categoryAdapter = new CategoryAdapter(requireContext(), categoryList);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false); // Layout ngang
+            LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
             rvCategories.setLayoutManager(layoutManager);
             rvCategories.setAdapter(categoryAdapter);
-            rvCategories.setHasFixedSize(true); // Tối ưu hóa hiệu suất nếu kích thước item không đổi
+            rvCategories.setHasFixedSize(true);
         }
     }
 
-    // Thiết lập RecyclerView cho công việc
     private void setupJobRecyclerView() {
         if (getContext() != null) {
-            jobAdapter = new JobAdapter(requireContext(), jobList);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false); // Layout dọc
+            jobAdapter = new JobAdapter(requireContext(), jobList, this);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false);
             rvJobs.setLayoutManager(layoutManager);
             rvJobs.setAdapter(jobAdapter);
-            rvJobs.setNestedScrollingEnabled(false); // Vô hiệu hóa cuộn lồng vì đã có NestedScrollView
+            rvJobs.setNestedScrollingEnabled(false);
         }
     }
 
-    // Thiết lập listener cho ô tìm kiếm
     private void setupSearchListener() {
         etSearch.setOnClickListener(v -> {
             if (getActivity() != null) {
-                Intent intent = new Intent(getActivity(), SearchActivity.class); // Chuyển đến SearchActivity
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
                 startActivity(intent);
             }
         });
     }
 
-    // Thiết lập listener cho NestedScrollView để phát hiện khi cuộn đến cuối
     private void setupScrollListener() {
         if (nestedScrollView == null) return;
 
         nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            // Kiểm tra nếu đã cuộn đến cuối cùng của NestedScrollView
             if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
                 Log.d(TAG, "Đã cuộn xuống cuối. Trang hiện tại: " + currentPage + ", Đang tải công việc: " + isLoadingJobs + ", Trang cuối: " + isLastPage);
-                // Nếu không đang tải và chưa phải trang cuối, tải thêm công việc
                 if (!isLoadingJobs && !isLastPage) {
-                    currentPage++; // Tăng số trang hiện tại
-                    loadJobs(currentPage); // Tải công việc cho trang mới
+                    currentPage++;
+                    loadJobs(currentPage);
                 }
             }
         });
     }
 
-    // Tải dữ liệu ban đầu (công việc và danh mục)
     private void loadInitialData() {
-        jobList.clear(); // Xóa danh sách công việc cũ
-        currentPage = 1; // Reset về trang đầu tiên
-        isLastPage = false; // Reset cờ trang cuối
+        jobList.clear();
+        currentPage = 1;
+        isLastPage = false;
         if (jobAdapter != null) {
-            jobAdapter.clearJobs(); // Xóa các mục trong adapter công việc
+            jobAdapter.clearJobs();
         }
-        loadJobs(currentPage); // Tải công việc cho trang đầu tiên
-        loadCategories(); // Tải danh sách danh mục
+
+        if (currentAccessToken != null && !currentAccessToken.isEmpty()) {
+            fetchSavedJobsAndThenLoadPageJobs();
+        } else {
+            Log.w(TAG, "Access token is null. Loading jobs without favorite status.");
+            savedJobIds.clear();
+            loadJobs(currentPage);
+        }
+        loadCategories();
     }
 
-    // Tải danh sách công việc từ API cho một trang cụ thể
+    private void fetchSavedJobsAndThenLoadPageJobs() {
+        if (apiService == null || currentAccessToken == null) {
+            Log.e(TAG, "ApiService or AccessToken is null. Cannot fetch saved jobs.");
+            savedJobIds.clear();
+            loadJobs(currentPage);
+            return;
+        }
+        isLoadingJobs = true;
+        if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.VISIBLE);
+
+
+        Log.d(TAG, "Fetching saved jobs...");
+        Call<SavedJobsApiResponse> callSavedJobs = apiService.getSavedJobs("Bearer " + currentAccessToken); // Thay đổi ở đây
+        callSavedJobs.enqueue(new Callback<SavedJobsApiResponse>() { // Thay đổi ở đây
+            @Override
+            public void onResponse(@NonNull Call<SavedJobsApiResponse> call, @NonNull Response<SavedJobsApiResponse> response) { // Thay đổi ở đây
+                isLoadingJobs = false;
+                if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.GONE);
+
+                if (isAdded() && getContext() != null) {
+                    savedJobIds.clear();
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) { // Kiểm tra isSuccess()
+                        List<Job> fetchedSavedJobs = response.body().getData(); // Lấy data từ SavedJobsApiResponse
+                        if (fetchedSavedJobs != null) {
+                            Log.d(TAG, "Saved jobs fetched successfully: " + fetchedSavedJobs.size() + " items.");
+                            for (Job savedJob : fetchedSavedJobs) {
+                                savedJobIds.add(savedJob.getId());
+                            }
+                        } else {
+                            Log.w(TAG, "Fetched saved jobs list is null from response data.");
+                        }
+                    } else {
+                        Log.e(TAG, "Failed to fetch saved jobs. Code: " + response.code());
+                        if (response.code() == 401) {
+                            Toast.makeText(getContext(), "Phiên đăng nhập hết hạn.", Toast.LENGTH_SHORT).show();
+                            navigateToLogin();
+                        }
+                    }
+                    loadJobs(currentPage);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<SavedJobsApiResponse> call, @NonNull Throwable t) { // Thay đổi ở đây
+                isLoadingJobs = false;
+                if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.GONE);
+                if (isAdded() && getContext() != null) {
+                    Log.e(TAG, "Network error fetching saved jobs: " + t.getMessage(), t);
+                    Toast.makeText(getContext(), "Lỗi mạng khi tải công việc đã lưu.", Toast.LENGTH_SHORT).show();
+                    savedJobIds.clear();
+                    loadJobs(currentPage);
+                }
+            }
+        });
+    }
+
+
     private void loadJobs(int page) {
         if (apiService == null) {
             Log.e(TAG, "ApiService is null. Không thể tải công việc.");
             if(getContext() != null) Toast.makeText(getContext(), "Lỗi kết nối dịch vụ.", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Không tải nếu đang tải hoặc đã ở trang cuối
-        if (isLoadingJobs || isLastPage) {
+        if (isLoadingJobs && page > 1) {
             return;
         }
+        if (isLastPage && page > 1) return;
 
-        isLoadingJobs = true; // Đặt cờ đang tải công việc
-        // Hiển thị ProgressBar tương ứng
+        isLoadingJobs = true;
         if (page == 1) {
             if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.VISIBLE);
             if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.GONE);
@@ -212,54 +271,51 @@ public class HomeFragment extends Fragment {
             if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.VISIBLE);
         }
 
-        // Gọi API để lấy danh sách công việc đã phân trang
         Call<PaginatedJobResponse> call = apiService.getJobsFiltered(
-                page, // pageNumber
-                PAGE_SIZE, // pageSize
-                "-createdAt", // sort
-                null, // jobCategoryId - không lọc theo category ở trang chủ ban đầu
-                null, // location
-                null, // search
-                null, // salaryGte
-                null, // salaryLte
-                null,  // isTopJob
-                null // <<< THÊM searchFields là null
+                page,
+                PAGE_SIZE,
+                "-createdAt",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
         );
 
         call.enqueue(new Callback<PaginatedJobResponse>() {
             @Override
             public void onResponse(@NonNull Call<PaginatedJobResponse> call, @NonNull Response<PaginatedJobResponse> response) {
-                isLoadingJobs = false; // Reset cờ đang tải công việc
-                // Ẩn ProgressBar
+                isLoadingJobs = false;
                 if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.GONE);
                 if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.GONE);
 
-                if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
+                if (isAdded() && getContext() != null) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         PaginatedJobResponse paginatedResponse = response.body();
-                        List<Job> newJobs = paginatedResponse.getData(); // Lấy danh sách công việc từ phản hồi
+                        List<Job> newJobs = paginatedResponse.getData();
 
                         if (newJobs != null && !newJobs.isEmpty()) {
-                            if (jobAdapter != null) jobAdapter.addJobs(newJobs); // Thêm công việc mới vào adapter
+                            for (Job job : newJobs) {
+                                job.setFavorite(savedJobIds.contains(job.getId()));
+                            }
+                            if (jobAdapter != null) jobAdapter.addJobs(newJobs);
                         }
 
-                        // Kiểm tra thông tin phân trang từ meta
                         if (paginatedResponse.getMeta() != null) {
                             Log.d(TAG, "Phản hồi Meta API: Tổng số trang=" + paginatedResponse.getMeta().getTotalPages() + ", Trang hiện tại=" + paginatedResponse.getMeta().getCurrentPage());
-                            // Nếu trang hiện tại lớn hơn hoặc bằng tổng số trang, đặt cờ trang cuối
                             if (paginatedResponse.getMeta().getCurrentPage() >= paginatedResponse.getMeta().getTotalPages()) {
                                 isLastPage = true;
                                 Log.d(TAG, "Đã đến trang cuối.");
                             }
                         } else {
-                            // Nếu không có meta, giả sử là trang cuối nếu không có dữ liệu mới
                             if (newJobs == null || newJobs.isEmpty()) {
                                 isLastPage = true;
                             }
                             Log.w(TAG, "Phản hồi meta từ API là null. Giả sử là trang cuối nếu không có công việc mới.");
                         }
                     } else {
-                        // Xử lý lỗi API
                         String errorBodyString = "";
                         if (response.errorBody() != null) {
                             try {
@@ -270,7 +326,6 @@ public class HomeFragment extends Fragment {
                         }
                         Log.e(TAG, "Lỗi API khi tải công việc: " + response.code() + " - " + response.message() + " | Error Body: " + errorBodyString);
                         Toast.makeText(getContext(), "Không thể tải danh sách công việc. Mã lỗi: " + response.code(), Toast.LENGTH_SHORT).show();
-                        // Nếu lỗi ở trang > 1, có thể giảm currentPage để thử lại sau
                         if (currentPage > 1) {
                             currentPage--;
                         }
@@ -280,14 +335,12 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<PaginatedJobResponse> call, @NonNull Throwable t) {
-                isLoadingJobs = false; // Reset cờ đang tải công việc
-                // Ẩn ProgressBar
+                isLoadingJobs = false;
                 if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.GONE);
                 if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.GONE);
-                if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
+                if (isAdded() && getContext() != null) {
                     Log.e(TAG, "Lỗi mạng khi tải công việc: " + t.getMessage(), t);
                     Toast.makeText(getContext(), "Lỗi mạng khi tải công việc: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    // Nếu lỗi ở trang > 1, có thể giảm currentPage để thử lại sau
                     if (currentPage > 1) {
                         currentPage--;
                     }
@@ -296,43 +349,39 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // --- HÀM MỚI ĐỂ TẢI DANH MỤC ---
     private void loadCategories() {
         if (apiService == null) {
             Log.e(TAG, "ApiService is null. Không thể tải danh mục.");
             if(getContext() != null) Toast.makeText(getContext(), "Lỗi kết nối dịch vụ.", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Không tải nếu đang tải
         if (isLoadingCategories) {
             return;
         }
 
-        isLoadingCategories = true; // Đặt cờ đang tải danh mục
-        if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.VISIBLE); // Hiển thị ProgressBar
+        isLoadingCategories = true;
+        if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.VISIBLE);
 
-        // Gọi API để lấy danh sách danh mục
         Call<JobCategoryResponse> call = apiService.getJobCategories();
         call.enqueue(new Callback<JobCategoryResponse>() {
             @Override
             public void onResponse(@NonNull Call<JobCategoryResponse> call, @NonNull Response<JobCategoryResponse> response) {
-                isLoadingCategories = false; // Reset cờ đang tải danh mục
-                if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.GONE); // Ẩn ProgressBar
+                isLoadingCategories = false;
+                if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.GONE);
 
-                if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
+                if (isAdded() && getContext() != null) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        List<JobCategory> fetchedCategories = response.body().getData(); // Lấy danh sách danh mục từ phản hồi
+                        List<JobCategory> fetchedCategories = response.body().getData();
                         if (fetchedCategories != null) {
                             Log.d(TAG, "Tải danh mục thành công: " + fetchedCategories.size() + " mục");
-                            categoryList.clear(); // Xóa danh sách cũ
-                            categoryList.addAll(fetchedCategories); // Thêm danh mục mới
-                            if (categoryAdapter != null) categoryAdapter.notifyDataSetChanged(); // Cập nhật adapter
+                            categoryList.clear();
+                            categoryList.addAll(fetchedCategories);
+                            if (categoryAdapter != null) categoryAdapter.notifyDataSetChanged();
                         } else {
                             Log.w(TAG, "Danh sách danh mục tải về là null.");
                             Toast.makeText(getContext(), "Không có dữ liệu danh mục.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        // Xử lý lỗi API
                         String errorBodyString = "";
                         if (response.errorBody() != null) {
                             try {
@@ -349,9 +398,9 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<JobCategoryResponse> call, @NonNull Throwable t) {
-                isLoadingCategories = false; // Reset cờ đang tải danh mục
-                if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.GONE); // Ẩn ProgressBar
-                if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
+                isLoadingCategories = false;
+                if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.GONE);
+                if (isAdded() && getContext() != null) {
                     Log.e(TAG, "Lỗi mạng khi tải danh mục: " + t.getMessage(), t);
                     Toast.makeText(getContext(), "Lỗi mạng khi tải danh mục: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -362,9 +411,125 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Cân nhắc việc có nên tải lại dữ liệu khi fragment resume hay không.
-        // Hiện tại, chỉ tải lại khi fragment được tạo lần đầu.
-        // Nếu muốn tải lại mỗi khi quay lại, hãy gọi loadInitialData() ở đây.
-        // loadInitialData();
+        if (currentAccessToken != null && !currentAccessToken.isEmpty()) {
+            fetchSavedJobsAndUpdateVisibleItems();
+        }
+    }
+
+    private void fetchSavedJobsAndUpdateVisibleItems() {
+        if (apiService == null || currentAccessToken == null || jobAdapter == null || jobList.isEmpty()) {
+            return;
+        }
+
+        apiService.getSavedJobs("Bearer " + currentAccessToken).enqueue(new Callback<SavedJobsApiResponse>() { // Thay đổi ở đây
+            @Override
+            public void onResponse(@NonNull Call<SavedJobsApiResponse> call, @NonNull Response<SavedJobsApiResponse> response) { // Thay đổi ở đây
+                if (isAdded() && getContext() != null && response.isSuccessful() && response.body() != null && response.body().isSuccess()) { // Kiểm tra isSuccess()
+                    Set<Integer> newSavedJobIds = new HashSet<>();
+                    List<Job> fetchedSavedJobs = response.body().getData(); // Lấy data từ SavedJobsApiResponse
+                    if (fetchedSavedJobs != null) {
+                        for (Job savedJob : fetchedSavedJobs) {
+                            newSavedJobIds.add(savedJob.getId());
+                        }
+                    }
+
+                    boolean changed = !savedJobIds.equals(newSavedJobIds);
+                    if (changed) {
+                        savedJobIds = newSavedJobIds;
+                        for (int i = 0; i < jobList.size(); i++) {
+                            Job job = jobList.get(i);
+                            boolean oldFavoriteStatus = job.isFavorite();
+                            boolean newFavoriteStatus = savedJobIds.contains(job.getId());
+                            if (oldFavoriteStatus != newFavoriteStatus) {
+                                job.setFavorite(newFavoriteStatus);
+                                jobAdapter.notifyItemChanged(i);
+                            }
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<SavedJobsApiResponse> call, @NonNull Throwable t) { // Thay đổi ở đây
+                Log.e(TAG, "Lỗi khi cập nhật danh sách yêu thích lúc resume: " + t.getMessage());
+            }
+        });
+    }
+
+
+    @Override
+    public void onJobClick(Job job, int position) {
+        if (getContext() != null && job != null) {
+            Intent intent = new Intent(getContext(), JobDetailActivity.class);
+            intent.putExtra(JobAdapter.JOB_DETAIL_KEY, job);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onFavoriteToggle(Job job, int position, boolean isNowFavorite) {
+        if (getContext() == null || job == null || apiService == null) return;
+
+        if (currentAccessToken == null || currentAccessToken.isEmpty()) {
+            Toast.makeText(getContext(), "Vui lòng đăng nhập để sử dụng tính năng này.", Toast.LENGTH_SHORT).show();
+            navigateToLogin();
+            return;
+        }
+
+        if (isNowFavorite) {
+            apiService.saveJob("Bearer " + currentAccessToken, new SaveJobDto(job.getId())).enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                    if (isAdded() && getContext() != null) {
+                        if (response.isSuccessful()) {
+                            job.setFavorite(true);
+                            savedJobIds.add(job.getId());
+                            if (jobAdapter != null) jobAdapter.updateJobItem(position, job);
+                            Toast.makeText(getContext(), "Đã thêm vào yêu thích!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Lỗi khi thêm yêu thích: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } else {
+            apiService.unsaveJob("Bearer " + currentAccessToken, job.getId()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    if (isAdded() && getContext() != null) {
+                        if (response.isSuccessful()) {
+                            job.setFavorite(false);
+                            savedJobIds.remove(job.getId());
+                            if (jobAdapter != null) jobAdapter.updateJobItem(position, job);
+                            Toast.makeText(getContext(), "Đã xóa khỏi yêu thích!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Lỗi khi xóa yêu thích: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+
+    private void navigateToLogin() {
+        if (getActivity() != null) {
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            getActivity().finish();
+        }
     }
 }
