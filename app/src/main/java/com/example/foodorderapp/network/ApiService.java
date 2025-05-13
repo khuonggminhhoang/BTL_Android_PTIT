@@ -6,10 +6,11 @@ import com.example.foodorderapp.network.request.CreateExperienceRequest;
 import com.example.foodorderapp.network.request.CreateSkillRequest;
 import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateSkillRequest;
+import com.example.foodorderapp.network.response.CompaniesApiResponse; // <<< ĐÃ THÊM IMPORT NÀY
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
 import com.example.foodorderapp.network.response.ExperiencesApiResponse;
 import com.example.foodorderapp.network.response.JobCategoryResponse;
-import com.example.foodorderapp.network.response.JobDetailResponse; // Import mới
+import com.example.foodorderapp.network.response.JobDetailResponse;
 import com.example.foodorderapp.network.response.PaginatedJobResponse;
 import com.example.foodorderapp.network.response.ProfileApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
@@ -132,4 +133,8 @@ public interface ApiService {
     // PHƯƠNG THỨC MỚI: Lấy chi tiết một công việc
     @GET("jobs/{id}")
     Call<JobDetailResponse> getJobDetail(@Path("id") int jobId); // Không cần token nếu API public
+
+    // <<< PHƯƠNG THỨC MỚI ĐỂ LẤY TOP COMPANIES >>>
+    @GET("companies/top")
+    Call<CompaniesApiResponse> getTopCompanies();
 }
