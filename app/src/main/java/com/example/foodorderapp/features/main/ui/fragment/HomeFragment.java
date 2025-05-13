@@ -26,7 +26,7 @@ import com.example.foodorderapp.features.jobs.ui.adapter.CategoryAdapter;
 import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
 import com.example.foodorderapp.core.model.Job;
 import com.example.foodorderapp.network.ApiService;
-import com.example.foodorderapp.network.response.JobCategoryResponse; // Import mới
+import com.example.foodorderapp.network.response.JobCategoryResponse;
 import com.example.foodorderapp.network.response.PaginatedJobResponse;
 
 import java.io.IOException;
@@ -206,22 +206,33 @@ public class HomeFragment extends Fragment {
         isLoadingJobs = true; // Đặt cờ đang tải công việc
         // Hiển thị ProgressBar tương ứng
         if (page == 1) {
-            pbLoadingJobs.setVisibility(View.VISIBLE);
-            pbLoadingMoreJobs.setVisibility(View.GONE);
+            if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.VISIBLE);
+            if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.GONE);
         } else {
-            pbLoadingMoreJobs.setVisibility(View.VISIBLE);
+            if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.VISIBLE);
         }
 
         // Gọi API để lấy danh sách công việc đã phân trang
-        Call<PaginatedJobResponse> call = apiService.getJobsPaginated(page, PAGE_SIZE, "-createdAt"); // Sắp xếp theo ngày tạo giảm dần
+        // SỬA ĐỔI Ở ĐÂY: Gọi getJobsFiltered thay vì getJobsPaginated
+        Call<PaginatedJobResponse> call = apiService.getJobsFiltered(
+                page,
+                PAGE_SIZE,
+                "-createdAt", // Sắp xếp theo ngày tạo giảm dần
+                null, // jobCategoryId - không lọc theo category ở trang chủ ban đầu
+                null, // location
+                null, // search
+                null, // salaryGte
+                null, // salaryLte
+                null  // isTopJob
+        );
 
         call.enqueue(new Callback<PaginatedJobResponse>() {
             @Override
             public void onResponse(@NonNull Call<PaginatedJobResponse> call, @NonNull Response<PaginatedJobResponse> response) {
                 isLoadingJobs = false; // Reset cờ đang tải công việc
                 // Ẩn ProgressBar
-                pbLoadingJobs.setVisibility(View.GONE);
-                pbLoadingMoreJobs.setVisibility(View.GONE);
+                if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.GONE);
+                if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.GONE);
 
                 if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
@@ -229,7 +240,7 @@ public class HomeFragment extends Fragment {
                         List<Job> newJobs = paginatedResponse.getData(); // Lấy danh sách công việc từ phản hồi
 
                         if (newJobs != null && !newJobs.isEmpty()) {
-                            jobAdapter.addJobs(newJobs); // Thêm công việc mới vào adapter
+                            if (jobAdapter != null) jobAdapter.addJobs(newJobs); // Thêm công việc mới vào adapter
                         }
 
                         // Kiểm tra thông tin phân trang từ meta
@@ -271,8 +282,8 @@ public class HomeFragment extends Fragment {
             public void onFailure(@NonNull Call<PaginatedJobResponse> call, @NonNull Throwable t) {
                 isLoadingJobs = false; // Reset cờ đang tải công việc
                 // Ẩn ProgressBar
-                pbLoadingJobs.setVisibility(View.GONE);
-                pbLoadingMoreJobs.setVisibility(View.GONE);
+                if (pbLoadingJobs != null) pbLoadingJobs.setVisibility(View.GONE);
+                if (pbLoadingMoreJobs != null) pbLoadingMoreJobs.setVisibility(View.GONE);
                 if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
                     Log.e(TAG, "Lỗi mạng khi tải công việc: " + t.getMessage(), t);
                     Toast.makeText(getContext(), "Lỗi mạng khi tải công việc: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -298,7 +309,7 @@ public class HomeFragment extends Fragment {
         }
 
         isLoadingCategories = true; // Đặt cờ đang tải danh mục
-        pbLoadingCategories.setVisibility(View.VISIBLE); // Hiển thị ProgressBar
+        if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.VISIBLE); // Hiển thị ProgressBar
 
         // Gọi API để lấy danh sách danh mục
         Call<JobCategoryResponse> call = apiService.getJobCategories();
@@ -306,7 +317,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<JobCategoryResponse> call, @NonNull Response<JobCategoryResponse> response) {
                 isLoadingCategories = false; // Reset cờ đang tải danh mục
-                pbLoadingCategories.setVisibility(View.GONE); // Ẩn ProgressBar
+                if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.GONE); // Ẩn ProgressBar
 
                 if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
@@ -315,7 +326,7 @@ public class HomeFragment extends Fragment {
                             Log.d(TAG, "Tải danh mục thành công: " + fetchedCategories.size() + " mục");
                             categoryList.clear(); // Xóa danh sách cũ
                             categoryList.addAll(fetchedCategories); // Thêm danh mục mới
-                            categoryAdapter.notifyDataSetChanged(); // Cập nhật adapter
+                            if (categoryAdapter != null) categoryAdapter.notifyDataSetChanged(); // Cập nhật adapter
                         } else {
                             Log.w(TAG, "Danh sách danh mục tải về là null.");
                             Toast.makeText(getContext(), "Không có dữ liệu danh mục.", Toast.LENGTH_SHORT).show();
@@ -339,7 +350,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<JobCategoryResponse> call, @NonNull Throwable t) {
                 isLoadingCategories = false; // Reset cờ đang tải danh mục
-                pbLoadingCategories.setVisibility(View.GONE); // Ẩn ProgressBar
+                if (pbLoadingCategories != null) pbLoadingCategories.setVisibility(View.GONE); // Ẩn ProgressBar
                 if (isAdded() && getContext() != null) { // Kiểm tra fragment còn được gắn vào Activity
                     Log.e(TAG, "Lỗi mạng khi tải danh mục: " + t.getMessage(), t);
                     Toast.makeText(getContext(), "Lỗi mạng khi tải danh mục: " + t.getMessage(), Toast.LENGTH_SHORT).show();

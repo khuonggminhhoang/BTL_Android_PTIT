@@ -1,25 +1,31 @@
-package com.example.foodorderapp.features.jobs.ui.adapter; // Package của bạn
+package com.example.foodorderapp.features.jobs.ui.adapter;
 
 import android.content.Context;
-import android.content.Intent; // Import Intent
+import android.content.Intent;
+import android.util.Log; // Import Log
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.List;
-import com.example.foodorderapp.R;
-import com.example.foodorderapp.core.model.JobCategory;
-import com.example.foodorderapp.features.jobs.ui.activity.CategoryJobsActivity; // Import Activity mới
 
+import com.bumptech.glide.Glide; // Import Glide
+import com.example.foodorderapp.R;
+import com.example.foodorderapp.config.Config; // Import Config
+import com.example.foodorderapp.core.model.JobCategory;
+import com.example.foodorderapp.features.jobs.ui.activity.CategoryJobsActivity;
+
+import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
     private Context context;
     private List<JobCategory> categoryList;
+    private static final String TAG = "CategoryAdapter"; // Tag for logging
 
     public CategoryAdapter(Context context, List<JobCategory> categoryList) {
         this.context = context;
@@ -39,23 +45,52 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         if (category == null) return;
 
         holder.tvCategoryName.setText(category.getName());
-        holder.ivCategoryIcon.setImageResource(R.drawable.ic_building);
 
-        // --- Sửa đổi sự kiện click ---
+        // Load icon bằng Glide nếu có iconUrl
+        if (category.getIconUrl() != null && !category.getIconUrl().isEmpty()) {
+            String iconUrl = category.getIconUrl();
+            // Kiểm tra xem URL là tương đối hay tuyệt đối
+            if (!iconUrl.toLowerCase().startsWith("http://") && !iconUrl.toLowerCase().startsWith("https://")) {
+                // Nối với base URL của server nếu là đường dẫn tương đối
+                String imageBaseUrl = Config.BE_URL.replace("/api/v1", ""); // Bỏ phần /api/v1
+                if (imageBaseUrl.endsWith("/")) {
+                    imageBaseUrl = imageBaseUrl.substring(0, imageBaseUrl.length() - 1);
+                }
+                if (iconUrl.startsWith("/")) {
+                    iconUrl = iconUrl.substring(1);
+                }
+                iconUrl = imageBaseUrl + "/" + iconUrl;
+                Log.d(TAG, "Constructed icon URL for " + category.getName() + ": " + iconUrl);
+            } else {
+                Log.d(TAG, "Using absolute icon URL for " + category.getName() + ": " + iconUrl);
+            }
+
+            Glide.with(context)
+                    .load(iconUrl)
+                    .placeholder(R.drawable.ic_category_placeholder) // Tạo drawable này hoặc dùng drawable có sẵn
+                    .error(R.drawable.ic_default_category_icon)       // Tạo drawable này hoặc dùng drawable có sẵn
+                    .into(holder.ivCategoryIcon);
+        } else {
+            // Nếu không có iconUrl, set một icon mặc định
+            Log.d(TAG, "iconUrl is null or empty for category: " + category.getName() + ". Setting default icon.");
+            holder.ivCategoryIcon.setImageResource(R.drawable.ic_default_category_icon); // Tạo drawable này
+        }
+
+
         holder.itemView.setOnClickListener(v -> {
-            // Lấy tên danh mục được click
-            String categoryName = category.getName();
+            int categoryId = category.getId();
+            String categoryDisplayName = category.getName();
 
-            // Tạo Intent để mở CategoryJobsActivity
+            if (categoryId <= 0) { // Kiểm tra ID hợp lệ trước khi gửi
+                Toast.makeText(context, "Invalid category ID.", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Attempted to open category with invalid ID: " + categoryId);
+                return;
+            }
+
             Intent intent = new Intent(context, CategoryJobsActivity.class);
-
-            // Đặt tên danh mục vào Intent extra
-            intent.putExtra(CategoryJobsActivity.EXTRA_CATEGORY_NAME, categoryName);
-
-            // Khởi chạy Activity mới
+            intent.putExtra(CategoryJobsActivity.EXTRA_CATEGORY_ID, categoryId);
+            intent.putExtra(CategoryJobsActivity.EXTRA_CATEGORY_DISPLAY_NAME, categoryDisplayName);
             context.startActivity(intent);
-
-            // Toast.makeText(context, "Clicked category: " + categoryName, Toast.LENGTH_SHORT).show(); // Debug
         });
     }
 
@@ -73,5 +108,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);
             tvCategoryName = itemView.findViewById(R.id.tvCategoryName);
         }
+    }
+
+    public void updateData(List<JobCategory> newCategoryList) {
+        this.categoryList = newCategoryList;
+        notifyDataSetChanged();
     }
 }

@@ -6,7 +6,7 @@ import com.example.foodorderapp.network.request.CreateExperienceRequest;
 import com.example.foodorderapp.network.request.CreateSkillRequest;
 import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateSkillRequest;
-import com.example.foodorderapp.network.response.CompaniesApiResponse; // <<< ĐÃ THÊM IMPORT NÀY
+import com.example.foodorderapp.network.response.CompaniesApiResponse;
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
 import com.example.foodorderapp.network.response.ExperiencesApiResponse;
 import com.example.foodorderapp.network.response.JobCategoryResponse;
@@ -118,13 +118,21 @@ public interface ApiService {
     @POST("auth/logout")
     Call<Void> logout(@Header("Authorization") String authToken); // Token xác thực
 
-    // Lấy danh sách công việc có phân trang
+    // Lấy danh sách công việc có phân trang và lọc
     @GET("jobs")
-    Call<PaginatedJobResponse> getJobsPaginated(
-            @Query("pageNumber") int pageNumber,
-            @Query("pageSize") int pageSize,
-            @Query("sort") String sort
+    Call<PaginatedJobResponse> getJobsFiltered(
+            @Query("pageNumber") Integer pageNumber,
+            @Query("pageSize") Integer pageSize,
+            @Query("sort") String sort,
+            @Query("jobCategoryId") Integer jobCategoryId,
+            @Query("location") String location,
+            @Query("search") String search,
+            @Query("salaryGte") Integer salaryGte,
+            @Query("salaryLte") Integer salaryLte,
+            @Query("isTopJob") Boolean isTopJob
+            // Thêm các tham số lọc khác nếu cần
     );
+
 
     // Lấy danh sách tất cả các danh mục công việc
     @GET("job-categories")
@@ -132,9 +140,9 @@ public interface ApiService {
 
     // PHƯƠNG THỨC MỚI: Lấy chi tiết một công việc
     @GET("jobs/{id}")
-    Call<JobDetailResponse> getJobDetail(@Path("id") int jobId); // Không cần token nếu API public
+    Call<JobDetailResponse> getJobDetail(@Path("id") int jobId);
 
-    // <<< PHƯƠNG THỨC MỚI ĐỂ LẤY TOP COMPANIES >>>
+    // Lấy danh sách top các công ty
     @GET("companies/top")
     Call<CompaniesApiResponse> getTopCompanies();
 }
