@@ -31,7 +31,7 @@
     <string name="top_job_in_month_placeholder">Công việc hàng đầu</string>
     <string name="favorites_fragment_placeholder">Màn hình Yêu thích</string>
     <string name="chat_fragment_placeholder">Màn hình Thông báo</string> <string name="profile_fraaceholder">Màn hình Hồ sơ</string> <string name="filter_button_description">Lọc</string>
-    <string name="search_category_hint">Tìm công việc hoặc %1$s...</string>
+    <string name="search_category_hint">Tìm tên công việc yêu thích</string>
     <string name="top_companies_title">Công ty hàng đầu</string>
     <string name="recommended_for_you_title">Đề xuất cho bạn</string>
     <string name="apply_job_title">Ứng Tuyển</string>

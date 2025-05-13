@@ -16,6 +16,7 @@ import com.example.foodorderapp.network.response.ProfileApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
 import com.example.foodorderapp.network.response.SkillsApiResponse;
 
+import java.util.List; // Thêm import này
 import java.util.Map;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -129,8 +130,8 @@ public interface ApiService {
             @Query("search") String search,
             @Query("salaryGte") Integer salaryGte,
             @Query("salaryLte") Integer salaryLte,
-            @Query("isTopJob") Boolean isTopJob
-            // Thêm các tham số lọc khác nếu cần
+            @Query("isTopJob") Boolean isTopJob,
+            @Query("searchFields") List<String> searchFields // <<< THÊM THAM SỐ NÀY
     );
 
 

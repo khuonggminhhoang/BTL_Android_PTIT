@@ -30,6 +30,7 @@ import com.example.foodorderapp.network.response.PaginatedJobResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays; // <<< THÊM IMPORT NÀY
 import java.util.List;
 
 import retrofit2.Call;
@@ -45,23 +46,23 @@ public class CategoryJobsActivity extends AppCompatActivity {
     private static final String TAG = "CategoryJobsActivity";
 
     private TextView tvToolbarTitle;
-    private ImageButton btnBack, btnFilter;
+    private ImageButton btnBack;
+    // private ImageButton btnFilter; // Bỏ btnFilter nếu không dùng
     private EditText etSearchCategory;
     private RecyclerView rvCategoryJobs;
     private JobAdapter jobAdapter;
-    private List<Job> jobListFromApi;
+    // private List<Job> jobListFromApi; // Không cần thiết nếu jobAdapter quản lý list
     private String categoryDisplayName;
     private int categoryId = -1;
 
     private RecyclerView rvTopCompanies;
     private TopCompanyAdapter topCompanyAdapter;
-    private List<Company> topCompanyList;
+    // private List<Company> topCompanyList; // Không cần thiết nếu topCompanyAdapter quản lý list
     private ProgressBar pbLoadingTopCompanies, pbLoadingCategoryJobs;
     private ApiService apiService;
 
     private int currentPage = 1;
-    // SỬA LỖI: Thay đổi PAGE_SIZE thành 5 hoặc giá trị nhỏ hơn theo yêu cầu của API
-    private final int PAGE_SIZE = 5; // Số lượng công việc mỗi lần tải
+    private final int PAGE_SIZE = 5;
     private boolean isLoadingJobs = false;
     private boolean isLastPageJobs = false;
 
@@ -88,6 +89,7 @@ public class CategoryJobsActivity extends AppCompatActivity {
         fetchTopCompanies();
 
         setupJobsRecyclerView();
+        // Tải lần đầu không có searchQuery, chỉ theo categoryId
         fetchJobsForCategory(categoryId, currentPage, null);
 
         setupClickListeners();
@@ -99,6 +101,8 @@ public class CategoryJobsActivity extends AppCompatActivity {
         if (baseUrl == null || baseUrl.isEmpty()) {
             Log.e(TAG, "BE_URL is not configured!");
             Toast.makeText(this, "Lỗi cấu hình máy chủ.", Toast.LENGTH_LONG).show();
+            // Cân nhắc finish() activity nếu không có URL
+            // finish();
             return;
         }
         if (!baseUrl.endsWith("/")) {
@@ -115,7 +119,7 @@ public class CategoryJobsActivity extends AppCompatActivity {
     private void findViews() {
         tvToolbarTitle = findViewById(R.id.toolbar_title_category);
         btnBack = findViewById(R.id.btnBackCategory);
-        btnFilter = findViewById(R.id.btnFilterCategory);
+        // btnFilter = findViewById(R.id.btnFilterCategory); // Bỏ nếu không dùng
         etSearchCategory = findViewById(R.id.etSearchCategory);
         rvCategoryJobs = findViewById(R.id.rvCategoryJobs);
         rvTopCompanies = findViewById(R.id.rvTopCompanies);
@@ -124,8 +128,8 @@ public class CategoryJobsActivity extends AppCompatActivity {
     }
 
     private void setupTopCompaniesRecyclerView() {
-        topCompanyList = new ArrayList<>();
-        topCompanyAdapter = new TopCompanyAdapter(this, topCompanyList);
+        // Khởi tạo list rỗng cho adapter
+        topCompanyAdapter = new TopCompanyAdapter(this, new ArrayList<>());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         rvTopCompanies.setLayoutManager(layoutManager);
         rvTopCompanies.setAdapter(topCompanyAdapter);
@@ -155,6 +159,7 @@ public class CategoryJobsActivity extends AppCompatActivity {
                         topCompanyAdapter.updateData(fetchedCompanies);
                     } else {
                         Log.d(TAG, "No top companies found or data is null.");
+                        // Có thể hiển thị thông báo "Không có công ty hàng đầu" nếu cần
                     }
                 } else {
                     String errorMsg = "Lỗi " + response.code() + ": Không thể tải danh sách công ty hàng đầu.";
@@ -181,11 +186,11 @@ public class CategoryJobsActivity extends AppCompatActivity {
     }
 
     private void setupJobsRecyclerView() {
-        jobListFromApi = new ArrayList<>();
-        jobAdapter = new JobAdapter(this, jobListFromApi);
+        // Khởi tạo list rỗng cho adapter
+        jobAdapter = new JobAdapter(this, new ArrayList<>());
         rvCategoryJobs.setLayoutManager(new LinearLayoutManager(this));
         rvCategoryJobs.setAdapter(jobAdapter);
-        rvCategoryJobs.setNestedScrollingEnabled(false);
+        rvCategoryJobs.setNestedScrollingEnabled(false); // Quan trọng khi RecyclerView nằm trong NestedScrollView
     }
 
     private void fetchJobsForCategory(int categoryIdToFetch, int page, @Nullable String searchQuery) {
@@ -195,29 +200,38 @@ public class CategoryJobsActivity extends AppCompatActivity {
             isLoadingJobs = false;
             return;
         }
-        if (isLoadingJobs) return;
+        if (isLoadingJobs && page > 1) return; // Chỉ cho phép một yêu cầu tải thêm tại một thời điểm
 
         isLoadingJobs = true;
-        if (page == 1 && pbLoadingCategoryJobs != null) {
-            pbLoadingCategoryJobs.setVisibility(View.VISIBLE);
-            if (jobAdapter != null) jobAdapter.clearJobs();
+        if (page == 1) { // Nếu là trang đầu tiên (tải mới hoặc tìm kiếm mới)
+            if (pbLoadingCategoryJobs != null) pbLoadingCategoryJobs.setVisibility(View.VISIBLE);
+            if (jobAdapter != null) jobAdapter.clearJobs(); // Xóa dữ liệu cũ
+            isLastPageJobs = false; // Reset cờ trang cuối
+        } else { // Nếu là tải thêm (load more)
+            // Có thể thêm ProgressBar ở cuối RecyclerView nếu muốn
         }
 
         Integer categoryIdParam = (categoryIdToFetch <= 0) ? null : categoryIdToFetch;
+        List<String> searchFields = null;
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            searchFields = Arrays.asList("title", "description"); // Tìm kiếm trong tiêu đề và mô tả
+        }
+
 
         Call<PaginatedJobResponse> call = apiService.getJobsFiltered(
                 page,
-                PAGE_SIZE, // Giá trị này đã được sửa thành 5
-                "-createdAt",
+                PAGE_SIZE,
+                "-createdAt", // Sắp xếp theo ngày tạo mới nhất
                 categoryIdParam,
-                null,
-                searchQuery,
-                null,
-                null,
-                null
+                null, // location - không lọc theo location ở màn này
+                searchQuery, // Từ khóa tìm kiếm (tên công việc)
+                null, // salaryGte
+                null, // salaryLte
+                null,  // isTopJob
+                searchFields // <<< THÊM searchFields
         );
 
-        Log.d(TAG, "Fetching jobs for category ID: " + categoryIdParam + ", Page: " + page + ", Search: " + (searchQuery != null ? searchQuery : "N/A") + ", PageSize: " + PAGE_SIZE);
+        Log.d(TAG, "Fetching jobs for category ID: " + categoryIdParam + ", Page: " + page + ", Search: " + (searchQuery != null ? searchQuery : "N/A") + ", PageSize: " + PAGE_SIZE + ", SearchFields: " + (searchFields != null ? searchFields.toString() : "N/A"));
 
         call.enqueue(new Callback<PaginatedJobResponse>() {
             @Override
@@ -235,13 +249,17 @@ public class CategoryJobsActivity extends AppCompatActivity {
                             jobAdapter.addJobs(fetchedJobs);
                         }
                         Log.d(TAG, "Jobs fetched for category " + categoryIdParam + ": " + fetchedJobs.size());
-                        isLastPageJobs = (fetchedJobs.size() < PAGE_SIZE);
-                    } else {
-                        if (page == 1) {
-                            jobAdapter.clearJobs();
+                        // Cập nhật isLastPageJobs dựa trên số lượng item trả về
+                        isLastPageJobs = fetchedJobs.size() < PAGE_SIZE;
+                        if (isLastPageJobs && page > 1) {
+                            Toast.makeText(CategoryJobsActivity.this, "Đã tải hết công việc.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else { // Không có công việc nào được tìm thấy
+                        if (page == 1) { // Nếu là trang đầu tiên và không có kết quả
+                            jobAdapter.clearJobs(); // Đảm bảo RecyclerView trống
                             Toast.makeText(CategoryJobsActivity.this, "Không tìm thấy công việc nào.", Toast.LENGTH_SHORT).show();
                         }
-                        isLastPageJobs = true;
+                        isLastPageJobs = true; // Đánh dấu là trang cuối
                         Log.d(TAG, "No jobs found for category " + categoryIdParam + " on page " + page);
                     }
                 } else {
@@ -255,6 +273,7 @@ public class CategoryJobsActivity extends AppCompatActivity {
                     }
                     Toast.makeText(CategoryJobsActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                     Log.e(TAG, "API Error (Jobs for category): " + errorMsg);
+                    if (page > 1) currentPage--; // Giảm trang hiện tại nếu tải thêm thất bại
                 }
             }
 
@@ -265,6 +284,7 @@ public class CategoryJobsActivity extends AppCompatActivity {
                 if (isFinishing() || isDestroyed()) return;
                 Log.e(TAG, "Lỗi mạng khi tải công việc cho danh mục: " + t.getMessage(), t);
                 Toast.makeText(CategoryJobsActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                if (page > 1) currentPage--; // Giảm trang hiện tại nếu tải thêm thất bại
             }
         });
     }
@@ -272,25 +292,31 @@ public class CategoryJobsActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         btnBack.setOnClickListener(v -> finish());
-        btnFilter.setOnClickListener(v -> {
-            Toast.makeText(this, "Chức năng Filter chưa được cài đặt", Toast.LENGTH_SHORT).show();
-        });
+        // btnFilter.setOnClickListener(v -> { // Bỏ nếu không dùng
+        //     Toast.makeText(this, "Chức năng Filter chưa được cài đặt", Toast.LENGTH_SHORT).show();
+        // });
     }
 
     private void setupSearchListener() {
         etSearchCategory.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 String searchQuery = etSearchCategory.getText().toString().trim();
-                currentPage = 1;
-                isLastPageJobs = false;
+                currentPage = 1; // Reset về trang đầu tiên khi tìm kiếm mới
+                // isLastPageJobs đã được reset trong fetchJobsForCategory khi page = 1
                 fetchJobsForCategory(categoryId, currentPage, searchQuery.isEmpty() ? null : searchQuery);
+
+                // Ẩn bàn phím
                 android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 if (imm != null && getCurrentFocus() != null) {
                     imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                 }
+                etSearchCategory.clearFocus(); // Bỏ focus khỏi EditText
                 return true;
             }
             return false;
         });
     }
+
+    // TODO: Cân nhắc thêm logic tải thêm khi cuộn xuống cuối RecyclerView cho rvCategoryJobs
+    // nếu danh sách công việc có thể rất dài.
 }

@@ -213,17 +213,17 @@ public class HomeFragment extends Fragment {
         }
 
         // Gọi API để lấy danh sách công việc đã phân trang
-        // SỬA ĐỔI Ở ĐÂY: Gọi getJobsFiltered thay vì getJobsPaginated
         Call<PaginatedJobResponse> call = apiService.getJobsFiltered(
-                page,
-                PAGE_SIZE,
-                "-createdAt", // Sắp xếp theo ngày tạo giảm dần
+                page, // pageNumber
+                PAGE_SIZE, // pageSize
+                "-createdAt", // sort
                 null, // jobCategoryId - không lọc theo category ở trang chủ ban đầu
                 null, // location
                 null, // search
                 null, // salaryGte
                 null, // salaryLte
-                null  // isTopJob
+                null,  // isTopJob
+                null // <<< THÊM searchFields là null
         );
 
         call.enqueue(new Callback<PaginatedJobResponse>() {
