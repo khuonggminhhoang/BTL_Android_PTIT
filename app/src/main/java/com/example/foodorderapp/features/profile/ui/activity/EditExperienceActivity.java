@@ -24,7 +24,7 @@ import com.example.foodorderapp.R;
 import com.example.foodorderapp.config.Config;
 import com.example.foodorderapp.core.model.Experience;
 import com.example.foodorderapp.network.ApiService;
-import com.example.foodorderapp.network.request.CreateExperienceRequest; // Import mới
+import com.example.foodorderapp.network.request.CreateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
 import com.google.android.material.textfield.TextInputEditText;
@@ -48,7 +48,7 @@ public class EditExperienceActivity extends AppCompatActivity {
 
     private static final String TAG = "EditExperienceActivity";
     public static final String EXTRA_EXPERIENCE_ID = "EXPERIENCE_ID";
-    public static final String EXTRA_USER_ID = "USER_ID_FOR_NEW_EXPERIENCE"; // Extra mới
+    public static final String EXTRA_USER_ID = "USER_ID_FOR_NEW_EXPERIENCE";
 
     private Toolbar toolbarEditExperience;
     private TextInputLayout tilExperienceTitle, tilExperienceCompanyName, tilExperienceStartDate, tilExperienceEndDate, tilExperienceDescription;
@@ -59,9 +59,8 @@ public class EditExperienceActivity extends AppCompatActivity {
 
     private ApiService apiService;
     private String currentAccessToken;
-    // private Experience currentExperience; // Không cần thiết nếu chỉ fetch khi edit
     private int experienceIdToEdit = -1;
-    private int currentUserId = -1; // Lưu userId khi thêm mới
+    private int currentUserId = -1;
     private boolean isEditMode = false;
 
     private SimpleDateFormat viewDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -70,77 +69,70 @@ public class EditExperienceActivity extends AppCompatActivity {
     private Calendar startDateCalendar;
     private Calendar endDateCalendar;
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_experience);
 
+        // Khởi tạo lịch
         startDateCalendar = Calendar.getInstance();
         clearCalendarTime(startDateCalendar);
         endDateCalendar = Calendar.getInstance();
         clearCalendarTime(endDateCalendar);
         apiDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
+        // Khởi tạo giao diện và API
         initViews();
         setupToolbar();
         initApiService();
 
+        // Lấy token xác thực
         SharedPreferences prefs = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
         currentAccessToken = prefs.getString("accessToken", null);
-
         if (currentAccessToken == null) {
-            Toast.makeText(this, "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Phiên làm việc hết hạn. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
 
+        // Xử lý intent
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(EXTRA_EXPERIENCE_ID)) { // Chế độ Sửa
+        if (intent != null && intent.hasExtra(EXTRA_EXPERIENCE_ID)) {
+            isEditMode = true;
             experienceIdToEdit = intent.getIntExtra(EXTRA_EXPERIENCE_ID, -1);
             if (experienceIdToEdit != -1) {
-                isEditMode = true;
                 toolbarEditExperience.setTitle("Chỉnh sửa Kinh nghiệm");
                 btnSaveExperience.setText("Lưu thay đổi");
                 fetchExperienceDetails(experienceIdToEdit);
             } else {
-                Toast.makeText(this, "ID Kinh nghiệm không hợp lệ để sửa.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "ID kinh nghiệm không hợp lệ.", Toast.LENGTH_SHORT).show();
                 finish();
             }
-        } else if (intent != null && intent.hasExtra(EXTRA_USER_ID)) { // Chế độ Thêm mới
+        } else if (intent != null && intent.hasExtra(EXTRA_USER_ID)) {
             isEditMode = false;
             currentUserId = intent.getIntExtra(EXTRA_USER_ID, -1);
             if (currentUserId == -1) {
-                Toast.makeText(this, "ID Người dùng không hợp lệ để thêm kinh nghiệm.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "ID người dùng không hợp lệ.", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
             toolbarEditExperience.setTitle("Thêm Kinh nghiệm mới");
             btnSaveExperience.setText("Thêm Kinh nghiệm");
-            if (cbCurrentJob.isChecked()) {
-                etExperienceEndDate.setText("");
-                etExperienceEndDate.setEnabled(false);
-                tilExperienceEndDate.setEnabled(false);
-            }
+            updateEndDateFieldState();
         } else {
-            Toast.makeText(this, "Không đủ thông tin để thực hiện.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Thiếu thông tin để thực hiện.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Cài đặt sự kiện
         setupDatePickers();
         btnSaveExperience.setOnClickListener(v -> saveOrUpdateExperience());
-        cbCurrentJob.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            etExperienceEndDate.setEnabled(!isChecked);
-            tilExperienceEndDate.setEnabled(!isChecked);
-            if (isChecked) {
-                etExperienceEndDate.setText("");
-            }
-        });
+        cbCurrentJob.setOnCheckedChangeListener((buttonView, isChecked) -> updateEndDateFieldState());
     }
 
+    // Xóa thời gian trong lịch
     private void clearCalendarTime(Calendar cal) {
-        // ... (giữ nguyên)
         if (cal == null) return;
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -148,8 +140,8 @@ public class EditExperienceActivity extends AppCompatActivity {
         cal.set(Calendar.MILLISECOND, 0);
     }
 
+    // Khởi tạo view
     private void initViews() {
-        // ... (giữ nguyên)
         toolbarEditExperience = findViewById(R.id.toolbar_edit_experience);
         tilExperienceTitle = findViewById(R.id.til_experience_title);
         etExperienceTitle = findViewById(R.id.et_experience_title);
@@ -166,8 +158,8 @@ public class EditExperienceActivity extends AppCompatActivity {
         progressBarEditExperience = findViewById(R.id.progressBar_edit_experience);
     }
 
+    // Cài đặt Toolbar
     private void setupToolbar() {
-        // ... (giữ nguyên)
         setSupportActionBar(toolbarEditExperience);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -176,10 +168,10 @@ public class EditExperienceActivity extends AppCompatActivity {
         toolbarEditExperience.setNavigationOnClickListener(v -> finish());
     }
 
+    // Khởi tạo dịch vụ API
     private void initApiService() {
-        // ... (giữ nguyên)
         String baseUrl = Config.BE_URL;
-        if (!baseUrl.endsWith("/")) { baseUrl += "/"; }
+        if (!baseUrl.endsWith("/")) baseUrl += "/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -187,18 +179,16 @@ public class EditExperienceActivity extends AppCompatActivity {
         apiService = retrofit.create(ApiService.class);
     }
 
+    // Cài đặt chọn ngày
     private void setupDatePickers() {
-        // ... (giữ nguyên)
         etExperienceStartDate.setOnClickListener(v -> showDatePickerDialog(true));
         etExperienceEndDate.setOnClickListener(v -> {
-            if (!cbCurrentJob.isChecked()) {
-                showDatePickerDialog(false);
-            }
+            if (!cbCurrentJob.isChecked()) showDatePickerDialog(false);
         });
     }
 
+    // Hiển thị hộp thoại chọn ngày
     private void showDatePickerDialog(final boolean isStartDatePicker) {
-        // ... (giữ nguyên như phiên bản trước)
         Calendar calendarToInitializeDialog = Calendar.getInstance();
 
         if (isStartDatePicker) {
@@ -206,7 +196,9 @@ public class EditExperienceActivity extends AppCompatActivity {
                 try {
                     Date d = viewDateFormat.parse(etExperienceStartDate.getText().toString());
                     if (d != null) calendarToInitializeDialog.setTime(d);
-                } catch (ParseException e) { calendarToInitializeDialog.setTimeInMillis(startDateCalendar.getTimeInMillis()); }
+                } catch (ParseException e) {
+                    calendarToInitializeDialog.setTimeInMillis(startDateCalendar.getTimeInMillis());
+                }
             } else {
                 calendarToInitializeDialog.setTimeInMillis(startDateCalendar.getTimeInMillis());
             }
@@ -215,12 +207,16 @@ public class EditExperienceActivity extends AppCompatActivity {
                 try {
                     Date d = viewDateFormat.parse(etExperienceEndDate.getText().toString());
                     if (d != null) calendarToInitializeDialog.setTime(d);
-                } catch (ParseException e) { calendarToInitializeDialog.setTimeInMillis(endDateCalendar.getTimeInMillis());}
+                } catch (ParseException e) {
+                    calendarToInitializeDialog.setTimeInMillis(endDateCalendar.getTimeInMillis());
+                }
             } else if (!etExperienceStartDate.getText().toString().isEmpty()) {
                 try {
                     Date d = viewDateFormat.parse(etExperienceStartDate.getText().toString());
                     if (d != null) calendarToInitializeDialog.setTime(d);
-                } catch (ParseException e) { calendarToInitializeDialog.setTimeInMillis(endDateCalendar.getTimeInMillis()); }
+                } catch (ParseException e) {
+                    calendarToInitializeDialog.setTimeInMillis(endDateCalendar.getTimeInMillis());
+                }
             } else {
                 calendarToInitializeDialog.setTimeInMillis(endDateCalendar.getTimeInMillis());
             }
@@ -242,7 +238,7 @@ public class EditExperienceActivity extends AppCompatActivity {
                                 Date currentEndDate = viewDateFormat.parse(etExperienceEndDate.getText().toString());
                                 if (currentEndDate != null && currentEndDate.before(selectedDate.getTime())) {
                                     etExperienceEndDate.setText("");
-                                    Toast.makeText(EditExperienceActivity.this, "Ngày kết thúc đã được xóa.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Ngày kết thúc đã được xóa.", Toast.LENGTH_SHORT).show();
                                 }
                             } catch (ParseException e) {/* ignore */}
                         }
@@ -275,8 +271,16 @@ public class EditExperienceActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    // Cập nhật trạng thái trường ngày kết thúc
+    private void updateEndDateFieldState() {
+        boolean isCurrentJob = cbCurrentJob.isChecked();
+        etExperienceEndDate.setEnabled(!isCurrentJob);
+        tilExperienceEndDate.setEnabled(!isCurrentJob);
+        if (isCurrentJob) etExperienceEndDate.setText("");
+    }
+
+    // Hiển thị/ẩn trạng thái tải
     private void showLoading(boolean isLoading) {
-        // ... (giữ nguyên)
         progressBarEditExperience.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         btnSaveExperience.setEnabled(!isLoading);
         etExperienceTitle.setEnabled(!isLoading);
@@ -287,10 +291,10 @@ public class EditExperienceActivity extends AppCompatActivity {
         etExperienceDescription.setEnabled(!isLoading);
     }
 
+    // Tải chi tiết kinh nghiệm
     private void fetchExperienceDetails(int experienceId) {
-        // ... (giữ nguyên)
         showLoading(true);
-        Log.d(TAG, "Fetching details for experience ID: " + experienceId);
+        Log.d(TAG, "Tải chi tiết kinh nghiệm ID: " + experienceId);
         apiService.getExperienceDetail("Bearer " + currentAccessToken, experienceId).enqueue(new Callback<ExperienceDetailApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ExperienceDetailApiResponse> call, @NonNull Response<ExperienceDetailApiResponse> response) {
@@ -304,7 +308,7 @@ public class EditExperienceActivity extends AppCompatActivity {
                             Toast.makeText(EditExperienceActivity.this, "Không tìm thấy chi tiết kinh nghiệm.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(EditExperienceActivity.this, "Lỗi khi tải chi tiết kinh nghiệm. Code: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditExperienceActivity.this, "Lỗi tải chi tiết: " + response.code(), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -319,20 +323,18 @@ public class EditExperienceActivity extends AppCompatActivity {
         });
     }
 
+    // Điền dữ liệu kinh nghiệm vào giao diện
     private void populateExperienceDataToFields(Experience exp) {
-        // ... (giữ nguyên như phiên bản trước, đảm bảo parse ngày đúng)
         etExperienceTitle.setText(exp.getTitle());
         etExperienceCompanyName.setText(exp.getCompanyName());
         etExperienceDescription.setText(exp.getDescription());
 
         SimpleDateFormat sourceDateFormat;
         if (exp.getStartDate() != null && !exp.getStartDate().isEmpty()) {
-            if (exp.getStartDate().contains("T")) {
-                sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            } else {
-                sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            }
+            sourceDateFormat = exp.getStartDate().contains("T") ?
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US) :
+                    new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             try {
                 Date date = sourceDateFormat.parse(exp.getStartDate());
                 if (date != null) {
@@ -341,7 +343,7 @@ public class EditExperienceActivity extends AppCompatActivity {
                     etExperienceStartDate.setText(viewDateFormat.format(date));
                 }
             } catch (ParseException e) {
-                Log.e(TAG, "Error parsing start date from API: " + exp.getStartDate(), e);
+                Log.e(TAG, "Lỗi phân tích ngày bắt đầu: " + exp.getStartDate(), e);
                 etExperienceStartDate.setText(exp.getStartDate());
             }
         } else {
@@ -354,12 +356,10 @@ public class EditExperienceActivity extends AppCompatActivity {
             cbCurrentJob.setChecked(false);
             etExperienceEndDate.setEnabled(true);
             tilExperienceEndDate.setEnabled(true);
-            if (exp.getEndDate().contains("T")) {
-                sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            } else {
-                sourceDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            }
+            sourceDateFormat = exp.getEndDate().contains("T") ?
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US) :
+                    new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            sourceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             try {
                 Date date = sourceDateFormat.parse(exp.getEndDate());
                 if (date != null) {
@@ -368,7 +368,7 @@ public class EditExperienceActivity extends AppCompatActivity {
                     etExperienceEndDate.setText(viewDateFormat.format(date));
                 }
             } catch (ParseException e) {
-                Log.e(TAG, "Error parsing end date from API: " + exp.getEndDate(), e);
+                Log.e(TAG, "Lỗi phân tích ngày kết thúc: " + exp.getEndDate(), e);
                 etExperienceEndDate.setText(exp.getEndDate());
             }
         } else {
@@ -376,15 +376,13 @@ public class EditExperienceActivity extends AppCompatActivity {
             etExperienceEndDate.setText("");
             etExperienceEndDate.setEnabled(false);
             tilExperienceEndDate.setEnabled(false);
-            if (startDateCalendar.getTimeInMillis() != 0 && !etExperienceStartDate.getText().toString().isEmpty()) {
-                endDateCalendar.setTimeInMillis(startDateCalendar.getTimeInMillis());
-            } else {
-                endDateCalendar.setTimeInMillis(System.currentTimeMillis());
-            }
+            endDateCalendar.setTimeInMillis(startDateCalendar.getTimeInMillis() != 0 ?
+                    startDateCalendar.getTimeInMillis() : System.currentTimeMillis());
             clearCalendarTime(endDateCalendar);
         }
     }
 
+    // Lưu hoặc cập nhật kinh nghiệm
     private void saveOrUpdateExperience() {
         String title = etExperienceTitle.getText().toString().trim();
         String companyName = etExperienceCompanyName.getText().toString().trim();
@@ -392,26 +390,38 @@ public class EditExperienceActivity extends AppCompatActivity {
         String endDateStrView = cbCurrentJob.isChecked() ? null : etExperienceEndDate.getText().toString().trim();
         String description = etExperienceDescription.getText().toString().trim();
 
+        // Xác thực đầu vào
         boolean isValid = true;
-        // ... (logic validate giữ nguyên) ...
         if (TextUtils.isEmpty(title)) {
-            tilExperienceTitle.setError("Chức danh không được để trống"); isValid = false;
-        } else { tilExperienceTitle.setError(null); }
+            tilExperienceTitle.setError("Chức danh không được để trống");
+            isValid = false;
+        } else {
+            tilExperienceTitle.setError(null);
+        }
         if (TextUtils.isEmpty(companyName)) {
-            tilExperienceCompanyName.setError("Tên công ty không được để trống"); isValid = false;
-        } else { tilExperienceCompanyName.setError(null); }
+            tilExperienceCompanyName.setError("Tên công ty không được để trống");
+            isValid = false;
+        } else {
+            tilExperienceCompanyName.setError(null);
+        }
         if (TextUtils.isEmpty(startDateStrView)) {
-            tilExperienceStartDate.setError("Ngày bắt đầu không được để trống"); isValid = false;
-        } else { tilExperienceStartDate.setError(null); }
+            tilExperienceStartDate.setError("Ngày bắt đầu không được để trống");
+            isValid = false;
+        } else {
+            tilExperienceStartDate.setError(null);
+        }
         if (!cbCurrentJob.isChecked() && TextUtils.isEmpty(endDateStrView)) {
-            tilExperienceEndDate.setError("Ngày kết thúc không được để trống (hoặc chọn công việc hiện tại)"); isValid = false;
-        } else { tilExperienceEndDate.setError(null); }
+            tilExperienceEndDate.setError("Ngày kết thúc không được để trống");
+            isValid = false;
+        } else {
+            tilExperienceEndDate.setError(null);
+        }
 
         if (!isValid) return;
 
+        // Chuyển đổi định dạng ngày
         String apiStartDate = null;
         String apiEndDate = null;
-
         try {
             if (!startDateStrView.isEmpty()) {
                 Date date = viewDateFormat.parse(startDateStrView);
@@ -422,11 +432,12 @@ public class EditExperienceActivity extends AppCompatActivity {
                 if (date != null) apiEndDate = apiDateFormat.format(date);
             }
         } catch (ParseException e) {
-            Log.e(TAG, "Error parsing dates for API submission", e);
-            Toast.makeText(this, "Định dạng ngày không hợp lệ khi lưu.", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Lỗi phân tích ngày khi lưu", e);
+            Toast.makeText(this, "Định dạng ngày không hợp lệ.", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Kiểm tra ngày kết thúc hợp lệ
         if (apiStartDate != null && apiEndDate != null) {
             try {
                 Date sDate = apiDateFormat.parse(apiStartDate);
@@ -435,20 +446,20 @@ public class EditExperienceActivity extends AppCompatActivity {
                     tilExperienceEndDate.setError("Ngày kết thúc không thể trước ngày bắt đầu");
                     return;
                 }
-            } catch (ParseException e) { /* Should not happen if formatted correctly */ }
+            } catch (ParseException e) { /* Không xảy ra nếu định dạng đúng */ }
         }
 
         showLoading(true);
 
         if (isEditMode && experienceIdToEdit != -1) {
-            // CHẾ ĐỘ SỬA: Gọi API PATCH
+            // Cập nhật kinh nghiệm
             UpdateExperienceRequest updateRequest = new UpdateExperienceRequest(title, companyName, apiStartDate, apiEndDate, description);
-            Log.d(TAG, "Updating experience ID: " + experienceIdToEdit + ", Start: " + apiStartDate + ", End: " + apiEndDate);
+            Log.d(TAG, "Cập nhật kinh nghiệm ID: " + experienceIdToEdit);
             apiService.updateExperience("Bearer " + currentAccessToken, experienceIdToEdit, updateRequest).enqueue(new Callback<ExperienceDetailApiResponse>() {
                 @Override
                 public void onResponse(@NonNull Call<ExperienceDetailApiResponse> call, @NonNull Response<ExperienceDetailApiResponse> response) {
                     showLoading(false);
-                    if(!isFinishing()){
+                    if (!isFinishing()) {
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                             Toast.makeText(EditExperienceActivity.this, "Kinh nghiệm đã được cập nhật!", Toast.LENGTH_SHORT).show();
                             Intent resultIntent = new Intent();
@@ -458,9 +469,11 @@ public class EditExperienceActivity extends AppCompatActivity {
                         } else {
                             try {
                                 String errorBody = response.errorBody() != null ? response.errorBody().string() : "Lỗi không xác định";
-                                Log.e(TAG, "Error updating experience: " + response.code() + " - " + errorBody);
+                                Log.e(TAG, "Lỗi cập nhật kinh nghiệm: " + response.code() + " - " + errorBody);
                                 Toast.makeText(EditExperienceActivity.this, "Lỗi cập nhật: " + response.code(), Toast.LENGTH_SHORT).show();
-                            } catch (IOException e) { Log.e(TAG, "Error reading error body", e); }
+                            } catch (IOException e) {
+                                Log.e(TAG, "Lỗi đọc thông báo lỗi", e);
+                            }
                         }
                     }
                 }
@@ -468,21 +481,21 @@ public class EditExperienceActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Call<ExperienceDetailApiResponse> call, @NonNull Throwable t) {
                     showLoading(false);
-                    if(!isFinishing()){
-                        Log.e(TAG, "Network failure updating experience", t);
+                    if (!isFinishing()) {
+                        Log.e(TAG, "Lỗi mạng khi cập nhật kinh nghiệm", t);
                         Toast.makeText(EditExperienceActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         } else {
-            // CHẾ ĐỘ THÊM MỚI: Gọi API POST
+            // Thêm kinh nghiệm mới
             if (currentUserId == -1) {
-                Toast.makeText(this, "Lỗi: Không có ID người dùng để thêm kinh nghiệm.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Lỗi: Không có ID người dùng.", Toast.LENGTH_LONG).show();
                 showLoading(false);
                 return;
             }
             CreateExperienceRequest createRequest = new CreateExperienceRequest(currentUserId, title, companyName, apiStartDate, apiEndDate, description);
-            Log.d(TAG, "Adding new experience for User ID: " + currentUserId + " - StartDate: " + apiStartDate + ", EndDate: " + apiEndDate);
+            Log.d(TAG, "Thêm kinh nghiệm mới cho User ID: " + currentUserId);
             apiService.createExperience("Bearer " + currentAccessToken, createRequest).enqueue(new Callback<ExperienceDetailApiResponse>() {
                 @Override
                 public void onResponse(@NonNull Call<ExperienceDetailApiResponse> call, @NonNull Response<ExperienceDetailApiResponse> response) {
@@ -497,9 +510,11 @@ public class EditExperienceActivity extends AppCompatActivity {
                         } else {
                             try {
                                 String errorBody = response.errorBody() != null ? response.errorBody().string() : "Lỗi không xác định";
-                                Log.e(TAG, "Error creating experience: " + response.code() + " - " + errorBody);
+                                Log.e(TAG, "Lỗi thêm kinh nghiệm: " + response.code() + " - " + errorBody);
                                 Toast.makeText(EditExperienceActivity.this, "Lỗi thêm mới: " + response.code(), Toast.LENGTH_SHORT).show();
-                            } catch (IOException e) { Log.e(TAG, "Error reading error body", e); }
+                            } catch (IOException e) {
+                                Log.e(TAG, "Lỗi đọc thông báo lỗi", e);
+                            }
                         }
                     }
                 }
@@ -508,7 +523,7 @@ public class EditExperienceActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Call<ExperienceDetailApiResponse> call, @NonNull Throwable t) {
                     showLoading(false);
                     if (!isFinishing()) {
-                        Log.e(TAG, "Network failure creating experience", t);
+                        Log.e(TAG, "Lỗi mạng khi thêm kinh nghiệm", t);
                         Toast.makeText(EditExperienceActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }

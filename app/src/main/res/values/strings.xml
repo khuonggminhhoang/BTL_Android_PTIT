@@ -131,4 +131,5 @@
     <string name="empty_notification_title">Chưa có thông báo</string>
     <string name="empty_notification_subtitle">Bạn sẽ thấy các cập nhật quan trọng tại đây.</string>
     <string name="no_results_found">Không tìm thấy kết quả phù hợp</string>
+
 </resources>

@@ -25,22 +25,19 @@
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@mipmap/ic_launcher"
-        android:contentDescription="@string/content_description_favorite_item_icon"/>
-
-        <TextView
-            android:id="@+id/tv_job_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textAppearance="?attr/textAppearanceSubtitle1"
-            android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/iv_company_logo"
-            app:layout_constraintEnd_toStartOf="@id/iv_favorite_heart"
-            app:layout_constraintTop_toTopOf="@id/iv_company_logo"
-            tools:text="Remote UI/UX Designer" />
+            tools:srcCompat="@drawable/ic_company_logo_placeholder" android:contentDescription="@string/company_logo_content_description"/> <TextView
+        android:id="@+id/tv_job_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintStart_toEndOf="@id/iv_company_logo"
+        app:layout_constraintEnd_toStartOf="@id/iv_favorite_heart"
+        app:layout_constraintTop_toTopOf="@id/iv_company_logo"
+        tools:text="Remote UI/UX Designer" />
 
         <TextView
             android:id="@+id/tv_company_location"
@@ -56,21 +53,18 @@
             app:layout_constraintBottom_toBottomOf="@id/iv_company_logo"
             tools:text="Twitter • Jakarta-Indonesia" />
 
-
         <ImageView
             android:id="@+id/iv_favorite_heart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:minWidth="48dp" android:minHeight="48dp" android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:padding="4dp"
-        app:srcCompat="@drawable/ic_heart_filled_red"
-        android:contentDescription="@string/content_description_unfavorite_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
+            android:padding="12dp" android:scaleType="centerInside" app:srcCompat="@drawable/ic_heart_filled_red"
+            android:contentDescription="@string/content_description_unfavorite_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

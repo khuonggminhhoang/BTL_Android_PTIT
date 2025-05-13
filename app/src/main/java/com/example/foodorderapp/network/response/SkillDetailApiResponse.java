@@ -1,6 +1,6 @@
 package com.example.foodorderapp.network.response;
 
-import com.example.foodorderapp.core.model.Skill; // Đảm bảo import đúng model Skill
+import com.example.foodorderapp.core.model.Skill;
 import com.google.gson.annotations.SerializedName;
 
 public class SkillDetailApiResponse {
@@ -14,14 +14,14 @@ public class SkillDetailApiResponse {
     @SerializedName("message")
     private String message;
 
-    @SerializedName("error") // Thêm trường error nếu API của bạn có trả về
+    @SerializedName("error")
     private String error;
 
     @SerializedName("data")
-    private Skill data; // Dữ liệu là một đối tượng Skill duy nhất
+    private Skill data;
 
-    @SerializedName("meta") // Thêm trường meta nếu API của bạn có trả về
-    private Object meta; // Kiểu Object vì chúng ta không biết rõ cấu trúc của meta, hoặc bạn có thể tạo lớp Meta nếu cần
+    @SerializedName("meta")
+    private Object meta;
 
     // Getters
     public boolean isSuccess() {
@@ -48,7 +48,6 @@ public class SkillDetailApiResponse {
         return meta;
     }
 
-    // Setters (Tùy chọn, thường không cần cho lớp response)
     public void setSuccess(boolean success) {
         this.success = success;
     }

@@ -18,7 +18,7 @@ public class ManageSkillsAdapter extends RecyclerView.Adapter<ManageSkillsAdapte
     private Context context;
     private OnSkillManageClickListener listener;
 
-    // Interface để xử lý các sự kiện click từ Activity
+    // Giao diện xử lý sự kiện click
     public interface OnSkillManageClickListener {
         void onEditSkillClicked(Skill skill, int position);
         void onDeleteSkillClicked(Skill skill, int position);
@@ -33,6 +33,7 @@ public class ManageSkillsAdapter extends RecyclerView.Adapter<ManageSkillsAdapte
     @NonNull
     @Override
     public SkillViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Tạo view cho item kỹ năng
         View view = LayoutInflater.from(context).inflate(R.layout.item_skill_manage, parent, false);
         return new SkillViewHolder(view);
     }
@@ -40,40 +41,38 @@ public class ManageSkillsAdapter extends RecyclerView.Adapter<ManageSkillsAdapte
     @Override
     public void onBindViewHolder(@NonNull SkillViewHolder holder, int position) {
         Skill skill = skillList.get(position);
-        if (skill == null) {
-            return;
-        }
+        if (skill == null) return;
 
+        // Gán dữ liệu cho view
         String skillName = skill.getName() != null ? skill.getName() : "N/A";
         String rawLevel = skill.getLevel();
-        String displayLevel = rawLevel; // Mặc định hiển thị giá trị gốc
-
+        String displayLevel = rawLevel;
         if (rawLevel != null) {
-            if (rawLevel.equalsIgnoreCase("SKILL_LEVEL.BEGINNER")) {
-                displayLevel = "Beginner";
-            } else if (rawLevel.equalsIgnoreCase("SKILL_LEVEL.INTERMEDIATE")) {
-                displayLevel = "Intermediate";
-            } else if (rawLevel.equalsIgnoreCase("SKILL_LEVEL.ADVANCE")) {
-                displayLevel = "Advance";
-            } else if (rawLevel.equalsIgnoreCase("SKILL_LEVEL.EXPERT")) {
-                displayLevel = "Expert";
+            switch (rawLevel.toUpperCase()) {
+                case "SKILL_LEVEL.BEGINNER":
+                    displayLevel = "Beginner";
+                    break;
+                case "SKILL_LEVEL.INTERMEDIATE":
+                    displayLevel = "Intermediate";
+                    break;
+                case "SKILL_LEVEL.ADVANCE":
+                    displayLevel = "Advance";
+                    break;
+                case "SKILL_LEVEL.EXPERT":
+                    displayLevel = "Expert";
+                    break;
             }
         } else {
             displayLevel = "N/A";
         }
-
         holder.tvSkillNameLevel.setText(String.format("%s - %s", skillName, displayLevel));
 
+        // Gán sự kiện click
         holder.ivEdit.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onEditSkillClicked(skill, holder.getAdapterPosition());
-            }
+            if (listener != null) listener.onEditSkillClicked(skill, holder.getAdapterPosition());
         });
-
         holder.ivDelete.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onDeleteSkillClicked(skill, holder.getAdapterPosition());
-            }
+            if (listener != null) listener.onDeleteSkillClicked(skill, holder.getAdapterPosition());
         });
     }
 
@@ -82,14 +81,14 @@ public class ManageSkillsAdapter extends RecyclerView.Adapter<ManageSkillsAdapte
         return skillList == null ? 0 : skillList.size();
     }
 
+    // Cập nhật danh sách kỹ năng
     public void updateSkills(List<Skill> newSkills) {
         this.skillList.clear();
-        if (newSkills != null) {
-            this.skillList.addAll(newSkills);
-        }
+        if (newSkills != null) this.skillList.addAll(newSkills);
         notifyDataSetChanged();
     }
 
+    // Xóa item khỏi danh sách
     public void removeItem(int position) {
         if (position >= 0 && position < skillList.size()) {
             skillList.remove(position);
@@ -98,6 +97,7 @@ public class ManageSkillsAdapter extends RecyclerView.Adapter<ManageSkillsAdapte
         }
     }
 
+    // ViewHolder cho item kỹ năng
     static class SkillViewHolder extends RecyclerView.ViewHolder {
         TextView tvSkillNameLevel;
         ImageView ivEdit, ivDelete;

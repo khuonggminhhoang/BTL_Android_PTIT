@@ -1,4 +1,4 @@
-package com.example.foodorderapp.features.main.ui.activity; // Package của bạn
+package com.example.foodorderapp.features.main.ui.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,15 +7,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
-import android.view.MenuItem; // Import MenuItem
+import android.view.MenuItem;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.features.main.ui.fragment.FavoritesFragment;
 import com.example.foodorderapp.features.main.ui.fragment.HomeFragment;
 import com.example.foodorderapp.features.main.ui.fragment.NotificationFragment;
-import com.example.foodorderapp.features.profile.ui.fragment.ProfileFragment; // Import ProfileFragment
+import com.example.foodorderapp.features.profile.ui.fragment.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView; // Import đúng
+import com.google.android.material.navigation.NavigationBarView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,23 +28,22 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-        // Load Fragment mặc định khi Activity khởi chạy
+        // Khởi tạo HomeFragment mặc định
         if (savedInstanceState == null) {
-            loadFragment(new HomeFragment(), "HOME_FRAGMENT"); // Load HomeFragment ban đầu với tag
+            loadFragment(new HomeFragment(), "HOME_FRAGMENT");
         }
 
-        // Thiết lập Bottom Navigation View để chuyển đổi Fragment
+        // Thiết lập điều hướng BottomNavigationView
         setupBottomNavigation();
     }
 
-    // Thiết lập Bottom Navigation View
+    // Cấu hình BottomNavigationView
     private void setupBottomNavigation() {
-        // Sử dụng setOnItemSelectedListener thay vì setOnNavigationItemSelectedListener
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
-                String tag = null; // Tag để quản lý fragment
+                String tag = null;
                 int itemId = item.getItemId();
 
                 if (itemId == R.id.navigation_home) {
@@ -63,37 +62,29 @@ public class MainActivity extends AppCompatActivity {
 
                 if (selectedFragment != null) {
                     loadFragment(selectedFragment, tag);
-                    return true; // Trả về true để hiển thị item được chọn
+                    return true;
                 }
                 return false;
             }
         });
-
-        // Đặt item mặc định được chọn (nếu cần, nhưng loadFragment ban đầu đã xử lý)
-        // bottomNavigationView.setSelectedItemId(R.id.navigation_home);
     }
 
-    // Phương thức để load (thay thế) Fragment vào container
+    // Thay thế Fragment vào container
     private void loadFragment(Fragment fragment, String tag) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        // Kiểm tra xem fragment đã tồn tại trong back stack chưa
+        // Kiểm tra Fragment đã tồn tại
         Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
 
         if (existingFragment == null) {
-            // Nếu chưa tồn tại, thay thế và thêm vào back stack (tùy chọn)
+            // Thay thế Fragment mới
             fragmentTransaction.replace(R.id.fragment_container, fragment, tag);
-            // fragmentTransaction.addToBackStack(tag); // Bỏ comment nếu muốn dùng nút back để quay lại fragment trước
         } else {
-            // Nếu đã tồn tại, chỉ cần hiển thị nó (nếu đang bị ẩn) hoặc không làm gì nếu nó đang hiển thị
-            // Để đơn giản, ta vẫn dùng replace ở đây. Nếu muốn tối ưu hơn, bạn có thể dùng show/hide.
+            // Sử dụng Fragment hiện có
             fragmentTransaction.replace(R.id.fragment_container, existingFragment, tag);
         }
 
-        // Tối ưu: Chỉ commit nếu có sự thay đổi thực sự (ví dụ: fragment mới hoặc fragment khác được chọn)
-        // if (!fragment.isVisible() || existingFragment == null) {
-        fragmentTransaction.commit(); // Thực hiện thay đổi
-        // }
+        fragmentTransaction.commit();
     }
 }

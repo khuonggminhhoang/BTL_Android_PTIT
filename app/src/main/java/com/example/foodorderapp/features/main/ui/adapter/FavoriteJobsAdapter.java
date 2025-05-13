@@ -1,4 +1,4 @@
-package com.example.foodorderapp.features.main.ui.adapter; // Hoặc package của bạn
+package com.example.foodorderapp.features.main.ui.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,13 +8,12 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-// ... các import khác ...
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide; // <<< THÊM IMPORT GLIDE
+import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
-import com.example.foodorderapp.core.model.Job; // Import model Job đã sửa
+import com.example.foodorderapp.core.model.Job;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
     private final Context context;
     private final OnFavoriteClickListener listener;
 
-    // Interface giữ nguyên
+    // Interface xử lý sự kiện click
     public interface OnFavoriteClickListener {
         void onUnfavoriteClick(Job job, int position);
         void onItemClick(Job job, int position);
@@ -55,15 +54,15 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
         String companyLocation = job.getCompany().getName() + " • " + job.getLocation();
         holder.tvCompanyLocation.setText(companyLocation);
 
-        // --- Load Logo bằng Glide từ URL ---
+        // Tải logo công ty bằng Glide
         Glide.with(context)
-                .load(job.getCompany().getLogoUrl()) // <<< SỬ DỤNG URL
-                .placeholder(R.mipmap.ic_launcher) // Ảnh mặc định khi đang tải
-                .error(R.mipmap.ic_launcher)      // Ảnh mặc định khi lỗi URL hoặc không có mạng
-                .circleCrop() // Tùy chọn: Bo tròn ảnh logo
+                .load(job.getCompany().getLogoUrl())
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .circleCrop()
                 .into(holder.ivCompanyLogo);
 
-        // Xử lý click (giữ nguyên, nhưng giờ có thể dựa vào job.getId() trong listener)
+        // Xử lý click bỏ yêu thích
         holder.ivFavoriteHeart.setOnClickListener(v -> {
             if (listener != null) {
                 int currentPosition = holder.getAdapterPosition();
@@ -73,6 +72,7 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
             }
         });
 
+        // Xử lý click item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 int currentPosition = holder.getAdapterPosition();
@@ -88,25 +88,24 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
         return favoriteJobsFiltered == null ? 0 : favoriteJobsFiltered.size();
     }
 
-    // Hàm cập nhật data (giữ nguyên)
+    // Cập nhật danh sách công việc
     public void updateData(List<Job> newFavoriteJobs) {
         this.favoriteJobs = newFavoriteJobs != null ? new ArrayList<>(newFavoriteJobs) : new ArrayList<>();
         this.favoriteJobsFiltered = new ArrayList<>(this.favoriteJobs);
         notifyDataSetChanged();
     }
 
-    // Hàm xóa item (nên dựa vào ID để xóa khỏi list gốc)
+    // Xóa công việc khỏi danh sách
     public void removeItem(int position) {
         if (position >= 0 && position < favoriteJobsFiltered.size()) {
             Job removedJobFromFiltered = favoriteJobsFiltered.remove(position);
-            // Xóa khỏi list gốc dựa trên equals (đã override bằng ID)
             favoriteJobs.remove(removedJobFromFiltered);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, favoriteJobsFiltered.size());
         }
     }
 
-    // ViewHolder (Kiểm tra lại ID tv_job_title)
+    // ViewHolder cho item
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCompanyLogo;
         TextView tvJobTitle;
@@ -116,19 +115,18 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivCompanyLogo = itemView.findViewById(R.id.iv_company_logo);
-            tvJobTitle = itemView.findViewById(R.id.tv_job_title); // <<< ĐẢM BẢO ID NÀY ĐÚNG
+            tvJobTitle = itemView.findViewById(R.id.tv_job_title);
             tvCompanyLocation = itemView.findViewById(R.id.tv_company_location);
             ivFavoriteHeart = itemView.findViewById(R.id.iv_favorite_heart);
         }
     }
 
-    // Filter (giữ nguyên logic, chỉ cần đảm bảo getter đúng)
+    // Bộ lọc danh sách công việc
     @Override
     public Filter getFilter() {
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                // ... (logic filter giữ nguyên) ...
                 List<Job> filteredList = new ArrayList<>();
                 String filterPattern = constraint == null ? "" : constraint.toString().toLowerCase(Locale.getDefault()).trim();
 

@@ -18,7 +18,7 @@ public class User implements Serializable {
     @SerializedName("username")
     private String username;
 
-    @SerializedName("phone_number")
+    @SerializedName("phoneNumber")
     private String phoneNumber;
 
     @SerializedName("avatar")
@@ -30,39 +30,30 @@ public class User implements Serializable {
     @SerializedName("location")
     private String location;
 
-    // Giả sử API GET /profile/me trả về key "dateOfBirth" (camelCase) cho ngày sinh
-    // Nếu API GET trả về "date_of_birth" (snake_case), hãy sửa lại @SerializedName ở đây
     @SerializedName("dateOfBirth")
     private String dateOfBirth;
 
-    @SerializedName("aboutMe") // Sửa thành "aboutMe" để khớp với JSON từ API
+    @SerializedName("aboutMe")
     private String aboutMe;
 
-    @SerializedName("createdAt") // Giả sử API GET trả về "createdAt"
+    @SerializedName("createdAt")
     private String createdAt;
 
-    @SerializedName("updatedAt") // Giả sử API GET trả về "updatedAt"
+    @SerializedName("updatedAt")
     private String updatedAt;
 
-    // Giả sử API GET /profile/me trả về danh sách experiences với key là "experiences"
     @SerializedName("experiences")
     private List<Experience> experiences;
 
-    // Giả sử API GET /profile/me trả về danh sách skills với key là "skills"
     @SerializedName("skills")
     private List<Skill> skills;
 
-    // Thêm trường này để lưu URL/tên file CV từ API
-    // Thay "resume_url" bằng key JSON thực tế mà API GET /profile/me trả về cho thông tin CV
-    @SerializedName("resume_url")
+    @SerializedName("portfolio")
     private String resumeUrl;
 
-    // @SerializedName("resume_last_uploaded") // Ví dụ cho ngày upload CV, nếu API có trả về
-    // private String resumeLastUploaded;
 
     public User() {}
 
-    // Getters and Setters (đầy đủ cho các trường bạn cần)
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
@@ -97,7 +88,5 @@ public class User implements Serializable {
     }
     public String getResumeUrl() { return resumeUrl; }
     public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
-    // public String getResumeLastUploaded() { return resumeLastUploaded; }
-    // public void setResumeLastUploaded(String resumeLastUploaded) { this.resumeLastUploaded = resumeLastUploaded; }
 
 }
