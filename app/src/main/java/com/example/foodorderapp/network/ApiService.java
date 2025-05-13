@@ -8,7 +8,8 @@ import com.example.foodorderapp.network.request.UpdateExperienceRequest;
 import com.example.foodorderapp.network.request.UpdateSkillRequest;
 import com.example.foodorderapp.network.response.ExperienceDetailApiResponse;
 import com.example.foodorderapp.network.response.ExperiencesApiResponse;
-import com.example.foodorderapp.network.response.JobCategoryResponse; // Import mới
+import com.example.foodorderapp.network.response.JobCategoryResponse;
+import com.example.foodorderapp.network.response.JobDetailResponse; // Import mới
 import com.example.foodorderapp.network.response.PaginatedJobResponse;
 import com.example.foodorderapp.network.response.ProfileApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
@@ -117,24 +118,18 @@ public interface ApiService {
     Call<Void> logout(@Header("Authorization") String authToken); // Token xác thực
 
     // Lấy danh sách công việc có phân trang
-    // Backend NestJS của bạn (với TransformSort decorator) có vẻ mong đợi "-createdAt" cho DESC
-    @GET("jobs") // Đường dẫn API cho danh sách công việc
+    @GET("jobs")
     Call<PaginatedJobResponse> getJobsPaginated(
-            // Không cần @Header("Authorization") String authToken nếu API này public
-            // Nếu API yêu cầu token, hãy thêm vào. Dựa trên JobController.ts, nó là public (@SkipAuth).
-            @Query("pageNumber") int pageNumber, // Số trang hiện tại
-            @Query("pageSize") int pageSize, // Số lượng mục trên mỗi trang
-            @Query("sort") String sort // Tiêu chí sắp xếp, ví dụ: "createdAt,DESC" hoặc "-createdAt"
+            @Query("pageNumber") int pageNumber,
+            @Query("pageSize") int pageSize,
+            @Query("sort") String sort
     );
 
-    // --- THÊM PHƯƠNG THỨC MỚI ĐỂ LẤY DANH MỤC CÔNG VIỆC ---
-    /**
-     * Lấy danh sách tất cả các danh mục công việc.
-     * Dựa trên JobCategoryController.ts, endpoint là /job-categories và không yêu cầu xác thực.
-     */
-    @GET("job-categories") // Đường dẫn API cho danh sách danh mục công việc
-    Call<JobCategoryResponse> getJobCategories(
-            // Bạn có thể thêm các tham số Query nếu API hỗ trợ (ví dụ: sort, filter)
-            // @Query("sort") String sort
-    );
+    // Lấy danh sách tất cả các danh mục công việc
+    @GET("job-categories")
+    Call<JobCategoryResponse> getJobCategories();
+
+    // PHƯƠNG THỨC MỚI: Lấy chi tiết một công việc
+    @GET("jobs/{id}")
+    Call<JobDetailResponse> getJobDetail(@Path("id") int jobId); // Không cần token nếu API public
 }

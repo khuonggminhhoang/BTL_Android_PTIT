@@ -1,10 +1,15 @@
 package com.example.foodorderapp.features.jobs.ui.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build; // <<< THÊM IMPORT NÀY
 import android.os.Bundle;
+import android.text.Html;
+import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,34 +18,55 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.FrameLayout;
 
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.config.Config;
+import com.example.foodorderapp.features.auth.ui.activity.LoginActivity;
 import com.example.foodorderapp.features.jobs.ui.adapter.JobAdapter;
 import com.example.foodorderapp.core.model.Job;
 import com.example.foodorderapp.core.model.Company;
+import com.example.foodorderapp.network.ApiService;
+import com.example.foodorderapp.network.response.JobDetailResponse;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class JobDetailActivity extends AppCompatActivity {
+
+    private static final String TAG = "JobDetailActivity";
 
     private ImageView ivCompanyLogoDetail;
     private TextView tvCompanyNameDetail, tvJobTitleDetail, tvLocationDetail, tvApplicants, tvSalaryDetail;
     private ImageButton btnBack, btnFavoriteDetail;
     private Button btnApply;
     private TabLayout tabLayout;
-    private LinearLayout layoutTags;
+    private LinearLayout layoutTags; // Layout để chứa các tag (ví dụ: Full-time, Remote)
     private FrameLayout tabContentContainer;
-    private LinearLayout layoutDescriptionContent;
+    private LinearLayout layoutDescriptionContent; // Layout cho tab mô tả
     private TextView tvDescription;
-    private LinearLayout layoutCompanyContent;
+    private LinearLayout layoutCompanyContent; // Layout cho tab công ty
     private TextView tvCompanyDescription, tvWebsite, tvIndustry, tvCompanySize, tvOfficeAddress;
+    private ProgressBar progressBarJobDetail; // ProgressBar để hiển thị khi tải dữ liệu
 
-    private Job currentJob;
+    private ApiService apiService;
+    private Job currentJob; // Job object nhận từ Intent (có thể chỉ chứa ID ban đầu)
+    private int jobIdToFetch = -1; // ID công việc để fetch chi tiết
+    private String currentAccessToken; // Token để lưu/bỏ lưu công việc
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,16 +74,21 @@ public class JobDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_job_detail);
 
         findViews();
-        getIntentData();
+        initApiService();
+        setupToolbar(); // Thiết lập toolbar (nút back)
 
-        if (currentJob != null) {
-            populateCommonUi();
-            setupTabLayout();
-            setupClickListeners();
+        SharedPreferences prefs = getSharedPreferences("AuthPrefs", MODE_PRIVATE);
+        currentAccessToken = prefs.getString("accessToken", null);
+
+        getIntentData(); // Lấy jobId từ Intent
+
+        if (jobIdToFetch != -1) {
+            fetchJobDetails(jobIdToFetch); // Gọi API để lấy chi tiết công việc
         } else {
-            Toast.makeText(this, "Không thể tải chi tiết công việc.", Toast.LENGTH_SHORT).show();
-            finish();
+            Toast.makeText(this, "Không tìm thấy thông tin công việc.", Toast.LENGTH_SHORT).show();
+            finish(); // Đóng activity nếu không có jobId
         }
+        // Các listener sẽ được setup sau khi có dữ liệu
     }
 
     private void findViews() {
@@ -65,7 +96,7 @@ public class JobDetailActivity extends AppCompatActivity {
         tvCompanyNameDetail = findViewById(R.id.tvCompanyNameDetail);
         tvJobTitleDetail = findViewById(R.id.tvJobTitleDetail);
         tvLocationDetail = findViewById(R.id.tvLocationDetail);
-        tvApplicants = findViewById(R.id.tvApplicants);
+        tvApplicants = findViewById(R.id.tvApplicants); // Sẽ cập nhật sau nếu API có
         tvSalaryDetail = findViewById(R.id.tvSalaryDetail);
         btnBack = findViewById(R.id.btnBack);
         btnFavoriteDetail = findViewById(R.id.btnFavoriteDetail);
@@ -81,53 +112,249 @@ public class JobDetailActivity extends AppCompatActivity {
         tvIndustry = findViewById(R.id.tvIndustry);
         tvCompanySize = findViewById(R.id.tvCompanySize);
         tvOfficeAddress = findViewById(R.id.tvOfficeAddress);
+        progressBarJobDetail = findViewById(R.id.progressBarJobDetail); // Ánh xạ ProgressBar
+    }
+
+    private void initApiService() {
+        String baseUrl = Config.BE_URL;
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            Log.e(TAG, "BE_URL is not configured!");
+            Toast.makeText(this, "Lỗi cấu hình máy chủ.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        if (!baseUrl.endsWith("/")) {
+            baseUrl += "/";
+        }
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiService = retrofit.create(ApiService.class);
+    }
+
+    private void setupToolbar() {
+        btnBack.setOnClickListener(v -> finish());
     }
 
     private void getIntentData() {
         Intent intent = getIntent();
-        String jobDetailKey = JobAdapter.JOB_DETAIL_KEY;
-        if (intent != null) {
-            if (intent.hasExtra(jobDetailKey)) {
-                currentJob = (Job) intent.getSerializableExtra(jobDetailKey);
+        if (intent != null && intent.hasExtra(JobAdapter.JOB_DETAIL_KEY)) {
+            // Nhận toàn bộ object Job từ Intent
+            Job jobFromIntent = (Job) intent.getSerializableExtra(JobAdapter.JOB_DETAIL_KEY);
+            if (jobFromIntent != null) {
+                jobIdToFetch = jobFromIntent.getId(); // Lấy ID từ object
             }
+        } else if (intent != null && intent.hasExtra("JOB_ID")) { // Dự phòng nếu chỉ truyền ID
+            jobIdToFetch = intent.getIntExtra("JOB_ID", -1);
         }
     }
 
+    private void showLoading(boolean isLoading) {
+        if (progressBarJobDetail != null) {
+            progressBarJobDetail.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        }
+        View contentLayout = findViewById(R.id.scrollView);
+        if (contentLayout != null) {
+            contentLayout.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+        }
+        if (btnApply != null) {
+            btnApply.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+        }
+    }
+
+
+    private void fetchJobDetails(int jobId) {
+        if (apiService == null) {
+            Toast.makeText(this, "Lỗi dịch vụ API.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        showLoading(true);
+
+        Call<JobDetailResponse> call = apiService.getJobDetail(jobId);
+        call.enqueue(new Callback<JobDetailResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<JobDetailResponse> call, @NonNull Response<JobDetailResponse> response) {
+                showLoading(false);
+                if (isFinishing() || isDestroyed()) return;
+
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    currentJob = response.body().getData();
+                    if (currentJob != null) {
+                        populateCommonUi();
+                        setupTabLayout();
+                        setupClickListeners();
+                    } else {
+                        Toast.makeText(JobDetailActivity.this, "Không tìm thấy chi tiết công việc.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                } else {
+                    String errorMsg = "Lỗi " + response.code() + ": Không thể tải chi tiết công việc.";
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += "\n" + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Lỗi đọc errorBody", e);
+                        }
+                    }
+                    Log.e(TAG, "API Error: " + errorMsg);
+                    Toast.makeText(JobDetailActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JobDetailResponse> call, @NonNull Throwable t) {
+                showLoading(false);
+                if (isFinishing() || isDestroyed()) return;
+                Log.e(TAG, "Lỗi mạng khi tải chi tiết công việc: " + t.getMessage(), t);
+                Toast.makeText(JobDetailActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+    }
+
+    private String formatSalary(String salaryMinStr, String salaryMaxStr, String salaryPeriodStr) {
+        if (TextUtils.isEmpty(salaryMinStr) && TextUtils.isEmpty(salaryMaxStr)) {
+            return "Thỏa thuận";
+        }
+
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        String formattedMin = "N/A";
+        String formattedMax = "N/A";
+
+        try {
+            if (!TextUtils.isEmpty(salaryMinStr)) {
+                double minSalary = Double.parseDouble(salaryMinStr);
+                formattedMin = currencyFormat.format(minSalary);
+            }
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Không thể định dạng salaryMin: " + salaryMinStr, e);
+            formattedMin = salaryMinStr;
+        }
+
+        try {
+            if (!TextUtils.isEmpty(salaryMaxStr)) {
+                double maxSalary = Double.parseDouble(salaryMaxStr);
+                formattedMax = currencyFormat.format(maxSalary);
+            }
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Không thể định dạng salaryMax: " + salaryMaxStr, e);
+            formattedMax = salaryMaxStr;
+        }
+
+        String salaryRange;
+        if (!TextUtils.isEmpty(salaryMinStr) && !TextUtils.isEmpty(salaryMaxStr)) {
+            salaryRange = formattedMin + " - " + formattedMax;
+        } else if (!TextUtils.isEmpty(salaryMinStr)) {
+            salaryRange = "Từ " + formattedMin;
+        } else {
+            salaryRange = "Đến " + formattedMax;
+        }
+
+        String periodDisplay = "";
+        if ("MONTH".equalsIgnoreCase(salaryPeriodStr)) {
+            periodDisplay = "/ Tháng";
+        } else if ("YEAR".equalsIgnoreCase(salaryPeriodStr)) {
+            periodDisplay = "/ Năm";
+        } else if ("HOUR".equalsIgnoreCase(salaryPeriodStr)) {
+            periodDisplay = "/ Giờ";
+        }
+
+        return salaryRange + periodDisplay;
+    }
+
+
     private void populateCommonUi() {
+        if (currentJob == null) return;
+
         Company company = currentJob.getCompany();
-        String logoUrl = company != null ? company.getLogoUrl() : null;
+        String logoUrl = (company != null && company.getLogoUrl() != null) ? company.getLogoUrl() : "";
+        if (!logoUrl.isEmpty() && !logoUrl.toLowerCase().startsWith("http")) {
+            String imageBaseUrl = Config.BE_URL.replace("/api/v1", "");
+            logoUrl = imageBaseUrl + (logoUrl.startsWith("/") ? "" : "/") + logoUrl;
+        }
+
         Glide.with(this)
-                .load(logoUrl)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher_round)
+                .load(logoUrl.isEmpty() ? R.drawable.ic_company_logo_placeholder : logoUrl)
+                .placeholder(R.drawable.ic_company_logo_placeholder)
+                .error(R.drawable.ic_company_logo_placeholder)
                 .into(ivCompanyLogoDetail);
-        tvCompanyNameDetail.setText(company != null ? company.getName() : "");
+
+        tvCompanyNameDetail.setText(company != null ? company.getName() : "Không rõ");
         tvJobTitleDetail.setText(currentJob.getTitle());
         tvLocationDetail.setText(currentJob.getLocation());
-        String salary = currentJob.getSalaryMin() + " - " + currentJob.getSalaryMax() + " / " + currentJob.getSalaryPeriod();
-        tvSalaryDetail.setText(salary);
+
+        String salaryText = formatSalary(currentJob.getSalaryMin(), currentJob.getSalaryMax(), currentJob.getSalaryPeriod());
+        tvSalaryDetail.setText(salaryText);
+
+        tvApplicants.setText("- Ứng viên");
+
         updateFavoriteButton(currentJob.isTopJob());
         displayTags();
     }
 
     private void populateDescriptionTab() {
-        tvDescription.setText(currentJob.getDescription());
+        if (currentJob != null && tvDescription != null) {
+            // Kiểm tra phiên bản Android để sử dụng phương thức fromHtml phù hợp
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                tvDescription.setText(Html.fromHtml(currentJob.getDescription(), Html.FROM_HTML_MODE_COMPACT));
+            } else {
+                tvDescription.setText(Html.fromHtml(currentJob.getDescription()));
+            }
+        }
     }
 
     private void populateCompanyTab() {
+        if (currentJob == null || currentJob.getCompany() == null) {
+            if (layoutCompanyContent != null) layoutCompanyContent.setVisibility(View.GONE);
+            return;
+        }
         Company company = currentJob.getCompany();
-        tvCompanyDescription.setText(company != null ? company.getDescription() : "");
-        tvWebsite.setText(company != null ? company.getWebsite() : "");
+        tvCompanyDescription.setText(company.getDescription() != null ? company.getDescription() : "Không có mô tả.");
+        tvWebsite.setText(company.getWebsite() != null ? company.getWebsite() : "Chưa cập nhật");
         Linkify.addLinks(tvWebsite, Linkify.WEB_URLS);
-        tvIndustry.setText(company != null ? company.getIndustry() : "");
-        tvCompanySize.setText(company != null ? company.getCompanySize() : "");
-        tvOfficeAddress.setText(company != null ? company.getAddress() : "");
+        tvIndustry.setText(company.getIndustry() != null ? company.getIndustry() : "Chưa cập nhật");
+        tvCompanySize.setText(company.getCompanySize() != null ? company.getCompanySize() : "Chưa cập nhật");
+        tvOfficeAddress.setText(company.getAddress() != null ? company.getAddress() : "Chưa cập nhật");
     }
 
     private void displayTags() {
+        if (currentJob == null || layoutTags == null) return;
         layoutTags.removeAllViews();
-        layoutTags.setVisibility(View.GONE); // Nếu không có tags
+
+        List<String> tags = new ArrayList<>();
+        if (currentJob.getJobType() != null) {
+            tags.add(formatJobType(currentJob.getJobType()));
+        }
+
+        if (tags.isEmpty()) {
+            layoutTags.setVisibility(View.GONE);
+            return;
+        }
+
+        layoutTags.setVisibility(View.VISIBLE);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (String tagText : tags) {
+            TextView tagView = (TextView) inflater.inflate(R.layout.item_tag_template, layoutTags, false);
+            tagView.setText(tagText);
+            layoutTags.addView(tagView);
+        }
     }
+
+    private String formatJobType(String jobTypeApi) {
+        if (jobTypeApi == null) return "";
+        switch (jobTypeApi.toUpperCase()) {
+            case "FULL_TIME": return "Toàn thời gian";
+            case "PART_TIME": return "Bán thời gian";
+            case "CONTRACT": return "Hợp đồng";
+            case "INTERNSHIP": return "Thực tập";
+            case "FREELANCE": return "Freelance";
+            default: return jobTypeApi;
+        }
+    }
+
 
     private void updateFavoriteButton(boolean isFavorite) {
         if (isFavorite) {
@@ -135,21 +362,31 @@ public class JobDetailActivity extends AppCompatActivity {
             btnFavoriteDetail.clearColorFilter();
         } else {
             btnFavoriteDetail.setImageResource(R.drawable.ic_favorite_border);
-            btnFavoriteDetail.setColorFilter(ContextCompat.getColor(this, R.color.grey), android.graphics.PorterDuff.Mode.SRC_IN);
+            btnFavoriteDetail.setColorFilter(ContextCompat.getColor(this, R.color.red), android.graphics.PorterDuff.Mode.SRC_IN);
         }
     }
 
     private void setupClickListeners() {
-        btnBack.setOnClickListener(v -> finish());
+        if (currentJob == null) return;
+
         btnFavoriteDetail.setOnClickListener(v -> {
-            if (currentJob == null) return;
+            if (currentAccessToken == null || currentAccessToken.isEmpty()) {
+                Toast.makeText(this, "Vui lòng đăng nhập để sử dụng tính năng này.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             boolean isNowFavorite = !currentJob.isTopJob();
+            // TODO: Gọi API để lưu/bỏ lưu công việc
             currentJob.setTopJob(isNowFavorite);
             updateFavoriteButton(isNowFavorite);
             Toast.makeText(this, isNowFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
         });
+
         btnApply.setOnClickListener(v -> {
-            if (currentJob == null) return;
+            if (currentAccessToken == null || currentAccessToken.isEmpty()) {
+                Toast.makeText(this, "Vui lòng đăng nhập để ứng tuyển.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent applyIntent = new Intent(JobDetailActivity.this, ApplyJobActivity.class);
             applyIntent.putExtra(JobAdapter.JOB_DETAIL_KEY, currentJob);
             startActivity(applyIntent);
@@ -157,11 +394,15 @@ public class JobDetailActivity extends AppCompatActivity {
     }
 
     private void setupTabLayout() {
+        if (currentJob == null || tabLayout == null) return;
+
         tabLayout.removeAllTabs();
         tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_description)));
         tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_company)));
+
         showDescriptionContent();
         populateDescriptionTab();
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -179,12 +420,12 @@ public class JobDetailActivity extends AppCompatActivity {
     }
 
     private void showDescriptionContent() {
-        layoutDescriptionContent.setVisibility(View.VISIBLE);
-        layoutCompanyContent.setVisibility(View.GONE);
+        if (layoutDescriptionContent != null) layoutDescriptionContent.setVisibility(View.VISIBLE);
+        if (layoutCompanyContent != null) layoutCompanyContent.setVisibility(View.GONE);
     }
 
     private void showCompanyContent() {
-        layoutDescriptionContent.setVisibility(View.GONE);
-        layoutCompanyContent.setVisibility(View.VISIBLE);
+        if (layoutDescriptionContent != null) layoutDescriptionContent.setVisibility(View.GONE);
+        if (layoutCompanyContent != null) layoutCompanyContent.setVisibility(View.VISIBLE);
     }
 }
