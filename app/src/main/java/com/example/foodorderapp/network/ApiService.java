@@ -11,7 +11,6 @@ import com.example.foodorderapp.network.response.ExperiencesApiResponse;
 import com.example.foodorderapp.network.response.ProfileApiResponse;
 import com.example.foodorderapp.network.response.SkillDetailApiResponse;
 import com.example.foodorderapp.network.response.SkillsApiResponse;
-// import com.example.foodorderapp.network.response.LogoutResponse; // <<< KHÔNG CẦN NỮA
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.PartMap;
 import retrofit2.http.Path;
+import androidx.annotation.Nullable; // Thêm import này
 
 public interface ApiService {
 
@@ -41,11 +41,11 @@ public interface ApiService {
     Call<ProfileApiResponse> getMyProfile(@Header("Authorization") String authToken);
 
     @Multipart
-    @POST("profile/me")
+    @POST("profile/me") // Endpoint này đã có, giả sử dùng để cập nhật thông tin chung và avatar
     Call<ProfileApiResponse> updateMyProfile(
             @Header("Authorization") String authToken,
             @PartMap Map<String, RequestBody> fields,
-            @Part MultipartBody.Part avatarFile
+            @Part @Nullable MultipartBody.Part avatarFile // Có thể avatar là tùy chọn khi cập nhật profile
     );
 
     @GET("skills")
@@ -104,7 +104,17 @@ public interface ApiService {
             @Body CreateExperienceRequest createExperienceRequest
     );
 
-    // >>> PHƯƠNG THỨC ĐĂNG XUẤT ĐÃ CẬP NHẬT <<<
     @POST("auth/logout")
-    Call<Void> logout(@Header("Authorization") String authToken); // <<< THAY ĐỔI Ở ĐÂY
+    Call<Void> logout(@Header("Authorization") String authToken);
+
+    // --- Các API mới cho CV/Portfolio ---
+    @Multipart
+    @POST("profile/me/portfolio") // Endpoint cho việc upload CV/portfolio
+    Call<ProfileApiResponse> uploadPortfolio( // Giả sử API trả về thông tin profile đã cập nhật (bao gồm resumeUrl mới)
+                                              @Header("Authorization") String authToken,
+                                              @Part MultipartBody.Part file // 'file' là tên của trường chứa tệp PDF trong form data
+    );
+
+    @DELETE("profile/me/portfolio") // Endpoint cho việc xóa CV/portfolio
+    Call<Void> deletePortfolio(@Header("Authorization") String authToken); // Giả sử API trả về Void khi xóa thành công
 }

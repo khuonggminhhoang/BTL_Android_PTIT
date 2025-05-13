@@ -2,19 +2,23 @@ package com.example.foodorderapp.features.profile.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri; // <<< THÊM IMPORT NÀY
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast; // <<< THÊM IMPORT NÀY (để xử lý ActivityNotFoundException)
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.features.settings.ui.activity.SettingsActivity;
+// Đảm bảo import đúng lớp MenuItem model của bạn
 import com.example.foodorderapp.features.profile.ui.model.MenuItem;
 import com.example.foodorderapp.features.profile.ui.activity.PersonalDataActivity;
-import com.example.foodorderapp.features.profile.ui.activity.ResumeMyInfoActivity; // Thêm import
+import com.example.foodorderapp.features.profile.ui.activity.ResumeMyInfoActivity;
 
 import java.util.List;
 
@@ -59,7 +63,8 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             headerHolder.headerText.setText((String) items.get(position));
         } else {
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
-            MenuItem menuItem = (MenuItem) items.get(position);
+            // Sử dụng final để có thể truy cập trong OnClickListener
+            final com.example.foodorderapp.features.profile.ui.model.MenuItem menuItem = (com.example.foodorderapp.features.profile.ui.model.MenuItem) items.get(position);
             itemHolder.icon.setImageResource(menuItem.getIconResId());
             itemHolder.title.setText(menuItem.getTitle());
 
@@ -67,15 +72,34 @@ public class MenuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (menuItem.getTitle().equals(context.getString(R.string.personal_data))) {
-                        Intent intent = new Intent(context, PersonalDataActivity.class);
+                    String title = menuItem.getTitle();
+                    Intent intent = null;
+
+                    if (title.equals(context.getString(R.string.personal_data))) {
+                        intent = new Intent(context, PersonalDataActivity.class);
                         context.startActivity(intent);
-                    } else if (menuItem.getTitle().equals(context.getString(R.string.resume_my_info))) {
-                        Intent intent = new Intent(context, ResumeMyInfoActivity.class);
+                    } else if (title.equals(context.getString(R.string.resume_my_info))) {
+                        intent = new Intent(context, ResumeMyInfoActivity.class);
                         context.startActivity(intent);
-                    } else if (menuItem.getTitle().equals(context.getString(R.string.settings_title))) {
-                        Intent intent = new Intent(context, SettingsActivity.class);
+                    } else if (title.equals(context.getString(R.string.settings_title))) {
+                        intent = new Intent(context, SettingsActivity.class);
                         context.startActivity(intent);
+                    } else if (title.equals(context.getString(R.string.faq))) { // <<< THÊM ĐIỀU KIỆN NÀY
+                        String faqUrl = "https://github.com/khuonggminhhoang/BTL_Android_PTIT/issues";
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(faqUrl));
+                        try {
+                            context.startActivity(intent);
+                        } catch (android.content.ActivityNotFoundException e) {
+                            Toast.makeText(context, "Không tìm thấy ứng dụng trình duyệt.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (title.equals(context.getString(R.string.privacy_policy))) {
+                        String privacyUrl = "https://github.com/khuonggminhhoang/BTL_Android_PTIT/wiki";
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl));
+                        try {
+                            context.startActivity(intent);
+                        } catch (android.content.ActivityNotFoundException e) {
+                            Toast.makeText(context, "Không tìm thấy ứng dụng trình duyệt.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });

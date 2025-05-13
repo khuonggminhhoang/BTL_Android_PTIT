@@ -54,7 +54,7 @@ public class User implements Serializable {
 
     // Thêm trường này để lưu URL/tên file CV từ API
     // Thay "resume_url" bằng key JSON thực tế mà API GET /profile/me trả về cho thông tin CV
-    @SerializedName("resume_url")
+    @SerializedName("portfolio") // Sửa "resume_url" thành "portfolio"
     private String resumeUrl;
 
     // @SerializedName("resume_last_uploaded") // Ví dụ cho ngày upload CV, nếu API có trả về

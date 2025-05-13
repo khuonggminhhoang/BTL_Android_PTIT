@@ -51,213 +51,260 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CV của tôi"
+                android:text="@string/cv_portfolio_pdf"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"/>
+
             <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#F0F0F0"
-                android:layout_marginTop="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:id="@+id/tv_cv_file_name_resume"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="User_CV.pdf"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black" />
-                    <TextView
-                        android:id="@+id/tv_cv_upload_info_resume"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="2MB last upload 24 Jun 2021"
-                        android:textSize="12sp"
-                        android:textColor="@color/grey_dark"
-                        android:layout_marginTop="4dp" />
-                    <TextView
-                        android:id="@+id/tv_edit_resume_link_resume"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Edit resume"
-                        android:textSize="14sp"
-                        android:textColor="@color/blue_primary"
-                        android:layout_marginTop="8dp"
-                        android:textStyle="bold"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/about_me"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"/>
-                <ImageView
-                    android:id="@+id/iv_edit_about_me_resume"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_edit" android:padding="2dp" android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    app:tint="@color/blue_primary"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:contentDescription="Chỉnh sửa Giới thiệu"/>
-            </RelativeLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_about_me_resume_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="1dp"
-                app:boxStrokeColor="@color/blue_primary"
-                android:layout_marginTop="8dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_about_me_resume_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:text="Đây là phần giới thiệu bản thân của tôi. Tôi là một người năng động và sáng tạo..."
-                    android:textSize="14sp"
-                    android:textColor="@color/grey_dark"
-                    android:lineSpacingExtra="4dp"
-                    android:inputType="textMultiLine"
-                    android:minLines="3"
-                    android:gravity="top"
-                    android:padding="16dp"
-                    android:background="@drawable/bg_container_card"
-                    android:enabled="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
-                    android:longClickable="false"
-                    android:textColorHint="@color/grey_medium"
-                    />
-            </com.google.android.material.textfield.TextInputLayout>
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/work_experience"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"/>
-                <ImageView
-                    android:id="@+id/iv_add_work_experience_resume"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_add_circle_outline"
-                    android:scaleType="fitCenter"
-                    android:padding="2dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    app:tint="@color/blue_primary"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:contentDescription="Add Work Experience"/>
-            </RelativeLayout>
-            <LinearLayout
-                android:id="@+id/ll_work_experience_items_container_resume"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_container_card"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:minHeight="50dp"/>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/skills"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"/>
-                <ImageView
-                    android:id="@+id/iv_add_skill_resume"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_add_circle_outline"
-                    android:scaleType="fitCenter"
-                    android:padding="2dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    app:tint="@color/blue_primary"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:contentDescription="Add Skill"/>
-            </RelativeLayout>
-            <LinearLayout
-                android:id="@+id/ll_skills_items_container_resume"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_container_card"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:minHeight="50dp"/>
-
-            <Button
-                android:id="@+id/btn_detail_experience_skills_resume"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/detail_experience_skills"
-                android:textAllCaps="false"
-                android:textColor="@color/blue_primary"
-                app:strokeColor="@color/blue_primary"
-                app:cornerRadius="8dp"
-                android:layout_marginTop="32dp"/>
-        </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/progressBar_resume_info"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
+                android:id="@+id/card_cv_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible" />
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F0F0F0"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tv_cv_file_name_resume"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chưa có CV nào"
+                tools:text="User_CV.pdf"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/tv_cv_upload_info_resume"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Cập nhật lần cuối: 13 thg 5 25, 16:00"
+                    android:textSize="12sp"
+                    android:textColor="@color/grey_dark"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone"
+                tools:visibility="visible"/>
+
+                <LinearLayout
+                    android:id="@+id/layout_cv_actions_inside"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp"
+                    android:gravity="start|center_vertical">
+
+                    <TextView
+                        android:id="@+id/tv_upload_change_cv_link"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tải lên CV"
+                    android:textSize="14sp"
+                    android:textColor="@color/blue_primary"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:background="?attr/selectableItemBackground"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/iv_delete_cv"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_delete"
+                    app:tint="@color/red"
+                    android:contentDescription="Xóa CV"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="6dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_me"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"/>
+            <ImageView
+                android:id="@+id/iv_edit_about_me_resume"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_edit"
+                android:padding="2dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                app:tint="@color/blue_primary"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Chỉnh sửa Giới thiệu"/>
+        </RelativeLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_about_me_resume_content"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeColor="@color/blue_primary"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_about_me_resume_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Đây là phần giới thiệu bản thân của tôi. Tôi là một người năng động và sáng tạo..."
+                android:textSize="14sp"
+                android:textColor="@color/grey_dark"
+                android:lineSpacingExtra="4dp"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:gravity="top"
+                android:padding="16dp"
+                android:background="@drawable/bg_container_card"
+                android:enabled="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:cursorVisible="false"
+                android:longClickable="false"
+                android:textColorHint="@color/grey_medium"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/work_experience"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"/>
+            <ImageView
+                android:id="@+id/iv_add_work_experience_resume"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_add_circle_outline"
+                android:scaleType="fitCenter"
+                android:padding="2dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                app:tint="@color/blue_primary"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Add Work Experience"/>
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/ll_work_experience_items_container_resume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_container_card"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:minHeight="50dp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/skills"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"/>
+            <ImageView
+                android:id="@+id/iv_add_skill_resume"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_add_circle_outline"
+                android:scaleType="fitCenter"
+                android:padding="2dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                app:tint="@color/blue_primary"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Add Skill"/>
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/ll_skills_items_container_resume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_container_card"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:minHeight="50dp"/>
+
+        <Button
+            android:id="@+id/btn_detail_experience_skills_resume"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/detail_experience_skills"
+            android:textAllCaps="false"
+            android:textColor="@color/blue_primary"
+            app:strokeColor="@color/blue_primary"
+            app:cornerRadius="8dp"
+            android:layout_marginTop="32dp"/>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar_resume_info"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>

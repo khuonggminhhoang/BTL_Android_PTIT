@@ -147,9 +147,9 @@ public class ProfileFragment extends Fragment {
         tilProfileHeadline = view.findViewById(R.id.til_profile_headline);
         etProfileHeadline = view.findViewById(R.id.et_profile_headline);
         ivEditProfileHeadline = view.findViewById(R.id.iv_edit_profile_headline);
-        tvApplied = view.findViewById(R.id.tv_applied);
-        tvReviewed = view.findViewById(R.id.tv_reviewed);
-        tvContacted = view.findViewById(R.id.tv_contacted);
+//        tvApplied = view.findViewById(R.id.tv_applied);
+//        tvReviewed = view.findViewById(R.id.tv_reviewed);
+//        tvContacted = view.findViewById(R.id.tv_contacted);
         ivAvatar = view.findViewById(R.id.iv_avatar);
         ivCameraIcon = view.findViewById(R.id.iv_camera_icon);
         progressBarProfile = view.findViewById(R.id.progressBar_profile_loading);
