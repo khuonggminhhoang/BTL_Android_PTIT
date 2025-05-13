@@ -5,17 +5,17 @@ import com.google.gson.annotations.SerializedName;
 
 public class ProfileApiResponse {
 
-    @SerializedName("success") // Hoặc tên trường tương ứng từ API của bạn
+    @SerializedName("success")
     private boolean success;
 
-    @SerializedName("statusCode") // Hoặc tên trường tương ứng
+    @SerializedName("statusCode")
     private int statusCode;
 
-    @SerializedName("message") // Hoặc tên trường tương ứng
+    @SerializedName("message")
     private String message;
 
-    @SerializedName("data") // QUAN TRỌNG: Tên trường chứa đối tượng User
-    private User data; // Hoặc private User user; nếu key trong JSON là "user"
+    @SerializedName("data")
+    private User data;
 
     // Getters
     public boolean isSuccess() { return success; }

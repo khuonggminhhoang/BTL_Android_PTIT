@@ -18,7 +18,7 @@ public class User implements Serializable {
     @SerializedName("username")
     private String username;
 
-    @SerializedName("phone_number")
+    @SerializedName("phoneNumber")
     private String phoneNumber;
 
     @SerializedName("avatar")
