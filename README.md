@@ -100,7 +100,7 @@ Dự án được xây dựng bằng Java/Kotlin và sử dụng các thư việ
 1.  **Cài đặt Android Studio:** Phiên bản mới nhất được khuyến nghị.
 2.  **Clone repository này:**
     ```bash
-    git clone <URL_REPOSITORY_CUA_BAN>
+    git clone https://github.com/khuonggminhhoang/BTL_Android_PTIT.git
     cd BTL_Android_PTIT
     ```
 3.  **Mở dự án trong Android Studio.**
