@@ -213,7 +213,7 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         if (!isLoading) updateEmptyStateVisibility();
     }
 
-    // Cập nhật trạng thái giao diện khi không có thông báo
+    // Cập nhật trạng thái giao diện khi không có thông báo, chưa có real-time
     private void updateEmptyStateVisibility() {
         if (adapter == null || recyclerViewNotifications == null || emptyStateLayout == null || getContext() == null) return;
         if (progressBar != null && progressBar.getVisibility() == View.VISIBLE) {
