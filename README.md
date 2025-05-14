@@ -1,5 +1,3 @@
-#  JobFinder - Ứng dụng Tìm kiếm Việc làm trên Android
-
 JobFinder là một ứng dụng di động Android được thiết kế để giúp người dùng dễ dàng tìm kiếm và ứng tuyển các công việc phù hợp với kỹ năng và mong muốn của họ. Ứng dụng cung cấp một giao diện trực quan để duyệt qua các danh sách việc làm, xem chi tiết công việc, quản lý hồ sơ cá nhân và theo dõi quá trình ứng tuyển.
 
 ---
@@ -126,7 +124,6 @@ Dự án được xây dựng bằng Java/Kotlin và sử dụng các thư việ
 
 ## 📸 Ảnh chụp màn hình (Screenshots)
 
-
 | Màn hình Đăng nhập                                 | Màn hình Trang chủ                                  | Màn hình Chi tiết Công việc                           |
 | :--------------------------------------------------: | :----------------------------------------------------: | :------------------------------------------------------: |
-| ![Login Screen](https://drive.google.com/file/d/1mmOXbg1nJh9C53hJ6PN1GjVDDM4YGEz9/view?usp=sharing) | ![Home Screen](https://drive.google.com/file/d/1mmOXbg1nJh9C53hJ6PN1GjVDDM4YGEz9/view) | ![Job Detail Screen](https://drive.google.com/drive/u/0/folders/1mlmAOFK-rUd3gfVLJdAfykACBmJJNpjA) |
+| <img src="https://github.com/user-attachments/assets/ed2a0705-d310-4423-b91b-71aeddc7c6f9" alt="Login Screen" width="300"/> | <img src="https://github.com/user-attachments/assets/acab4ad1-8f30-4dea-831f-a6ac36721b60" alt="Home Screen" width="300"/> | <img src="https://github.com/user-attachments/assets/7e6f7fd1-c7b7-4702-bce5-3c88c2a9ec83" alt="Job Detail Screen" width="300"/> |
