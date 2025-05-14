@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.core.model.Job;
+import com.example.foodorderapp.config.Config; // Để lấy URL cơ sở nếu logo là tương đối
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,12 @@ import java.util.Locale;
 
 public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapter.ViewHolder> implements Filterable {
 
-    private List<Job> favoriteJobs;
-    private List<Job> favoriteJobsFiltered;
+    private List<Job> favoriteJobs; // Danh sách gốc
+    private List<Job> favoriteJobsFiltered; // Danh sách đã lọc để hiển thị
     private final Context context;
     private final OnFavoriteClickListener listener;
 
-    // Interface xử lý sự kiện click
+    // Interface để xử lý sự kiện click
     public interface OnFavoriteClickListener {
         void onUnfavoriteClick(Job job, int position);
         void onItemClick(Job job, int position);
@@ -34,8 +35,8 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
 
     public FavoriteJobsAdapter(Context context, List<Job> favoriteJobs, OnFavoriteClickListener listener) {
         this.context = context;
-        this.favoriteJobs = favoriteJobs != null ? favoriteJobs : new ArrayList<>();
-        this.favoriteJobsFiltered = new ArrayList<>(this.favoriteJobs);
+        this.favoriteJobs = favoriteJobs != null ? new ArrayList<>(favoriteJobs) : new ArrayList<>();
+        this.favoriteJobsFiltered = new ArrayList<>(this.favoriteJobs); // Khởi tạo danh sách lọc ban đầu
         this.listener = listener;
     }
 
@@ -48,24 +49,43 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Job job = favoriteJobsFiltered.get(position);
+        Job job = favoriteJobsFiltered.get(position); // Luôn sử dụng danh sách đã lọc
 
         holder.tvJobTitle.setText(job.getTitle());
-        String companyLocation = job.getCompany().getName() + " • " + job.getLocation();
+        String companyName = (job.getCompany() != null && job.getCompany().getName() != null) ? job.getCompany().getName() : "N/A";
+        String location = (job.getLocation() != null) ? job.getLocation() : "N/A";
+        String companyLocation = companyName + " • " + location;
         holder.tvCompanyLocation.setText(companyLocation);
 
         // Tải logo công ty bằng Glide
+        String logoUrl = null;
+        if (job.getCompany() != null && job.getCompany().getLogoUrl() != null && !job.getCompany().getLogoUrl().isEmpty()) {
+            logoUrl = job.getCompany().getLogoUrl();
+            // Kiểm tra xem URL là tương đối hay tuyệt đối
+            if (!logoUrl.toLowerCase().startsWith("http://") && !logoUrl.toLowerCase().startsWith("https://")) {
+                // Nối với URL cơ sở nếu là đường dẫn tương đối
+                String imageBaseUrl = Config.BE_URL.replace("/api/v1", "");
+                if (imageBaseUrl.endsWith("/")) {
+                    imageBaseUrl = imageBaseUrl.substring(0, imageBaseUrl.length() - 1);
+                }
+                if (logoUrl.startsWith("/")) {
+                    logoUrl = logoUrl.substring(1);
+                }
+                logoUrl = imageBaseUrl + "/" + logoUrl;
+            }
+        }
+
         Glide.with(context)
-                .load(job.getCompany().getLogoUrl())
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .circleCrop()
+                .load(logoUrl) // Glide xử lý URL null bằng cách hiển thị lỗi/placeholder
+                .placeholder(R.drawable.ic_company_logo_placeholder) // Nên có một placeholder chung
+                .error(R.drawable.ic_company_logo_placeholder)       // Và một ảnh lỗi chung
+                .circleCrop() // Nếu muốn ảnh tròn
                 .into(holder.ivCompanyLogo);
 
         // Xử lý click bỏ yêu thích
         holder.ivFavoriteHeart.setOnClickListener(v -> {
             if (listener != null) {
-                int currentPosition = holder.getAdapterPosition();
+                int currentPosition = holder.getAdapterPosition(); // Sử dụng getAdapterPosition() để an toàn
                 if (currentPosition != RecyclerView.NO_POSITION) {
                     listener.onUnfavoriteClick(favoriteJobsFiltered.get(currentPosition), currentPosition);
                 }
@@ -75,7 +95,7 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
         // Xử lý click item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                int currentPosition = holder.getAdapterPosition();
+                int currentPosition = holder.getAdapterPosition(); // Sử dụng getAdapterPosition()
                 if (currentPosition != RecyclerView.NO_POSITION) {
                     listener.onItemClick(favoriteJobsFiltered.get(currentPosition), currentPosition);
                 }
@@ -91,17 +111,21 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
     // Cập nhật danh sách công việc
     public void updateData(List<Job> newFavoriteJobs) {
         this.favoriteJobs = newFavoriteJobs != null ? new ArrayList<>(newFavoriteJobs) : new ArrayList<>();
-        this.favoriteJobsFiltered = new ArrayList<>(this.favoriteJobs);
+        this.favoriteJobsFiltered = new ArrayList<>(this.favoriteJobs); // Cập nhật lại cả danh sách lọc
         notifyDataSetChanged();
     }
 
-    // Xóa công việc khỏi danh sách
-    public void removeItem(int position) {
-        if (position >= 0 && position < favoriteJobsFiltered.size()) {
-            Job removedJobFromFiltered = favoriteJobsFiltered.remove(position);
-            favoriteJobs.remove(removedJobFromFiltered);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, favoriteJobsFiltered.size());
+    // Xóa công việc khỏi danh sách (cả danh sách gốc và danh sách đã lọc)
+    public void removeItem(int positionInFilteredList) {
+        if (positionInFilteredList >= 0 && positionInFilteredList < favoriteJobsFiltered.size()) {
+            Job removedJob = favoriteJobsFiltered.remove(positionInFilteredList);
+            // Cũng cần xóa khỏi danh sách gốc để đảm bảo tính nhất quán
+            if (favoriteJobs != null) {
+                favoriteJobs.remove(removedJob);
+            }
+            notifyItemRemoved(positionInFilteredList);
+            // Cập nhật lại range để tránh lỗi IndexOutOfBoundsException
+            notifyItemRangeChanged(positionInFilteredList, favoriteJobsFiltered.size());
         }
     }
 
@@ -131,11 +155,12 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
                 String filterPattern = constraint == null ? "" : constraint.toString().toLowerCase(Locale.getDefault()).trim();
 
                 if (filterPattern.isEmpty()) {
-                    filteredList.addAll(favoriteJobs);
+                    filteredList.addAll(favoriteJobs); // Nếu không có filter, hiển thị tất cả từ danh sách gốc
                 } else {
-                    for (Job job : favoriteJobs) {
-                        if (job.getTitle().toLowerCase(Locale.getDefault()).contains(filterPattern) ||
-                                job.getCompany().getName().toLowerCase(Locale.getDefault()).contains(filterPattern)) {
+                    for (Job job : favoriteJobs) { // Lọc từ danh sách gốc
+                        boolean titleMatches = job.getTitle() != null && job.getTitle().toLowerCase(Locale.getDefault()).contains(filterPattern);
+                        boolean companyMatches = job.getCompany() != null && job.getCompany().getName() != null && job.getCompany().getName().toLowerCase(Locale.getDefault()).contains(filterPattern);
+                        if (titleMatches || companyMatches) {
                             filteredList.add(job);
                         }
                     }
@@ -152,7 +177,7 @@ public class FavoriteJobsAdapter extends RecyclerView.Adapter<FavoriteJobsAdapte
                 if (results.values != null) {
                     favoriteJobsFiltered.addAll((List) results.values);
                 }
-                notifyDataSetChanged();
+                notifyDataSetChanged(); // Thông báo cho adapter về sự thay đổi dữ liệu
             }
         };
     }
