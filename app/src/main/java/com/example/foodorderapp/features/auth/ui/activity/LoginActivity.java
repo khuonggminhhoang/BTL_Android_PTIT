@@ -32,7 +32,6 @@ public class LoginActivity extends AppCompatActivity {
     private ImageView imgTogglePassword;
     private TextView tvForgotPassword;
     private Button btnLogin, btnRegister;
-
     private boolean isPasswordVisible = false;
 
     @Override
@@ -71,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // Tạo JSON object chứa thông tin đăng nhập
             JSONObject loginData = new JSONObject();
             try {
                 loginData.put("email", email);
@@ -84,7 +82,6 @@ public class LoginActivity extends AppCompatActivity {
             JsonObjectRequest loginRequest = new JsonObjectRequest(Request.Method.POST, url, loginData,
                 response -> {
                     try {
-                        // Kiểm tra success và statusCode
                         boolean success = response.getBoolean("success");
                         int statusCode = response.getInt("statusCode");
                         
@@ -94,7 +91,6 @@ public class LoginActivity extends AppCompatActivity {
                             String refreshToken = data.getString("refreshToken");
                             JSONObject userData = data.getJSONObject("user");
                             
-                            // Lưu tokens và user data vào SharedPreferences
                             SharedPreferences prefs = getSharedPreferences("AuthPrefs", MODE_PRIVATE);
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putString("accessToken", accessToken);
@@ -123,7 +119,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 },
                 error -> {
-                    // Xử lý lỗi
                     if (error.networkResponse != null) {
                         switch (error.networkResponse.statusCode) {
                             case 401:
@@ -143,15 +138,8 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-            // Thêm request vào queue
             RequestQueue requestQueue = Volley.newRequestQueue(this);
             requestQueue.add(loginRequest);
-
-            // Ví dụ xử lý nếu đăng nhập thất bại:
-            // else {
-            //    Toast.makeText(LoginActivity.this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
-            // }
-            // --- Kết thúc Logic đăng nhập ---
         });
 
         btnRegister.setOnClickListener(v -> {

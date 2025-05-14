@@ -165,7 +165,6 @@ public class OtpVerificationActivity extends AppCompatActivity {
 
             String enteredOtp = otp1 + otp2 + otp3 + otp4;
 
-            // Gọi API xác thực OTP
             String url = Config.BE_URL + "/auth/verify-otp";
             JSONObject requestData = new JSONObject();
             try {
