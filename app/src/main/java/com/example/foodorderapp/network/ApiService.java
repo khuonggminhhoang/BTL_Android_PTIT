@@ -174,4 +174,5 @@ public interface ApiService {
             @Part("coverLetter") RequestBody coverLetter,
             @Part MultipartBody.Part file // CV file
     );
+
 }

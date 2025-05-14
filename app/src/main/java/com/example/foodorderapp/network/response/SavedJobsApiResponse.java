@@ -15,13 +15,13 @@ public class SavedJobsApiResponse {
     private String message;
 
     @SerializedName("data")
-    private List<Job> data; // Danh sách các công việc đã lưu
+    private List<Job> data;
 
-    // Trường meta có thể có hoặc không, tùy thuộc vào API của bạn
     @SerializedName("meta")
     private Object meta;
 
-    // Getters
+
+
     public boolean isSuccess() {
         return success;
     }
