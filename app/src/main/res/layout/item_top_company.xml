@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="12dp"
         android:gravity="center_horizontal">
 
         <ImageView
@@ -25,13 +25,18 @@
 
         <TextView
             android:id="@+id/tvTopCompanyName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             tools:text="Slack"
             android:textColor="@color/black"
             android:textSize="14sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:minHeight="36sp"
+            />
 
         <TextView
             android:id="@+id/tvTopCompanyJobsCount"
@@ -40,8 +45,8 @@
             android:layout_marginTop="2dp"
             tools:text="10 Jobs"
             android:textColor="@color/grey"
-            android:textSize="12sp"/>
+            android:textSize="12sp"
+            android:visibility="gone" />
 
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>
