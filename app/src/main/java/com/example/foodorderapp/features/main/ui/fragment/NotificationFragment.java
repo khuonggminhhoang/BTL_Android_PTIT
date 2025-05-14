@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.config.Config;
+import com.example.foodorderapp.core.model.Application;
 import com.example.foodorderapp.core.model.Job;
 import com.example.foodorderapp.core.model.Notification;
 import com.example.foodorderapp.features.auth.ui.activity.LoginActivity;
@@ -107,7 +108,7 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Thiết lập RecyclerView và kiểm tra token
+        // Thiết lập RecyclerView
         setupRecyclerView();
         if (currentAccessToken == null && getContext() != null) loadAuthToken();
     }
@@ -135,14 +136,16 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
             Log.e(TAG, "ApiService rỗng, khởi tạo lại");
             initApiService();
             if (apiService == null) {
-                Toast.makeText(getContext(), "Lỗi dịch vụ.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Lỗi dịch vụ API.", Toast.LENGTH_SHORT).show();
                 showLoading(false);
                 updateEmptyStateVisibility();
                 return;
             }
         }
         if (currentAccessToken == null) {
-            Log.w(TAG, "Token rỗng, yêu cầu đăng nhập");
+            Log.w(TAG, "Token rỗng");
+            notificationList.clear();
+            if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
             showLoading(false);
             updateEmptyStateVisibility();
             if (getActivity() instanceof MainActivity) {
@@ -158,48 +161,46 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
             @Override
             public void onResponse(@NonNull Call<NotificationsApiResponse> call, @NonNull Response<NotificationsApiResponse> response) {
                 showLoading(false);
-                if (getActivity() != null && isAdded()) {
-                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        Log.d(TAG, "Đã tải thông báo: " + (response.body().getData() != null ? response.body().getData().size() : 0));
-                        notificationList.clear();
-                        if (response.body().getData() != null) notificationList.addAll(response.body().getData());
-                        if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
+                if (getActivity() == null || !isAdded()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Log.d(TAG, "Đã tải thông báo: " + (response.body().getData() != null ? response.body().getData().size() : 0));
+                    notificationList.clear();
+                    if (response.body().getData() != null) notificationList.addAll(response.body().getData());
+                    if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
+                } else {
+                    Log.e(TAG, "Lỗi tải thông báo: " + response.code());
+                    if (response.code() == 401) {
+                        Toast.makeText(getContext(), "Phiên đăng nhập hết hạn.", Toast.LENGTH_LONG).show();
+                        navigateToLogin();
                     } else {
-                        Log.e(TAG, "Lỗi tải thông báo: " + response.code());
-                        if (response.code() == 401) {
-                            Toast.makeText(getContext(), "Phiên đăng nhập hết hạn.", Toast.LENGTH_LONG).show();
-                            navigateToLogin();
-                        } else {
-                            String errorMsg = "Lỗi tải thông báo: " + response.code();
-                            try {
-                                if (response.errorBody() != null) errorMsg += " - " + response.errorBody().string();
-                            } catch (IOException e) {
-                                Log.e(TAG, "Lỗi đọc thông báo lỗi", e);
-                            }
-                            Toast.makeText(getContext(), errorMsg, Toast.LENGTH_SHORT).show();
+                        String errorMsg = "Lỗi tải thông báo: " + response.code();
+                        try {
+                            if (response.errorBody() != null) errorMsg += " - " + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Lỗi đọc thông báo lỗi", e);
                         }
-                        notificationList.clear();
-                        if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
+                        Toast.makeText(getContext(), errorMsg, Toast.LENGTH_SHORT).show();
                     }
-                    updateEmptyStateVisibility();
-                    if (getActivity() instanceof MainActivity) {
-                        ((MainActivity) getActivity()).onNotificationStatusChanged();
-                    }
+                    notificationList.clear();
+                    if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
+                }
+                updateEmptyStateVisibility();
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).onNotificationStatusChanged();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<NotificationsApiResponse> call, @NonNull Throwable t) {
                 showLoading(false);
-                if (getActivity() != null && isAdded()) {
-                    Log.e(TAG, "Lỗi mạng khi tải thông báo", t);
-                    Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    notificationList.clear();
-                    if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
-                    updateEmptyStateVisibility();
-                    if (getActivity() instanceof MainActivity) {
-                        ((MainActivity) getActivity()).onNotificationStatusChanged();
-                    }
+                if (getActivity() == null || !isAdded()) return;
+                Log.e(TAG, "Lỗi mạng khi tải thông báo", t);
+                Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                notificationList.clear();
+                if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
+                updateEmptyStateVisibility();
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).onNotificationStatusChanged();
                 }
             }
         });
@@ -209,11 +210,14 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     private void showLoading(boolean isLoading) {
         if (progressBar != null) progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         if (recyclerViewNotifications != null) recyclerViewNotifications.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-        if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.GONE);
-        if (!isLoading) updateEmptyStateVisibility();
+        if (emptyStateLayout != null && !isLoading) {
+            updateEmptyStateVisibility();
+        } else if (emptyStateLayout != null && isLoading) {
+            emptyStateLayout.setVisibility(View.GONE);
+        }
     }
 
-    // Cập nhật trạng thái giao diện khi không có thông báo, chưa có real-time
+    // Cập nhật trạng thái giao diện khi không có thông báo
     private void updateEmptyStateVisibility() {
         if (adapter == null || recyclerViewNotifications == null || emptyStateLayout == null || getContext() == null) return;
         if (progressBar != null && progressBar.getVisibility() == View.VISIBLE) {
@@ -233,14 +237,17 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     // Xử lý khi nhấn vào thông báo
     @Override
     public void onNotificationClick(Notification notification, int position) {
-        if (getContext() == null || notification == null) return;
+        if (getContext() == null || notification == null) {
+            Log.w(TAG, "Context hoặc thông báo rỗng");
+            return;
+        }
         Log.d(TAG, "Nhấn thông báo ID: " + notification.getId() + ", Đã đọc: " + notification.isRead());
 
         if (apiService == null) {
             Log.e(TAG, "ApiService rỗng, khởi tạo lại");
             initApiService();
             if (apiService == null) {
-                Toast.makeText(getContext(), "Lỗi dịch vụ.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Lỗi dịch vụ API.", Toast.LENGTH_SHORT).show();
                 proceedWithNotificationAction(notification);
                 return;
             }
@@ -252,6 +259,7 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         }
 
         if (!notification.isRead()) {
+            Log.d(TAG, "Đánh dấu thông báo đã đọc");
             Call<NotificationDetailApiResponse> call = apiService.markNotificationAsRead("Bearer " + currentAccessToken, notification.getId());
             call.enqueue(new Callback<NotificationDetailApiResponse>() {
                 @Override
@@ -269,15 +277,6 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
                                     }
                                 }
                             }
-                        } else {
-                            String errorMsg = "Lỗi đánh dấu thông báo: " + response.code();
-                            try {
-                                if (response.errorBody() != null) errorMsg += " - " + response.errorBody().string();
-                            } catch (IOException e) {
-                                Log.e(TAG, "Lỗi đọc thông báo lỗi", e);
-                            }
-                            Log.e(TAG, errorMsg);
-                            Toast.makeText(getContext(), errorMsg, Toast.LENGTH_SHORT).show();
                         }
                         proceedWithNotificationAction(notification);
                     }
@@ -287,7 +286,6 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
                 public void onFailure(@NonNull Call<NotificationDetailApiResponse> call, @NonNull Throwable t) {
                     if (getActivity() != null && isAdded()) {
                         Log.e(TAG, "Lỗi mạng khi đánh dấu thông báo", t);
-                        Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                         proceedWithNotificationAction(notification);
                     }
                 }
@@ -307,49 +305,44 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
         }
 
         Log.d(TAG, "Xử lý hành động cho thông báo ID: " + notification.getId());
-        Job jobToView = null;
-        int jobIdToUse = 0;
+        int finalJobId = 0;
+        Job jobForIntent = null;
+        Application application = notification.getApplication();
 
-        // Trường hợp 1: Có Application và Job
-        if (notification.getApplication() != null && notification.getApplication().getJob() != null) {
-            jobToView = notification.getApplication().getJob();
-            jobIdToUse = jobToView.getId();
-            Log.d(TAG, "Tìm thấy Job, ID: " + jobIdToUse);
-            if (jobIdToUse == 0 && notification.getApplication().getJobId() != 0) {
-                jobIdToUse = notification.getApplication().getJobId();
-                jobToView.setId(jobIdToUse);
-                Log.d(TAG, "Job ID rỗng, dùng Application.getJobId(): " + jobIdToUse);
+        if (application != null) {
+            Log.d(TAG, "Application ID: " + application.getId());
+            if (application.getJob() != null && application.getJob().getId() != 0) {
+                finalJobId = application.getJob().getId();
+                jobForIntent = application.getJob();
+                Log.d(TAG, "Job ID từ Application.getJob(): " + finalJobId);
+            } else if (application.getJobId() != 0) {
+                finalJobId = application.getJobId();
+                jobForIntent = new Job();
+                jobForIntent.setId(finalJobId);
+                Log.d(TAG, "Job ID từ Application.getJobId(): " + finalJobId);
             }
-        }
-        // Trường hợp 2: Có Application, không có Job, nhưng có JobId
-        else if (notification.getApplication() != null && notification.getApplication().getJobId() != 0) {
-            jobIdToUse = notification.getApplication().getJobId();
-            Log.d(TAG, "Không có Job, dùng Application.getJobId(): " + jobIdToUse);
-            jobToView = new Job();
-            jobToView.setId(jobIdToUse);
-        }
-        // Trường hợp 3: Dùng ApplicationId của Notification
-        else if (notification.getApplicationId() != 0) {
-            jobIdToUse = notification.getApplicationId();
-            Log.w(TAG, "Không có Job/Application, dùng Notification.getApplicationId(): " + jobIdToUse);
-            jobToView = new Job();
-            jobToView.setId(jobIdToUse);
+        } else {
+            Log.w(TAG, "Application rỗng");
         }
 
-        // Điều hướng đến chi tiết công việc
-        if (jobToView != null && jobIdToUse != 0) {
+        if (finalJobId != 0) {
             Intent intent = new Intent(getContext(), JobDetailActivity.class);
-            intent.putExtra(JobAdapter.JOB_DETAIL_KEY, jobToView);
-            Log.d(TAG, "Mở JobDetailActivity với Job ID: " + jobIdToUse);
+            if (jobForIntent != null) {
+                intent.putExtra(JobAdapter.JOB_DETAIL_KEY, jobForIntent);
+                Log.d(TAG, "Mở JobDetailActivity với Job ID: " + finalJobId);
+            } else {
+                intent.putExtra("JOB_ID", finalJobId);
+                Log.d(TAG, "Mở JobDetailActivity với JOB_ID: " + finalJobId);
+            }
             try {
                 startActivity(intent);
             } catch (Exception e) {
-                Log.e(TAG, "Lỗi mở JobDetailActivity: " + e.getMessage(), e);
+                Log.e(TAG, "Lỗi mở JobDetailActivity", e);
                 Toast.makeText(getContext(), "Lỗi mở chi tiết công việc.", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(getContext(), "Không đủ thông tin để mở chi tiết công việc.", Toast.LENGTH_LONG).show();
-            Log.w(TAG, "Không xác định được Job ID cho thông báo ID: " + notification.getId());
+            Toast.makeText(getContext(), "Không thể mở chi tiết công việc.", Toast.LENGTH_LONG).show();
+            Log.w(TAG, "Không tìm thấy Job ID cho thông báo ID: " + notification.getId());
         }
     }
 
@@ -366,17 +359,9 @@ public class NotificationFragment extends Fragment implements NotificationsAdapt
     @Override
     public void onResume() {
         super.onResume();
-        // Tải lại thông báo khi fragment được hiển thị
+        // Tải lại thông báo khi fragment hiển thị
         Log.d(TAG, "NotificationFragment onResume");
-        if (currentAccessToken != null) {
-            loadNotifications();
-        } else {
-            notificationList.clear();
-            if (adapter != null) adapter.updateData(new ArrayList<>(notificationList));
-            updateEmptyStateVisibility();
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).onNotificationStatusChanged();
-            }
-        }
+        if (currentAccessToken == null && getContext() != null) loadAuthToken();
+        loadNotifications();
     }
 }

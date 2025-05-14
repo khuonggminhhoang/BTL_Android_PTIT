@@ -128,8 +128,8 @@ public interface ApiService {
     @GET("notifications")
     Call<NotificationsApiResponse> getNotifications(@Header("Authorization") String authToken);
 
-    @GET("notifications/{id}")
-    Call<NotificationDetailApiResponse> getNotificationDetail(@Header("Authorization") String authToken, @Path("id") int notificationId);
+//    @GET("notifications/{id}")
+//    Call<NotificationDetailApiResponse> getNotificationDetail(@Header("Authorization") String authToken, @Path("id") int notificationId);
 
     @PATCH("notifications/{id}/read")
     Call<NotificationDetailApiResponse> markNotificationAsRead(@Header("Authorization") String authToken, @Path("id") int notificationId);
