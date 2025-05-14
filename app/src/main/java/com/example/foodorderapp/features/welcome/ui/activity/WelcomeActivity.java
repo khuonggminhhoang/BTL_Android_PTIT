@@ -15,7 +15,7 @@ import com.example.foodorderapp.features.main.ui.activity.MainActivity;
 
 public class WelcomeActivity extends AppCompatActivity {
 
-    private Button btnRegister, btnLogin, btnStartExploring;
+    private Button btnRegister, btnLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,6 @@ public class WelcomeActivity extends AppCompatActivity {
     private void findViews() {
         btnRegister = findViewById(R.id.btnRegister);
         btnLogin = findViewById(R.id.btnLogin);
-        btnStartExploring = findViewById(R.id.btnStartExploring);
     }
 
     private void setupClickListeners() {
@@ -45,16 +44,6 @@ public class WelcomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(WelcomeActivity.this, LoginActivity.class);
                 startActivity(intent);
-            }
-        });
-
-        btnStartExploring.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-//                startActivity(intent);
-//                finish();
-                Toast.makeText(WelcomeActivity.this, "Tính năng", Toast.LENGTH_SHORT).show();
             }
         });
     }
