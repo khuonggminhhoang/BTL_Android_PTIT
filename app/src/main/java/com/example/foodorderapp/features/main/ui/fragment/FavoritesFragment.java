@@ -39,7 +39,6 @@ import com.example.foodorderapp.network.ApiService;
 import com.example.foodorderapp.network.response.SavedJobsApiResponse;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +55,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
 
     private RecyclerView recyclerViewFavorites;
     private FavoriteJobsAdapter adapter;
-    private List<Job> favoriteJobList; // This list will be the source of truth for the adapter
+    private List<Job> favoriteJobList;
     private LinearLayout emptyStateLayout;
     private EditText etSearch;
     private Button btnExploreNow;
@@ -73,12 +72,15 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Kích hoạt menu toolbar
         setHasOptionsMenu(true);
+        // Khởi tạo danh sách yêu thích và API
         favoriteJobList = new ArrayList<>();
         initApiService();
         loadAuthToken();
     }
 
+    // Khởi tạo dịch vụ API
     private void initApiService() {
         String baseUrl = Config.BE_URL;
         if (baseUrl == null || baseUrl.isEmpty()) {
@@ -95,6 +97,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
         Log.d(TAG, "Khởi tạo ApiService");
     }
 
+    // Tải access token từ SharedPreferences
     private void loadAuthToken() {
         if (getContext() != null) {
             SharedPreferences prefs = getContext().getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE);
@@ -107,6 +110,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Gán layout cho fragment
         View view = inflater.inflate(R.layout.fragment_favorites, container, false);
         toolbar = view.findViewById(R.id.toolbar_favorites);
         recyclerViewFavorites = view.findViewById(R.id.recyclerView_favorites);
@@ -121,15 +125,17 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Thiết lập Toolbar
         if (getActivity() instanceof AppCompatActivity) {
             ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         }
 
+        // Thiết lập RecyclerView
         recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(getContext()));
-        // Pass a new ArrayList to the adapter initially, it will be updated in loadFavoriteJobs
         adapter = new FavoriteJobsAdapter(getContext(), new ArrayList<>(favoriteJobList), this);
         recyclerViewFavorites.setAdapter(adapter);
 
+        // Thiết lập tìm kiếm
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -141,6 +147,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
             public void afterTextChanged(Editable s) {}
         });
 
+        // Xử lý nút khám phá
         btnExploreNow.setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
                 MainActivity mainActivity = (MainActivity) getActivity();
@@ -148,25 +155,28 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
                 if (bottomNav != null) {
                     bottomNav.setSelectedItemId(R.id.navigation_home);
                 } else {
-                    Log.e(TAG, "BottomNavigationView không tìm thấy trong MainActivity.");
+                    Log.e(TAG, "Không tìm thấy BottomNavigationView");
                     Toast.makeText(getContext(), "Không thể điều hướng.", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Log.e(TAG, "Activity không phải là MainActivity.");
+                Log.e(TAG, "Activity không phải MainActivity");
                 Toast.makeText(getContext(), "Lỗi điều hướng.", Toast.LENGTH_SHORT).show();
             }
         });
 
+        // Tải danh sách yêu thích
         if (currentAccessToken == null && getContext() != null) loadAuthToken();
         loadFavoriteJobs();
     }
 
+    // Tạo menu toolbar
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.favorites_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    // Xử lý chọn menu
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_more_favorites) {
@@ -176,6 +186,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
         return super.onOptionsItemSelected(item);
     }
 
+    // Hiển thị trạng thái tải
     private void showLoading(boolean isLoading) {
         if (progressBarFavorites != null) progressBarFavorites.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         if (recyclerViewFavorites != null) {
@@ -188,18 +199,24 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
         }
     }
 
+    // Tải danh sách công việc yêu thích
     private void loadFavoriteJobs() {
-        if (getContext() == null) { Log.e(TAG, "Context rỗng"); return; }
+        if (getContext() == null) {
+            Log.e(TAG, "Context rỗng");
+            return;
+        }
         if (apiService == null) {
             Log.e(TAG, "ApiService rỗng");
             Toast.makeText(getContext(), "Lỗi dịch vụ.", Toast.LENGTH_SHORT).show();
-            showLoading(false); updateEmptyStateVisibility(0); return;
+            showLoading(false);
+            updateEmptyStateVisibility(0);
+            return;
         }
         if (currentAccessToken == null) {
             Log.w(TAG, "Token rỗng");
             Toast.makeText(getContext(), "Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show();
-            showLoading(false); updateEmptyStateVisibility(0);
-            // navigateToLogin(); // Consider if immediate redirect is desired
+            showLoading(false);
+            updateEmptyStateVisibility(0);
             return;
         }
 
@@ -211,15 +228,10 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
             public void onResponse(@NonNull Call<SavedJobsApiResponse> call, @NonNull Response<SavedJobsApiResponse> response) {
                 if (getActivity() != null && isAdded()) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        Log.d(TAG, "Đã tải công việc yêu thích. Số lượng: " + (response.body().getData() != null ? response.body().getData().size() : 0) );
-                        favoriteJobList.clear(); // Clear the main list
-                        if (response.body().getData() != null) {
-                            favoriteJobList.addAll(response.body().getData()); // Populate the main list
-                        }
-                        if (adapter != null) {
-                            // Update the adapter with a new copy of the list to ensure filtering works correctly
-                            adapter.updateData(new ArrayList<>(favoriteJobList));
-                        }
+                        Log.d(TAG, "Đã tải công việc yêu thích: " + (response.body().getData() != null ? response.body().getData().size() : 0));
+                        favoriteJobList.clear();
+                        if (response.body().getData() != null) favoriteJobList.addAll(response.body().getData());
+                        if (adapter != null) adapter.updateData(new ArrayList<>(favoriteJobList));
                     } else {
                         Log.e(TAG, "Lỗi tải công việc: " + response.code());
                         if (response.code() == 401) {
@@ -230,7 +242,9 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
                             try {
                                 if (response.errorBody() != null) errorMessage += " Lỗi: " + response.errorBody().string();
                                 else errorMessage += " Mã lỗi: " + response.code();
-                            } catch (IOException e) { Log.e(TAG, "Lỗi đọc thông báo lỗi", e); }
+                            } catch (IOException e) {
+                                Log.e(TAG, "Lỗi đọc thông báo lỗi", e);
+                            }
                             Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
                         }
                         favoriteJobList.clear();
@@ -259,6 +273,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
         });
     }
 
+    // Cập nhật trạng thái giao diện khi không có công việc yêu thích
     private void updateEmptyStateVisibility(int itemCount) {
         if (emptyStateLayout == null || recyclerViewFavorites == null || progressBarFavorites == null || getContext() == null) return;
         if (progressBarFavorites.getVisibility() == View.VISIBLE) return;
@@ -271,15 +286,16 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
         }
     }
 
+    // Xử lý bỏ yêu thích
     @Override
-    public void onUnfavoriteClick(Job job, final int position) { // Made position final
+    public void onUnfavoriteClick(Job job, final int position) {
         if (job == null || getContext() == null) {
             Toast.makeText(getContext(), "Dữ liệu công việc không hợp lệ!", Toast.LENGTH_SHORT).show();
             return;
         }
         if (apiService == null || currentAccessToken == null) {
-            Toast.makeText(getContext(), "Không thể bỏ yêu thích. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "ApiService hoặc AccessToken rỗng khi bỏ yêu thích.");
+            Toast.makeText(getContext(), "Không thể bỏ yêu thích.", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "ApiService hoặc token rỗng");
             return;
         }
 
@@ -287,59 +303,42 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
                 .setTitle("Bỏ yêu thích")
                 .setMessage("Bạn có chắc muốn bỏ công việc \"" + job.getTitle() + "\" khỏi danh sách yêu thích?")
                 .setPositiveButton("Đồng ý", (dialog, which) -> {
-                    Log.d(TAG, "Xác nhận bỏ yêu thích Job ID: " + job.getId());
-                    // Optional: Show a small loading indicator on the item or a general one
-                    // progressBarFavorites.setVisibility(View.VISIBLE); // Or a more subtle indicator
-
+                    Log.d(TAG, "Bỏ yêu thích Job ID: " + job.getId());
                     Call<Void> call = apiService.unsaveJob("Bearer " + currentAccessToken, job.getId());
                     call.enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                            // progressBarFavorites.setVisibility(View.GONE);
                             if (getActivity() != null && isAdded()) {
                                 if (response.isSuccessful()) {
                                     Toast.makeText(getContext(), "Đã bỏ yêu thích: " + job.getTitle(), Toast.LENGTH_SHORT).show();
-
-                                    // Remove from the main list that backs the adapter's filter
-                                    // Find the actual object in favoriteJobList to remove,
-                                    // especially if the list passed to adapter.removeItem might be filtered.
                                     Job jobToRemove = null;
-                                    for(Job j : favoriteJobList){
-                                        if(j.getId() == job.getId()){
+                                    for (Job j : favoriteJobList) {
+                                        if (j.getId() == job.getId()) {
                                             jobToRemove = j;
                                             break;
                                         }
                                     }
-                                    if(jobToRemove != null) {
-                                        favoriteJobList.remove(jobToRemove);
-                                    }
-
-                                    // Adapter's removeItem should handle removing from its internal filtered list
-                                    // and notifying the changes.
+                                    if (jobToRemove != null) favoriteJobList.remove(jobToRemove);
                                     if (adapter != null) {
-                                        adapter.removeItem(position); // This position is from the filtered list
+                                        adapter.removeItem(position);
                                         updateEmptyStateVisibility(adapter.getItemCount());
                                     }
                                 } else {
                                     String errorMessage = "Lỗi khi bỏ yêu thích.";
                                     try {
-                                        if (response.errorBody() != null) {
-                                            errorMessage += " Lỗi: " + response.errorBody().string();
-                                        } else {
-                                            errorMessage += " Mã lỗi: " + response.code();
-                                        }
+                                        if (response.errorBody() != null) errorMessage += " Lỗi: " + response.errorBody().string();
+                                        else errorMessage += " Mã lỗi: " + response.code();
                                     } catch (IOException e) {
-                                        Log.e(TAG, "Lỗi đọc thông báo lỗi khi bỏ yêu thích", e);
+                                        Log.e(TAG, "Lỗi đọc thông báo lỗi", e);
                                     }
                                     Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
-                                    Log.e(TAG, "Lỗi API khi bỏ yêu thích: " + errorMessage);
+                                    Log.e(TAG, "Lỗi API: " + errorMessage);
                                 }
                             }
                         }
 
                         @Override
                         public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                            // progressBarFavorites.setVisibility(View.GONE);
                             if (getActivity() != null && isAdded()) {
                                 Toast.makeText(getContext(), "Lỗi mạng khi bỏ yêu thích: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                                 Log.e(TAG, "Lỗi mạng khi bỏ yêu thích", t);
@@ -351,6 +350,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
                 .show();
     }
 
+    // Xử lý nhấn vào công việc
     @Override
     public void onItemClick(Job job, int position) {
         if (job == null || getContext() == null) {
@@ -363,6 +363,7 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
         startActivity(intent);
     }
 
+    // Điều hướng đến màn hình đăng nhập
     private void navigateToLogin() {
         if (getActivity() != null && isAdded()) {
             Intent intent = new Intent(getActivity(), LoginActivity.class);
@@ -375,9 +376,9 @@ public class FavoritesFragment extends Fragment implements FavoriteJobsAdapter.O
     @Override
     public void onResume() {
         super.onResume();
+        // Tải lại danh sách yêu thích khi fragment hiển thị
         Log.d(TAG, "FavoritesFragment onResume");
         if (currentAccessToken == null && getContext() != null) loadAuthToken();
-        // It's good practice to refresh data that might have changed.
         loadFavoriteJobs();
     }
 }
